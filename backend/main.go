@@ -14,6 +14,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5"
+	"github.com/rs/cors"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -36,6 +37,14 @@ type InstagramPost struct {
 	URI               string `json:"uri"`
 	Title             string `json:"title"`
 	CreationTimeStamp int64  `json:"creation_timestamp"`
+}
+
+type MediaItem struct {
+	ID      int       `json:"id"`
+	UserID  int       `json:"user_id"`
+	URI     string    `json:"uri"`
+	Caption string    `json:"caption"`
+	TakenAt time.Time `json:"taken_at"`
 }
 
 func NewAPIServer(db *pgx.Conn) *APIServer {
@@ -306,6 +315,42 @@ func (s *APIServer) processArchive(filepath string, userID int) {
 	}
 }
 
+func (s *APIServer) getPostsHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(userIDKey).(int64)
+	if !ok {
+		http.Error(w, "Could not get user ID from context", http.StatusInternalServerError)
+		return
+	}
+
+	sqlStatement := `SELECT id, user_id, uri, caption, taken_at FROM media_items WHERE user_id=$1`
+
+	rows, err := s.db.Query(context.Background(), sqlStatement, userID)
+	if err != nil {
+		http.Error(w, "Failed to get media items", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	var mediaItems []MediaItem
+
+	for rows.Next() {
+		var item MediaItem
+
+		err := rows.Scan(&item.ID, &item.UserID, &item.URI, &item.Caption, &item.TakenAt)
+		if err != nil {
+			log.Printf("Failed to scan row: %v", err)
+			continue //skip the row if error
+		}
+
+		mediaItems = append(mediaItems, item)
+
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(mediaItems)
+}
+
 func main() {
 	connStr := "postgres://postgres:letmeinfast@localhost:5432/postgres"
 
@@ -322,16 +367,27 @@ func main() {
 	//create server Instance
 
 	server := NewAPIServer(db)
+	mux := http.NewServeMux()
 
-	http.HandleFunc("/api/v1/register", server.registerHandler)
-	http.HandleFunc("/api/v1/login", server.loginHandler)
+	mux.HandleFunc("/api/v1/register", server.registerHandler)
+	mux.HandleFunc("/api/v1/login", server.loginHandler)
 
 	// Protected route
 	// We wrap our protectedHandler with the authMiddleware.
-	http.Handle("/api/v1/protected", authMiddleware(http.HandlerFunc(server.protectedHandler)))
-	http.Handle("/api/v1/upload", authMiddleware(http.HandlerFunc(server.uploadHandler)))
+	mux.Handle("/api/v1/protected", authMiddleware(http.HandlerFunc(server.protectedHandler)))
+	mux.Handle("/api/v1/upload", authMiddleware(http.HandlerFunc(server.uploadHandler)))
+	mux.Handle("/api/v1/posts", authMiddleware(http.HandlerFunc(server.getPostsHandler)))
+
+	//-- CORS SETUP --
+	c := cors.New(cors.Options{
+		AllowedOrigins: []string{"http://localhost:3000"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+		AllowedHeaders: []string{"Authorization", "Content-Type"},
+	})
+
+	handler := c.Handler(mux)
 
 	fmt.Println("Server starting on post 8080......")
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }
