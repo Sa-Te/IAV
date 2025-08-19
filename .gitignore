@@ -63,3 +63,5 @@ lerna-debug.log*
 
 # IDEs
 .vscode/
+
+backend/temp-archive.zip
