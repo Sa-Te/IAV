@@ -1,9 +1,14 @@
 "use client";
 import { useState } from "react";
+import { useAuthStore } from "@/stores/authStore";
+import { useRouter } from "next/navigation";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const setToken = useAuthStore((state) => state.setToken);
+
+  const router = useRouter();
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -17,13 +22,18 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || "Something went wrong while Login."
-        );
+        throw new Error(data.message || "Something went wrong while Login.");
       }
-      console.log("Login Successful", await response.json());
+
+      if (data.token) {
+        setToken(data.token);
+        console.log("Token has been saved to the store!");
+      }
+
+      router.push("/app/upload");
     } catch (err) {
       if (err instanceof Error) {
         console.log("Login Failed: ", err.message);

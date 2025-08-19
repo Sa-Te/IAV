@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"archive/zip"
@@ -9,54 +9,12 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
+	"github.com/Sa-Te/IAV/backend/internal/models"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/jackc/pgx/v5"
-	"github.com/rs/cors"
 	"golang.org/x/crypto/bcrypt"
 )
-
-type User struct {
-	ID           int       `db:"id"`
-	Email        string    `db:"email"`
-	PasswordHash string    `db:"password_hash"`
-	CreatedAt    time.Time `db:"created_at"`
-}
-
-type APIServer struct {
-	db *pgx.Conn
-}
-
-type InstagramPostWrapper struct {
-	Media []InstagramPost `json:"media"`
-}
-
-type InstagramPost struct {
-	URI               string `json:"uri"`
-	Title             string `json:"title"`
-	CreationTimeStamp int64  `json:"creation_timestamp"`
-}
-
-type MediaItem struct {
-	ID      int       `json:"id"`
-	UserID  int       `json:"user_id"`
-	URI     string    `json:"uri"`
-	Caption string    `json:"caption"`
-	TakenAt time.Time `json:"taken_at"`
-}
-
-func NewAPIServer(db *pgx.Conn) *APIServer {
-	return &APIServer{
-		db: db,
-	}
-}
-
-// --- context key
-type contextKey string
-
-const userIDKey contextKey = "userID"
 
 func (s *APIServer) loginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
@@ -111,7 +69,7 @@ func (s *APIServer) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": tokenString})
+	json.NewEncoder(w).Encode(map[string]string{"token": tokenString})
 
 }
 
@@ -150,65 +108,6 @@ func (s *APIServer) registerHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{"message": "User created successfully"})
-}
-
-func authMiddleware(next http.Handler) http.Handler {
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		//get the token
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "Authorization header required", http.StatusUnauthorized)
-			return
-		}
-
-		//parse and validate
-		//header should be in format "Bearer <token>"
-		headerParts := strings.Split(authHeader, " ")
-		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-			http.Error(w, "Invalid Authorization header format", http.StatusUnauthorized)
-			return
-		}
-
-		tokenString := headerParts[1]
-
-		secretKey := []byte("complete-random-string-that-is-ver-long")
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			//check signing method
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-
-			}
-			return secretKey, nil
-		})
-
-		if err != nil || !token.Valid {
-			http.Error(w, "Invalid or expired token", http.StatusUnauthorized)
-			return
-		}
-
-		//extract the user id
-		claims, ok := token.Claims.(jwt.MapClaims)
-		if !ok {
-			http.Error(w, "Invalid token claims", http.StatusUnauthorized)
-			return
-		}
-		userIDFloat, ok := claims["userID"].(float64)
-		if !ok {
-			http.Error(w, "Invalid userID in token", http.StatusUnauthorized)
-			return
-		}
-		userID := int(userIDFloat)
-
-		//add id to the context
-		ctx := context.WithValue(r.Context(), userIDKey, userID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
-}
-
-func (s *APIServer) protectedHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Welcome to the protected area!"})
 }
 
 func (s *APIServer) uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -257,72 +156,106 @@ func (s *APIServer) uploadHandler(w http.ResponseWriter, r *http.Request) {
 	//send back success message
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "File uploaded, processing started..."})
-	go s.processArchive("temp-archive.zip", userID)
 
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "File uploaded, processing stage...."})
+	s.processArchive("temp-archive.zip", userID)
+
 }
 
 func (s *APIServer) processArchive(filepath string, userID int) {
-	// open zip for read
 	r, err := zip.OpenReader(filepath)
 	if err != nil {
-		fmt.Println(err)
+		log.Printf("Failed to open zip archive: %v", err)
 		return
 	}
 	defer r.Close()
 
 	log.Println("--- Archive Contents ---")
-	// Loop through each file in the archive.
 	for _, f := range r.File {
 		if f.Name == "your_instagram_activity/media/posts_1.json" {
 			log.Println("Found posts_1.json, starting to parse...")
 
 			postFile, err := f.Open()
 			if err != nil {
-				log.Printf("Failed to open %s from zip: %v", postFile, err)
+				log.Printf("Failed to open posts_1.json from zip: %v", err)
 				continue
 			}
-			defer postFile.Close()
 
-			var posts []InstagramPostWrapper
+			var postWrappers []models.InstagramPostWrapper
 
-			err = json.NewDecoder(postFile).Decode(&posts)
+			err = json.NewDecoder(postFile).Decode(&postWrappers)
 			if err != nil {
-				log.Printf("Failed to decode %s: %v", postFile, err)
+				log.Printf("Failed to decode posts_1.json: %v", err)
+				postFile.Close()
 				continue
 			}
+			postFile.Close()
 
-			log.Println("-------Parsed Post Titles-------")
-			for _, wrapper := range posts {
+			log.Println("--- Inserting Posts into Database ---")
+
+			for _, wrapper := range postWrappers {
 				for _, post := range wrapper.Media {
-					sqlStatement := `INSERT INTO media_items (user_id, uri, caption, taken_at) VALUES ($1, $2, $3, $4)`
-
-					// Convert the Unix timestamp to a time.Time object
+					sqlStatement := `INSERT INTO media_items (user_id, uri, caption, taken_at, media_type) VALUES ($1, $2, $3, $4, $5)`
 					takenAt := time.Unix(post.CreationTimeStamp, 0)
 
-					_, err := s.db.Exec(context.Background(), sqlStatement, userID, post.URI, post.Title, takenAt)
+					_, err := s.db.Exec(context.Background(), sqlStatement, userID, post.URI, post.Title, takenAt, "post")
 					if err != nil {
 						log.Printf("Failed to insert post with URI %s: %v\n", post.URI, err)
 					} else {
 						log.Printf("Successfully inserted post: %s\n", post.Title)
 					}
-
 				}
 			}
+
 			log.Println("--- Finished Inserting Posts ---")
+		}
+
+		if f.Name == "your_instagram_activity/media/stories.json" {
+			log.Println("Found stories.json, starting to parse...")
+
+			storiesFile, err := f.Open()
+			if err != nil {
+				log.Printf("Failed to open stories.json from zip: %v", err)
+				continue
+			}
+
+			var storyWrapper models.InstagramStoryWrapper
+
+			err = json.NewDecoder(storiesFile).Decode(&storyWrapper)
+			if err != nil {
+				log.Printf("Failed to decode stories.json: %v", err)
+				storiesFile.Close()
+				continue
+			}
+			storiesFile.Close()
+
+			log.Println("--- Inserting Stories into Database ---")
+
+			for _, story := range storyWrapper.Stories {
+				sqlStatement := `INSERT INTO media_items (user_id, uri, caption, taken_at, media_type) VALUES ($1, $2, $3, $4, $5)`
+				takenAt := time.Unix(story.CreationTimeStamp, 0)
+
+				_, err := s.db.Exec(context.Background(), sqlStatement, userID, story.URI, story.Title, takenAt, "story")
+
+				if err != nil {
+					log.Printf("Failed to insert story with URI %s: %v\n", story.URI, err)
+				} else {
+					log.Printf("Successfully inserted story: %s\n", story.Title)
+				}
+			}
+
+			log.Println("--- Finished Inserting Stories ---")
 		}
 	}
 }
 
-func (s *APIServer) getPostsHandler(w http.ResponseWriter, r *http.Request) {
-	userID, ok := r.Context().Value(userIDKey).(int64)
+func (s *APIServer) getMediaItemsHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(userIDKey).(int)
 	if !ok {
 		http.Error(w, "Could not get user ID from context", http.StatusInternalServerError)
 		return
 	}
 
-	sqlStatement := `SELECT id, user_id, uri, caption, taken_at FROM media_items WHERE user_id=$1`
+	sqlStatement := `SELECT id, user_id, uri, caption, taken_at, media_type FROM media_items WHERE user_id=$1`
 
 	rows, err := s.db.Query(context.Background(), sqlStatement, userID)
 	if err != nil {
@@ -331,12 +264,12 @@ func (s *APIServer) getPostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
-	var mediaItems []MediaItem
+	mediaItems := make([]models.MediaItem, 0)
 
 	for rows.Next() {
-		var item MediaItem
+		var item models.MediaItem
 
-		err := rows.Scan(&item.ID, &item.UserID, &item.URI, &item.Caption, &item.TakenAt)
+		err := rows.Scan(&item.ID, &item.UserID, &item.URI, &item.Caption, &item.TakenAt, &item.MediaType)
 		if err != nil {
 			log.Printf("Failed to scan row: %v", err)
 			continue //skip the row if error
@@ -349,45 +282,4 @@ func (s *APIServer) getPostsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(mediaItems)
-}
-
-func main() {
-	connStr := "postgres://postgres:letmeinfast@localhost:5432/postgres"
-
-	db, err := pgx.Connect(context.Background(), connStr)
-
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
-	}
-	defer db.Close(context.Background())
-
-	fmt.Println("Successfully connected to PostgreSQL!")
-
-	//create server Instance
-
-	server := NewAPIServer(db)
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("/api/v1/register", server.registerHandler)
-	mux.HandleFunc("/api/v1/login", server.loginHandler)
-
-	// Protected route
-	// We wrap our protectedHandler with the authMiddleware.
-	mux.Handle("/api/v1/protected", authMiddleware(http.HandlerFunc(server.protectedHandler)))
-	mux.Handle("/api/v1/upload", authMiddleware(http.HandlerFunc(server.uploadHandler)))
-	mux.Handle("/api/v1/posts", authMiddleware(http.HandlerFunc(server.getPostsHandler)))
-
-	//-- CORS SETUP --
-	c := cors.New(cors.Options{
-		AllowedOrigins: []string{"http://localhost:3000"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
-		AllowedHeaders: []string{"Authorization", "Content-Type"},
-	})
-
-	handler := c.Handler(mux)
-
-	fmt.Println("Server starting on post 8080......")
-
-	log.Fatal(http.ListenAndServe(":8080", handler))
 }
