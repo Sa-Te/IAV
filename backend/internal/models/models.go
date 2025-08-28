@@ -21,6 +21,14 @@ type MediaItem struct {
 	MediaType string    `json:"media_type"`
 }
 
+type Connection struct {
+	ID             int       `db:"id"`
+	UserID         int       `db:"user_id"`
+	Username       string    `db:"username"`
+	ConnectionType string    `db:"connection_type" json:"connection_type"`
+	Timestamp      time.Time `db:"timestamp"`
+}
+
 // JSON Parsing Models
 type InstagramPostWrapper struct {
 	Media []InstagramPost `json:"media"`
@@ -34,4 +42,31 @@ type InstagramPost struct {
 
 type InstagramStoryWrapper struct {
 	Stories []InstagramPost `json:"ig_stories"`
+}
+
+type Relationship struct {
+	StringListData []StringListData `json:"string_list_data"`
+}
+
+type StringListData struct {
+	Value     string `json:"value"`
+	Timestamp int64  `json:"timestamp"`
+}
+
+type SyncedContactsWrapper struct {
+	ContactInfo []ContactItem `json:"contacts_contact_info"`
+}
+
+type ContactItem struct {
+	StringMapData ContactStringMap `json:"string_map_data"`
+}
+
+type ContactStringMap struct {
+	FirstName   ValueObject `json:"First Name"`
+	LastName    ValueObject `json:"Last Name"`
+	ContactInfo ValueObject `json:"Contact Information"`
+}
+
+type ValueObject struct {
+	Value string `json:"value"`
 }

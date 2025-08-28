@@ -10,15 +10,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// This function now takes a pool instead of a single connection
 func runMigrations(db *pgxpool.Pool) {
-	// The logic inside remains the same, as the pool can execute commands too
+
 	applyMigration(db, "migrations/001_create_users_table.sql", "users")
 	applyMigration(db, "migrations/002_create_media_items_table.sql", "media_items")
 	applyMigration(db, "migrations/003_alter_media_items_for_media_type.sql", "media_type")
+	applyMigration(db, "migrations/004_add_unique_constraint_to_media_items.sql", "media_items")
+	applyMigration(db, "migrations/005_create_connections_table.sql", "connections")
 }
 
-// This helper function also needs to accept the pool type
 func applyMigration(db *pgxpool.Pool, filepath string, tableName string) {
 	migrationSQL, err := os.ReadFile(filepath)
 	if err != nil {
@@ -27,14 +27,14 @@ func applyMigration(db *pgxpool.Pool, filepath string, tableName string) {
 
 	_, err = db.Exec(context.Background(), string(migrationSQL))
 	if err != nil {
-		fmt.Printf("could not apply %s migration (table might already exist)\n", tableName)
+		fmt.Printf("could not apply %s migration: %v\n", tableName, err)
 	} else {
 		fmt.Printf("%s table migration successful\n", tableName)
 	}
 }
 
 func main() {
-	connStr := "postgres://postgres:letmeinfast@localhost:5432/postgres"
+	connStr := "postgres://postgres:letmeinfast@localhost:5432/postgres?client_encoding=utf8"
 
 	db, err := pgxpool.New(context.Background(), connStr)
 	if err != nil {

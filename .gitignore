@@ -65,3 +65,4 @@ lerna-debug.log*
 .vscode/
 
 backend/temp-archive.zip
+backend/uploads/

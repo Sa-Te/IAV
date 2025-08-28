@@ -9,11 +9,16 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/Sa-Te/IAV/backend/internal/models"
 	"github.com/golang-jwt/jwt/v5"
+
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/text/encoding/charmap"
+	"golang.org/x/text/transform"
 )
 
 func (s *APIServer) loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -123,41 +128,59 @@ func (s *APIServer) uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := r.ParseMultipartForm(32 << 20)
+	err := r.ParseMultipartForm(32 << 20) //32MB max file size
 	if err != nil {
 		http.Error(w, "The uploaded file is too big", http.StatusBadRequest)
 		return
 	}
 
-	fileName, handler, err := r.FormFile("archiveFile")
+	fileName, _, err := r.FormFile("archiveFile")
 	if err != nil {
 		http.Error(w, "Invalid file key. Expected 'archiveFile'.", http.StatusBadRequest)
 		return
 	}
 	defer fileName.Close()
 
-	log.Printf("Uploaded File: %s, Size: %d\n", handler.Filename, handler.Size)
+	//dedicated directory for user's unzipped files
+	userUploadDir := fmt.Sprintf("uploads/%d", userID)
+	if err := os.MkdirAll(userUploadDir, os.ModePerm); err != nil {
+		log.Printf("Failed to create user upload directory: %v", err)
+		http.Error(w, "Failed to process file on server.", http.StatusInternalServerError)
+		return
+	}
 
-	//save the file to disk
-	dst, err := os.Create("temp-archive.zip")
+	//save the file to temporary disk
+	tempZipPath := filepath.Join(userUploadDir, "temp-archive.zip")
+	dst, err := os.Create(tempZipPath)
 	if err != nil {
-		fmt.Println(w, "Failed to create file on server", http.StatusInternalServerError)
+		http.Error(w, "Failed to create temp file on server.", http.StatusInternalServerError)
 		return
 	}
 	defer dst.Close()
+	defer os.Remove(tempZipPath)
 
-	//copy uploaded files to the new file
 	_, err = io.Copy(dst, fileName)
 	if err != nil {
+		dst.Close()
 		http.Error(w, "Failed to save the file", http.StatusInternalServerError)
 		return
 	}
+	dst.Close()
+
+	//unzip the archive into user's dir
+	if err := unzip(tempZipPath, userUploadDir); err != nil {
+		log.Printf("Failed to unzip archive: %v", err)
+		http.Error(w, "Failed to process archive.", http.StatusInternalServerError)
+		return
+	}
+
+	s.processArchive(tempZipPath, userID)
+
+	os.Remove(tempZipPath)
 
 	//send back success message
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{"message": "File uploaded, processing started..."})
-
-	s.processArchive("temp-archive.zip", userID)
+	json.NewEncoder(w).Encode(map[string]string{"message": "File uploaded, processed successfully."})
 
 }
 
@@ -180,21 +203,22 @@ func (s *APIServer) processArchive(filepath string, userID int) {
 				continue
 			}
 
-			var postWrappers []models.InstagramPostWrapper
+			transformer := charmap.ISO8859_1.NewDecoder()
+			transformReader := transform.NewReader(postFile, transformer)
 
-			err = json.NewDecoder(postFile).Decode(&postWrappers)
-			if err != nil {
+			var postWrappers []models.InstagramPostWrapper
+			if err := json.NewDecoder(transformReader).Decode(&postWrappers); err != nil {
 				log.Printf("Failed to decode posts_1.json: %v", err)
 				postFile.Close()
 				continue
 			}
 			postFile.Close()
 
-			log.Println("--- Inserting Posts into Database ---")
+			log.Println("--- Inserting/Updating Posts in Database ---")
 
 			for _, wrapper := range postWrappers {
 				for _, post := range wrapper.Media {
-					sqlStatement := `INSERT INTO media_items (user_id, uri, caption, taken_at, media_type) VALUES ($1, $2, $3, $4, $5)`
+					sqlStatement := `INSERT INTO media_items (user_id, uri, caption, taken_at, media_type) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (user_id, uri) DO NOTHING;`
 					takenAt := time.Unix(post.CreationTimeStamp, 0)
 
 					_, err := s.db.Exec(context.Background(), sqlStatement, userID, post.URI, post.Title, takenAt, "post")
@@ -206,7 +230,7 @@ func (s *APIServer) processArchive(filepath string, userID int) {
 				}
 			}
 
-			log.Println("--- Finished Inserting Posts ---")
+			log.Println("--- Finished Processing Posts ---")
 		}
 
 		if f.Name == "your_instagram_activity/media/stories.json" {
@@ -218,10 +242,11 @@ func (s *APIServer) processArchive(filepath string, userID int) {
 				continue
 			}
 
-			var storyWrapper models.InstagramStoryWrapper
+			transformer := charmap.ISO8859_1.NewDecoder()
+			transformReader := transform.NewReader(storiesFile, transformer)
 
-			err = json.NewDecoder(storiesFile).Decode(&storyWrapper)
-			if err != nil {
+			var storyWrapper models.InstagramStoryWrapper
+			if err := json.NewDecoder(transformReader).Decode(&storyWrapper); err != nil {
 				log.Printf("Failed to decode stories.json: %v", err)
 				storiesFile.Close()
 				continue
@@ -231,11 +256,10 @@ func (s *APIServer) processArchive(filepath string, userID int) {
 			log.Println("--- Inserting Stories into Database ---")
 
 			for _, story := range storyWrapper.Stories {
-				sqlStatement := `INSERT INTO media_items (user_id, uri, caption, taken_at, media_type) VALUES ($1, $2, $3, $4, $5)`
+				sqlStatement := `INSERT INTO media_items (user_id, uri, caption, taken_at, media_type) VALUES ($1, $2, $3, $4, $5) ON CONFLICT (user_id, uri) DO NOTHING;`
 				takenAt := time.Unix(story.CreationTimeStamp, 0)
 
 				_, err := s.db.Exec(context.Background(), sqlStatement, userID, story.URI, story.Title, takenAt, "story")
-
 				if err != nil {
 					log.Printf("Failed to insert story with URI %s: %v\n", story.URI, err)
 				} else {
@@ -245,7 +269,136 @@ func (s *APIServer) processArchive(filepath string, userID int) {
 
 			log.Println("--- Finished Inserting Stories ---")
 		}
+
+		if f.Name == "connections/contacts/synced_contacts.json" {
+			log.Println("Found synced_contacts.json, starting to parse...")
+			contactFile, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var contactsWrapper models.SyncedContactsWrapper
+			if err := json.NewDecoder(contactFile).Decode(&contactsWrapper); err != nil {
+				log.Printf("Failed to decode synced_contacts.json: %v", err)
+				contactFile.Close()
+				continue
+			}
+			contactFile.Close()
+
+			log.Println("--- Inserting Synced Contacts into Database ---")
+			for _, contactItem := range contactsWrapper.ContactInfo {
+				contactName := strings.TrimSpace(contactItem.StringMapData.FirstName.Value + " " + contactItem.StringMapData.LastName.Value)
+				if contactName == "" {
+					continue
+				}
+
+				sqlStatement := `INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, username, connection_type) DO NOTHING;`
+				_, err := s.db.Exec(context.Background(), sqlStatement, userID, contactName, "contact", time.Now())
+				if err != nil {
+					log.Printf("Failed to upsert contact %s: %v\n", contactName, err)
+				}
+			}
+			log.Println("--- Finished Processing Synced Contacts ---")
+		}
+
+		if f.Name == "connections/followers_and_following/followers_1.json" {
+			log.Println("Found followers_1.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var followers []models.Relationship
+			if err := json.NewDecoder(file).Decode(&followers); err != nil {
+				log.Printf("Failed to decode followers_1.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			log.Println("--- Inserting Followers into Database ---")
+			for _, item := range followers {
+				for _, stringData := range item.StringListData {
+					sqlStatement := `INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, username, connection_type) DO NOTHING;`
+					timestamp := time.Unix(stringData.Timestamp, 0)
+					_, err := s.db.Exec(context.Background(), sqlStatement, userID, stringData.Value, "follower", timestamp)
+					if err != nil {
+						log.Printf("Failed to upsert follower %s: %v\n", stringData.Value, err)
+					}
+				}
+			}
+			log.Println("--- Finished Processing Followers ---")
+		}
+
+		if f.Name == "connections/followers_and_following/following.json" {
+			log.Println("Found following.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var followingWrapper map[string][]models.Relationship
+			if err := json.NewDecoder(file).Decode(&followingWrapper); err != nil {
+				log.Printf("Failed to decode following.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			var following []models.Relationship
+			for _, v := range followingWrapper {
+				following = v
+				break
+			}
+
+			log.Println("--- Inserting Following into Database ---")
+			for _, item := range following {
+				for _, stringData := range item.StringListData {
+					sqlStatement := `INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, username, connection_type) DO NOTHING;`
+					timestamp := time.Unix(stringData.Timestamp, 0)
+					_, err := s.db.Exec(context.Background(), sqlStatement, userID, stringData.Value, "following", timestamp)
+					if err != nil {
+						log.Printf("Failed to upsert following %s: %v\n", stringData.Value, err)
+					}
+				}
+			}
+			log.Println("--- Finished Processing Following ---")
+		}
+
 	}
+}
+
+func (s *APIServer) getConnectionsHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(userIDKey).(int)
+	if !ok {
+		http.Error(w, "Could not get user ID from context", http.StatusInternalServerError)
+		return
+	}
+
+	sqlStatement := `SELECT id, user_id, username, connection_type, timestamp FROM connections WHERE user_id=$1`
+
+	rows, err := s.db.Query(context.Background(), sqlStatement, userID)
+	if err != nil {
+		log.Printf("Database query error in getConnectionsHandler: %v", err)
+		http.Error(w, "Failed to get connections", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	connections := make([]models.Connection, 0)
+	for rows.Next() {
+		var conn models.Connection
+		err := rows.Scan(&conn.ID, &conn.UserID, &conn.Username, &conn.ConnectionType, &conn.Timestamp)
+		if err != nil {
+			log.Printf("Failed to scan connection row: %v", err)
+			continue
+		}
+		connections = append(connections, conn)
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(connections)
 }
 
 func (s *APIServer) getMediaItemsHandler(w http.ResponseWriter, r *http.Request) {
@@ -279,7 +432,63 @@ func (s *APIServer) getMediaItemsHandler(w http.ResponseWriter, r *http.Request)
 
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(mediaItems)
+}
+
+func (s *APIServer) serveMediaFileHandler(w http.ResponseWriter, r *http.Request) {
+	userId, ok := r.Context().Value(userIDKey).(int)
+	if !ok {
+		http.Error(w, "could not get user ID from context", http.StatusUnauthorized)
+		return
+	}
+
+	//extract file path from URL and trim prefix to get relative path
+	URLfilePath := strings.TrimPrefix(r.URL.Path, "/api/v1/mediafile/")
+
+	//construct full, safe path; prevents user from accessing files from other directory
+	fullPath := filepath.Join("uploads", fmt.Sprintf("%d", userId), URLfilePath)
+
+	http.ServeFile(w, r, fullPath)
+}
+
+func unzip(src, dest string) error {
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	for _, f := range r.File {
+		fpath := filepath.Join(dest, f.Name)
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(fpath, os.ModePerm)
+			continue
+		}
+
+		if err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+			return err
+		}
+
+		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return err
+		}
+
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(outFile, rc)
+
+		outFile.Close()
+		rc.Close()
+
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
