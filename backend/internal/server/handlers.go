@@ -292,8 +292,15 @@ func (s *APIServer) processArchive(filepath string, userID int) {
 					continue
 				}
 
-				sqlStatement := `INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) ON CONFLICT (user_id, username, connection_type) DO NOTHING;`
-				_, err := s.db.Exec(context.Background(), sqlStatement, userID, contactName, "contact", time.Now())
+				contactInfo := contactItem.StringMapData.ContactInfo.Value
+
+				sqlStatement := `
+					INSERT INTO connections (user_id, username, connection_type, timestamp, contact_info) 
+					VALUES ($1, $2, $3, $4, $5) 
+					ON CONFLICT (user_id, username, connection_type) 
+					DO UPDATE SET contact_info = EXCLUDED.contact_info;`
+
+				_, err := s.db.Exec(context.Background(), sqlStatement, userID, contactName, "contact", time.Now(), contactInfo)
 				if err != nil {
 					log.Printf("Failed to upsert contact %s: %v\n", contactName, err)
 				}
@@ -365,7 +372,363 @@ func (s *APIServer) processArchive(filepath string, userID int) {
 			log.Println("--- Finished Processing Following ---")
 		}
 
+		if f.Name == "connections/followers_and_following/blocked_profiles.json" {
+			log.Println("Found blocked_profiles.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.BlockedUserWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode blocked_profiles.json: %v", err)
+				file.Close()
+				continue
+			}
+
+			file.Close()
+
+			log.Println("-----Inserting Blocked Profiles into DB-----")
+			for _, user := range wrapper.BlockedUsers {
+				if len(user.StringData) > 0 {
+					username := user.Title
+					timestamp := time.Unix(user.StringData[0].Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) 
+                VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) 
+                DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					_, err := s.db.Exec(context.Background(), sqlStatement, userID, username, "blocked", timestamp)
+					if err != nil {
+						log.Printf("Failed to upsert blocked profile %s: %v\n", username, err)
+					}
+				}
+			}
+			log.Println("--- Finished Processing Blocked Profiles ---")
+		}
+
+		if f.Name == "connections/followers_and_following/close_friends.json" {
+			log.Println("Found close_friends.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.CloseFriendsWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode close_friends.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			log.Println("--- Inserting Close Friends into Database ---")
+			for _, item := range wrapper.CloseFriends {
+				for _, stringData := range item.StringListData {
+					username := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) 
+                VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) 
+                DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					_, err := s.db.Exec(context.Background(), sqlStatement, userID, username, "close_friends", timestamp)
+					if err != nil {
+						log.Printf("Failed to upsert close friend %s: %v\n", username, err)
+					}
+				}
+			}
+			log.Println("--- Finished Processing Close Friends ---")
+		}
+
+		if f.Name == "connections/followers_and_following/follow_requests_you've_received.json" {
+			log.Println("Found follow_requests_you've_received.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.FollowRequestsReceivedWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode follow_requests_you've_received.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			log.Println("--- Inserting Received Follow Requests into Database ---")
+			for _, item := range wrapper.Requests {
+				for _, stringData := range item.StringListData {
+					username := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					_, err := s.db.Exec(context.Background(), sqlStatement, userID, username, "request_received", timestamp)
+					if err != nil {
+						log.Printf("Failed to upsert received request from %s: %v\n", username, err)
+					}
+				}
+			}
+			log.Println("--- Finished Processing Received Follow Requests ---")
+		}
+
+		if f.Name == "connections/followers_and_following/hide_story_from.json" {
+			log.Println("Found hide_story_from.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.HideStoryFromWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode hide_story_from.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			log.Println("--- Inserting Hide Story From into Database ---")
+			for _, item := range wrapper.HiddenFrom {
+				for _, stringData := range item.StringListData {
+					username := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					_, err := s.db.Exec(context.Background(), sqlStatement, userID, username, "story_hidden_from", timestamp)
+					if err != nil {
+						log.Printf("Failed to upsert hide story from %s: %v\n", username, err)
+					}
+				}
+			}
+			log.Println("--- Finished Processing Hide Story From ---")
+		}
+
+		if f.Name == "connections/followers_and_following/following_hashtags.json" {
+			log.Println("Found following_hashtags.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.FollowingHashtagsWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode following_hashtags.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			log.Println("--- Inserting Followed Hashtags into Database ---")
+			for _, item := range wrapper.Hashtags {
+				for _, stringData := range item.StringListData {
+					hashtagName := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO followed_hashtags (user_id, name, timestamp) VALUES ($1, $2, $3) 
+                ON CONFLICT (user_id, name) DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					_, err := s.db.Exec(context.Background(), sqlStatement, userID, hashtagName, timestamp)
+					if err != nil {
+						log.Printf("Failed to upsert followed hashtag #%s: %v\n", hashtagName, err)
+					}
+				}
+			}
+			log.Println("--- Finished Processing Followed Hashtags ---")
+		}
+
+		if f.Name == "connections/followers_and_following/pending_follow_requests.json" {
+			log.Println("Found pending_follow_requests.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.FollowRequestsSentWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode pending_follow_requests.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			for _, item := range wrapper.Requests {
+				for _, stringData := range item.StringListData {
+					username := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					s.db.Exec(context.Background(), sqlStatement, userID, username, "request_sent", timestamp)
+				}
+			}
+			log.Println("--- Finished Processing Sent Follow Requests ---")
+		}
+
+		// Note: The JSON key is "permanent_follow_requests", we'll label it for clarity.
+		if f.Name == "connections/followers_and_following/recent_follow_requests.json" {
+			log.Println("Found recent_follow_requests.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.PermanentFollowRequestsWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode recent_follow_requests.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			for _, item := range wrapper.Requests {
+				for _, stringData := range item.StringListData {
+					username := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					s.db.Exec(context.Background(), sqlStatement, userID, username, "request_sent_permanent", timestamp)
+				}
+			}
+			log.Println("--- Finished Processing Permanent/Recent Follow Requests ---")
+		}
+
+		if f.Name == "connections/followers_and_following/recently_unfollowed_profiles.json" {
+			log.Println("Found recently_unfollowed_profiles.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.UnfollowedUsersWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode recently_unfollowed_profiles.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			for _, item := range wrapper.Unfollowed {
+				for _, stringData := range item.StringListData {
+					username := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					s.db.Exec(context.Background(), sqlStatement, userID, username, "unfollowed", timestamp)
+				}
+			}
+			log.Println("--- Finished Processing Unfollowed Users ---")
+		}
+
+		if f.Name == "connections/followers_and_following/removed_suggestions.json" {
+			log.Println("Found removed_suggestions.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.DismissedSuggestionsWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode removed_suggestions.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			for _, item := range wrapper.Dismissed {
+				for _, stringData := range item.StringListData {
+					username := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					s.db.Exec(context.Background(), sqlStatement, userID, username, "suggestion_removed", timestamp)
+				}
+			}
+			log.Println("--- Finished Processing Removed Suggestions ---")
+		}
+
+		if f.Name == "connections/followers_and_following/restricted_profiles.json" {
+			log.Println("Found restricted_profiles.json, starting to parse...")
+			file, err := f.Open()
+			if err != nil {
+				continue
+			}
+
+			var wrapper models.RestrictedUsersWrapper
+			if err := json.NewDecoder(file).Decode(&wrapper); err != nil {
+				log.Printf("Failed to decode restricted_profiles.json: %v", err)
+				file.Close()
+				continue
+			}
+			file.Close()
+
+			for _, item := range wrapper.Restricted {
+				for _, stringData := range item.StringListData {
+					username := stringData.Value
+					timestamp := time.Unix(stringData.Timestamp, 0)
+
+					sqlStatement := `
+                INSERT INTO connections (user_id, username, connection_type, timestamp) VALUES ($1, $2, $3, $4) 
+                ON CONFLICT (user_id, username, connection_type) DO UPDATE SET timestamp = EXCLUDED.timestamp;`
+
+					s.db.Exec(context.Background(), sqlStatement, userID, username, "restricted", timestamp)
+				}
+			}
+			log.Println("--- Finished Processing Restricted Profiles ---")
+		}
+
 	}
+}
+
+func (s *APIServer) getHashtagsHandler(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(userIDKey).(int)
+	if !ok {
+		http.Error(w, "Could not get user ID from context", http.StatusInternalServerError)
+		return
+	}
+
+	sqlStatement := `SELECT id, user_id, name, timestamp FROM followed_hashtags WHERE user_id=$1 ORDER BY name ASC`
+	rows, err := s.db.Query(context.Background(), sqlStatement, userID)
+	if err != nil {
+		http.Error(w, "Failed to get followed hashtags", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	hashtags := make([]models.FollowedHashtag, 0)
+	for rows.Next() {
+		var h models.FollowedHashtag
+		if err := rows.Scan(&h.ID, &h.UserID, &h.Name, &h.Timestamp); err != nil {
+			log.Printf("Failed to scan hashtag row: %v", err)
+			continue
+		}
+		hashtags = append(hashtags, h)
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(hashtags)
 }
 
 func (s *APIServer) getConnectionsHandler(w http.ResponseWriter, r *http.Request) {
@@ -375,7 +738,7 @@ func (s *APIServer) getConnectionsHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	sqlStatement := `SELECT id, user_id, username, connection_type, timestamp FROM connections WHERE user_id=$1`
+	sqlStatement := `SELECT id, user_id, username, connection_type, timestamp, contact_info FROM connections WHERE user_id=$1`
 
 	rows, err := s.db.Query(context.Background(), sqlStatement, userID)
 	if err != nil {
@@ -388,7 +751,7 @@ func (s *APIServer) getConnectionsHandler(w http.ResponseWriter, r *http.Request
 	connections := make([]models.Connection, 0)
 	for rows.Next() {
 		var conn models.Connection
-		err := rows.Scan(&conn.ID, &conn.UserID, &conn.Username, &conn.ConnectionType, &conn.Timestamp)
+		err := rows.Scan(&conn.ID, &conn.UserID, &conn.Username, &conn.ConnectionType, &conn.Timestamp, &conn.ContactInfo)
 		if err != nil {
 			log.Printf("Failed to scan connection row: %v", err)
 			continue

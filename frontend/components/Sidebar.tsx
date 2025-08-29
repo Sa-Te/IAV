@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   X,
+  Hash,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -68,6 +69,9 @@ export default function Sidebar() {
         </NavItem>
         <NavItem isExpanded={isExpanded} icon={<User />} href="/app/profile">
           Profile
+        </NavItem>
+        <NavItem isExpanded={isExpanded} icon={<Hash />} href="/app/hashtags">
+          Hashtags
         </NavItem>
       </nav>
 

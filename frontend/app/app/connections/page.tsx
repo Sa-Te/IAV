@@ -9,9 +9,23 @@ interface Connection {
   username: string;
   connection_type: string;
   timestamp: string;
+  contact_info?: string;
 }
 
-const CONNECTION_TYPES = ["Followers", "Following", "Contacts"];
+const CONNECTION_TYPES = [
+  "Followers",
+  "Following",
+  "Contacts",
+  "Blocked",
+  "Close Friends",
+  "Requests Received",
+  "Requests Sent",
+  "Recent Requests Sent",
+  "Unfollowed",
+  "Removed Suggestions",
+  "Restricted",
+  "Story Hidden From",
+];
 
 export default function ConnectionsPage() {
   const token = useAuthStore((state) => state.token);
@@ -36,6 +50,7 @@ export default function ConnectionsPage() {
             username: d.Username,
             connection_type: d.connection_type,
             timestamp: d.Timestamp || "",
+            contact_info: d.contact_info,
           }));
 
           setConnections(normalized);
@@ -54,6 +69,15 @@ export default function ConnectionsPage() {
       Followers: "follower",
       Following: "following",
       Contacts: "contact",
+      Blocked: "blocked",
+      "Close Friends": "close_friend",
+      "Requests Received": "request_received",
+      "Requests Sent": "request_sent",
+      "Recent Requests Sent": "request_sent_permanent",
+      Unfollowed: "unfollowed",
+      "Removed Suggestions": "suggestion_removed",
+      Restricted: "restricted",
+      "Story Hidden From": "story_hidden_from",
     };
     const filterType = filterTypeMap[activeFilter];
 
@@ -107,7 +131,9 @@ export default function ConnectionsPage() {
             <thead className="border-b border-gray-700">
               <tr>
                 <th className="p-4">Name / Username</th>
-                {activeFilter !== "Contacts" && <th className="p-4">Date</th>}
+                <th className="p-4">
+                  {activeFilter === "Contacts" ? "Contact Info" : "Date"}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -120,19 +146,16 @@ export default function ConnectionsPage() {
                     className="border-b border-gray-700 hover:bg-gray-700/50"
                   >
                     <td className="p-4 font-medium">{conn.username}</td>
-                    {activeFilter !== "Contacts" && (
-                      <td className="p-4 text-gray-400">
-                        {formatDateSafe(conn.timestamp)}
-                      </td>
-                    )}
+                    <td className="p-4 text-gray-400">
+                      {activeFilter === "Contacts"
+                        ? conn.contact_info || "N/A"
+                        : formatDateSafe(conn.timestamp)}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr key="no-results-row">
-                  <td
-                    colSpan={activeFilter !== "Contacts" ? 2 : 1}
-                    className="p-8 text-center text-gray-400"
-                  >
+                  <td colSpan={2} className="p-8 text-center text-gray-400">
                     No {activeFilter.toLowerCase()} found.
                   </td>
                 </tr>

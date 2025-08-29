@@ -32,6 +32,7 @@ func (s *APIServer) Run() {
 	mux.Handle("/api/v1/media", authMiddleware(http.HandlerFunc(s.getMediaItemsHandler)))
 	mux.Handle("/api/v1/mediafile/", authMiddleware(http.HandlerFunc(s.serveMediaFileHandler)))
 	mux.Handle("/api/v1/connections", authMiddleware(http.HandlerFunc(s.getConnectionsHandler)))
+	mux.Handle("/api/v1/hashtags", authMiddleware(http.HandlerFunc(s.getHashtagsHandler)))
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"http://localhost:3000"},

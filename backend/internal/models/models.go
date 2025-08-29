@@ -27,6 +27,14 @@ type Connection struct {
 	Username       string    `db:"username"`
 	ConnectionType string    `db:"connection_type" json:"connection_type"`
 	Timestamp      time.Time `db:"timestamp"`
+	ContactInfo    *string   `db:"contact_info" json:"contact_info,omitempty"`
+}
+
+type FollowedHashtag struct {
+	ID        int       `db:"id" json:"id"`
+	UserID    int       `db:"user_id" json:"user_id"`
+	Name      string    `db:"name" json:"name"`
+	Timestamp time.Time `db:"timestamp" json:"timestamp"`
 }
 
 // JSON Parsing Models
@@ -69,4 +77,49 @@ type ContactStringMap struct {
 
 type ValueObject struct {
 	Value string `json:"value"`
+}
+
+type BlockedUserWrapper struct {
+	BlockedUsers []BlockedUser `json:"relationships_blocked_users"`
+}
+
+type BlockedUser struct {
+	Title      string           `json:"title"`
+	StringData []StringListData `json:"string_list_data"`
+}
+
+type CloseFriendsWrapper struct {
+	CloseFriends []Relationship `json:"relationships_close_friends"`
+}
+
+type FollowRequestsReceivedWrapper struct {
+	Requests []Relationship `json:"relationships_follow_requests_received"`
+}
+
+type FollowingHashtagsWrapper struct {
+	Hashtags []Relationship `json:"relationships_following_hashtags"`
+}
+
+type HideStoryFromWrapper struct {
+	HiddenFrom []Relationship `json:"relationships_hide_stories_from"`
+}
+
+type FollowRequestsSentWrapper struct {
+	Requests []Relationship `json:"relationships_follow_requests_sent"`
+}
+
+type PermanentFollowRequestsWrapper struct {
+	Requests []Relationship `json:"relationships_permanent_follow_requests"`
+}
+
+type UnfollowedUsersWrapper struct {
+	Unfollowed []Relationship `json:"relationships_unfollowed_users"`
+}
+
+type DismissedSuggestionsWrapper struct {
+	Dismissed []Relationship `json:"relationships_dismissed_suggested_users"`
+}
+
+type RestrictedUsersWrapper struct {
+	Restricted []Relationship `json:"relationships_restricted_users"`
 }

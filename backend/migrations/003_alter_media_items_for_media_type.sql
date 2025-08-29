@@ -1,1 +1,1 @@
-ALTER TABLE media_items ADD media_type TEXT
+ALTER TABLE media_items ADD media_type TEXT;

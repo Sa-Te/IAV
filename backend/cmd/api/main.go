@@ -17,6 +17,8 @@ func runMigrations(db *pgxpool.Pool) {
 	applyMigration(db, "migrations/003_alter_media_items_for_media_type.sql", "media_type")
 	applyMigration(db, "migrations/004_add_unique_constraint_to_media_items.sql", "media_items")
 	applyMigration(db, "migrations/005_create_connections_table.sql", "connections")
+	applyMigration(db, "migrations/006_add_contact_info_to_connections.sql", "connections")
+	applyMigration(db, "migrations/007_create_followed_hashtags_table.sql", "followed_hashtags")
 }
 
 func applyMigration(db *pgxpool.Pool, filepath string, tableName string) {
