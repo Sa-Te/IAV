@@ -45,12 +45,18 @@ export default function MediaRenderer({ uri, token }: Props) {
 
   if (["mp4", "mov", "webm"].includes(ext)) {
     return (
-      <video controls className="w-full h-full object-cover rounded-t-xl">
-        <source src={mediaSrc} type={ext === "mov" ? "video/quicktime" : `video/${ext}`} />
-      </video>
+      <div className="w-full h-full bg-black rounded-t-xl flex items-center justify-center">
+        <video
+          controls
+          className="max-w-full max-h-full"
+          style={{ aspectRatio: "auto" }}
+        >
+          <source src={mediaSrc} type={ext === "mov" ? "video/quicktime" : `video/${ext}`} />
+        </video>
+      </div>
     );
   }
 
   // eslint-disable-next-line @next/next/no-img-element
-  return <img src={mediaSrc} alt={uri} className="w-full h-full object-cover rounded-t-xl" />;
+  return <img src={mediaSrc} alt={uri} className="w-full h-full object-contain rounded-t-xl" />;
 }

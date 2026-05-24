@@ -1,15 +1,6 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  async rewrites() {
-    const backend = process.env.BACKEND_URL ?? "http://localhost:8080";
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${backend}/api/:path*`,
-      },
-    ];
-  },
-};
+// API requests are handled by app/api/[...path]/route.ts which proxies to BACKEND_URL.
+const nextConfig: NextConfig = {};
 
 export default nextConfig;
