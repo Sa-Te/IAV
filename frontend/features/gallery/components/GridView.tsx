@@ -1,6 +1,7 @@
 "use client";
 
 import MediaRenderer from "./MediaRenderer";
+import { fixInstagramEncoding } from "@/lib/fixEncoding";
 
 export interface MediaItem {
   id: number;
@@ -26,7 +27,7 @@ export default function GridView({ media, token }: Props) {
             <MediaRenderer uri={item.uri} token={token} />
           </div>
           <div className="p-3">
-            <p className="text-xs text-star-300 truncate">{item.caption || "No caption"}</p>
+            <p className="text-xs text-star-300 truncate">{fixInstagramEncoding(item.caption) || "No caption"}</p>
             <p className="text-[10px] text-star-500 mt-1">{new Date(item.taken_at).toLocaleDateString()}</p>
           </div>
         </div>

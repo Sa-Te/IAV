@@ -2,6 +2,7 @@
 
 import MediaRenderer from "./MediaRenderer";
 import { MediaItem } from "./GridView";
+import { fixInstagramEncoding } from "@/lib/fixEncoding";
 
 interface Props {
   groupedMedia: Record<string, MediaItem[]>;
@@ -30,7 +31,7 @@ export default function TimelineView({ groupedMedia, token }: Props) {
                   <MediaRenderer uri={item.uri} token={token} />
                 </div>
                 <div className="p-2.5">
-                  <p className="text-xs text-star-300 truncate">{item.caption || "No caption"}</p>
+                  <p className="text-xs text-star-300 truncate">{fixInstagramEncoding(item.caption) || "No caption"}</p>
                   <p className="text-[10px] text-star-500 mt-0.5">{new Date(item.taken_at).toLocaleDateString()}</p>
                 </div>
               </div>
