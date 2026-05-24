@@ -1162,7 +1162,7 @@ func (s *APIServer) getActivityLogHandler(w http.ResponseWriter, r *http.Request
 	}
 
 	rows, err := s.db.Query(context.Background(),
-		`SELECT id, user_id, activity_type, author, timestamp, details FROM activity_log WHERE user_id=$1 ORDER BY timestamp DESC`, userID)
+		`SELECT id, user_id, activity_type, author, timestamp, details FROM activity_log WHERE user_id=$1 ORDER BY timestamp DESC LIMIT 5000`, userID)
 	if err != nil {
 		log.Printf("Failed to query activity log for user %d: %v", userID, err)
 		writeJSONError(w, http.StatusInternalServerError, "Failed to retrieve activity log")

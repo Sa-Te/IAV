@@ -1,7 +1,20 @@
 import { create } from "zustand";
 
-export interface Conversation { id: number; user_id: number; conversation_id: string; participants: string[]; thread_type: string; }
-export interface Message { id: number; user_id: number; conversation_id: string; sender_name: string; content: string; sent_at: string; }
+export interface Conversation {
+  id: number;
+  user_id: number;
+  conversation_id: string;
+  participants: string;
+  thread_type: string;
+}
+export interface Message {
+  id: number;
+  user_id: number;
+  conversation_id: string;
+  sender_name: string;
+  content: string;
+  sent_at: string;
+}
 
 interface MessagesState {
   conversations: Conversation[];
@@ -22,11 +35,18 @@ export const useMessagesStore = create<MessagesState>((set) => ({
   fetchMessages: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/messages", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("http://localhost:8080/api/v1/messages", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!res.ok) throw new Error("Failed to fetch messages");
       const data = await res.json();
-      const convs = data.conversations ?? [];
-      set({ conversations: convs, messages: data.messages ?? [], activeConversation: convs[0]?.conversation_id ?? null, loading: false });
+      const convs: Conversation[] = data.conversations ?? [];
+      set({
+        conversations: convs,
+        messages: data.messages ?? [],
+        activeConversation: convs[0]?.conversation_id ?? null,
+        loading: false,
+      });
     } catch (e) {
       set({ error: (e as Error).message, loading: false });
     }

@@ -8,15 +8,24 @@ import PageHeader from "@/components/ui/PageHeader";
 import TabNav from "@/components/ui/TabNav";
 import EmptyState from "@/components/ui/EmptyState";
 import { formatDistanceToNow } from "date-fns";
+import { fixInstagramEncoding } from "@/lib/fixEncoding";
 
 type Tab = "polls" | "quizzes" | "questions" | "sliders" | "reactions";
 
+const PAGE_SIZE = 50;
+
 export default function StoryInteractionsPage() {
   const token = useAuthStore((s) => s.token);
-  const { polls, quizzes, questions, emoji_sliders, reactions, loading, fetchStoryInteractions } = useStoryStore();
+  const { polls, quizzes, questions, emoji_sliders, reactions, loading, fetchStoryInteractions } =
+    useStoryStore();
   const [tab, setTab] = useState<Tab>("polls");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  useEffect(() => { if (token) fetchStoryInteractions(token); }, [token, fetchStoryInteractions]);
+  useEffect(() => {
+    if (token) fetchStoryInteractions(token);
+  }, [token, fetchStoryInteractions]);
+
+  const handleTabChange = (t: Tab) => { setTab(t); setVisibleCount(PAGE_SIZE); };
 
   const tabs = [
     { key: "polls" as Tab, label: "Polls", icon: HelpCircle, count: polls.length },
@@ -31,12 +40,23 @@ export default function StoryInteractionsPage() {
       <Film className="w-4 h-4 text-purple-400 shrink-0" />
       <span className="text-neon-400 text-sm font-medium">@{creator}</span>
       {detail !== undefined && detail !== "" && (
-        <span className="text-star-300 text-sm">{String(detail)}</span>
+        <span className="text-star-300 text-sm break-words">
+          {fixInstagramEncoding(String(detail))}
+        </span>
       )}
       <span className="flex-1" />
-      <span className="text-xs text-star-500 whitespace-nowrap">{date ? formatDistanceToNow(new Date(date), { addSuffix: true }) : "—"}</span>
+      <span className="text-xs text-star-500 whitespace-nowrap">
+        {date ? formatDistanceToNow(new Date(date), { addSuffix: true }) : "—"}
+      </span>
     </div>
   );
+
+  const currentList =
+    tab === "polls" ? polls
+    : tab === "quizzes" ? quizzes
+    : tab === "questions" ? questions
+    : tab === "sliders" ? emoji_sliders
+    : reactions;
 
   return (
     <div>
@@ -51,44 +71,89 @@ export default function StoryInteractionsPage() {
           { label: "Other", value: questions.length + emoji_sliders.length + reactions.length },
         ]}
       />
-      <TabNav tabs={tabs} active={tab} onChange={setTab} />
+      <TabNav tabs={tabs} active={tab} onChange={handleTabChange} />
 
       {loading ? (
-        <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="glass-card h-14 shimmer" />)}</div>
+        <div className="space-y-2">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="glass-card h-14 shimmer" />
+          ))}
+        </div>
       ) : tab === "polls" ? (
-        polls.length === 0 ? <EmptyState icon={HelpCircle} title="No polls" message="Story polls you answered will appear here." /> : (
-          <div className="space-y-1.5">{polls.map((p) => renderItem(p.id, p.creator_username, p.answered_at, p.poll_answer))}</div>
+        polls.length === 0 ? (
+          <EmptyState icon={HelpCircle} title="No polls" message="Story polls you answered will appear here." />
+        ) : (
+          <div className="space-y-1.5">
+            {polls.slice(0, visibleCount).map((p) =>
+              renderItem(p.id, p.creator_username, p.answered_at, p.poll_answer),
+            )}
+          </div>
         )
       ) : tab === "quizzes" ? (
-        quizzes.length === 0 ? <EmptyState icon={CheckSquare} title="No quizzes" message="Story quizzes you answered will appear here." /> : (
-          <div className="space-y-1.5">{quizzes.map((q) => renderItem(q.id, q.creator_username, q.answered_at, q.quiz_answer))}</div>
+        quizzes.length === 0 ? (
+          <EmptyState icon={CheckSquare} title="No quizzes" message="Story quizzes you answered will appear here." />
+        ) : (
+          <div className="space-y-1.5">
+            {quizzes.slice(0, visibleCount).map((q) =>
+              renderItem(q.id, q.creator_username, q.answered_at, q.quiz_answer),
+            )}
+          </div>
         )
       ) : tab === "questions" ? (
-        questions.length === 0 ? <EmptyState icon={MessageCircle} title="No questions" message="Story questions you responded to will appear here." /> : (
-          <div className="space-y-1.5">{questions.map((q) => renderItem(q.id, q.creator_username, q.responded_at))}</div>
+        questions.length === 0 ? (
+          <EmptyState icon={MessageCircle} title="No questions" message="Story questions you responded to will appear here." />
+        ) : (
+          <div className="space-y-1.5">
+            {questions.slice(0, visibleCount).map((q) =>
+              renderItem(q.id, q.creator_username, q.responded_at),
+            )}
+          </div>
         )
       ) : tab === "sliders" ? (
-        emoji_sliders.length === 0 ? <EmptyState icon={Sliders} title="No slider responses" message="Emoji sliders you interacted with will appear here." /> : (
+        emoji_sliders.length === 0 ? (
+          <EmptyState icon={Sliders} title="No slider responses" message="Emoji sliders you interacted with will appear here." />
+        ) : (
           <div className="space-y-1.5">
-            {emoji_sliders.map((s) => (
+            {emoji_sliders.slice(0, visibleCount).map((s) => (
               <div key={s.id} className="glass-card p-3.5 flex items-center gap-3 hover:border-neon-500/30 transition-all">
                 <Sliders className="w-4 h-4 text-purple-400 shrink-0" />
                 <span className="text-neon-400 text-sm font-medium">@{s.creator_username}</span>
                 <div className="flex items-center gap-2 flex-1">
                   <div className="flex-1 h-1.5 rounded-full bg-nebula-600 max-w-32">
-                    <div className="h-full rounded-full bg-neon-500" style={{ width: `${Math.min(100, s.slider_value * 100)}%` }} />
+                    <div
+                      className="h-full rounded-full bg-neon-500"
+                      style={{ width: `${Math.min(100, s.slider_value * 100)}%` }}
+                    />
                   </div>
                   <span className="text-star-300 text-xs">{(s.slider_value * 100).toFixed(0)}%</span>
                 </div>
-                <span className="text-xs text-star-500 whitespace-nowrap">{s.responded_at ? formatDistanceToNow(new Date(s.responded_at), { addSuffix: true }) : "—"}</span>
+                <span className="text-xs text-star-500 whitespace-nowrap">
+                  {s.responded_at ? formatDistanceToNow(new Date(s.responded_at), { addSuffix: true }) : "—"}
+                </span>
               </div>
             ))}
           </div>
         )
       ) : (
-        reactions.length === 0 ? <EmptyState icon={Smile} title="No reactions" message="Story reactions will appear here." /> : (
-          <div className="space-y-1.5">{reactions.map((r) => renderItem(r.id, r.creator_username, r.responded_at))}</div>
+        reactions.length === 0 ? (
+          <EmptyState icon={Smile} title="No reactions" message="Story reactions will appear here." />
+        ) : (
+          <div className="space-y-1.5">
+            {reactions.slice(0, visibleCount).map((r) =>
+              renderItem(r.id, r.creator_username, r.responded_at),
+            )}
+          </div>
         )
+      )}
+
+      {visibleCount < currentList.length && (
+        <button
+          onClick={() => setVisibleCount((n) => n + PAGE_SIZE)}
+          className="mt-4 w-full py-2.5 rounded-xl text-sm text-neon-400 transition-colors"
+          style={{ background: "rgba(0, 163, 196, 0.06)", border: "1px solid rgba(0, 163, 196, 0.2)" }}
+        >
+          Load more ({currentList.length - visibleCount} remaining)
+        </button>
       )}
     </div>
   );

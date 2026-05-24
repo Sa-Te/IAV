@@ -6,12 +6,19 @@ import { Hash } from "lucide-react";
 import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 
-interface Hashtag { id: number; hashtag_name: string; }
+interface Hashtag {
+  id: number;
+  name: string;
+  timestamp: string;
+}
+
+const PAGE_SIZE = 100;
 
 export default function HashtagsPage() {
   const token = useAuthStore((s) => s.token);
   const [hashtags, setHashtags] = useState<Hashtag[]>([]);
   const [loading, setLoading] = useState(true);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     if (!token) return;
@@ -21,6 +28,8 @@ export default function HashtagsPage() {
       .catch(console.error)
       .finally(() => setLoading(false));
   }, [token]);
+
+  const visible = hashtags.slice(0, visibleCount);
 
   return (
     <div>
@@ -40,16 +49,29 @@ export default function HashtagsPage() {
       ) : hashtags.length === 0 ? (
         <EmptyState icon={Hash} title="No hashtags" message="You don't follow any hashtags yet." />
       ) : (
-        <div className="flex flex-wrap gap-2">
-          {hashtags.map((h) => (
-            <span key={h.id}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 hover:border-neon-400/50"
-              style={{ background: "rgba(0, 163, 196, 0.08)", border: "1px solid rgba(0, 163, 196, 0.2)", color: "#00C4E8" }}>
-              <Hash className="w-3 h-3 opacity-70" />
-              {h.hashtag_name}
-            </span>
-          ))}
-        </div>
+        <>
+          <div className="flex flex-wrap gap-2">
+            {visible.map((h) => (
+              <span
+                key={h.id}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 hover:border-neon-400/50"
+                style={{ background: "rgba(0, 163, 196, 0.08)", border: "1px solid rgba(0, 163, 196, 0.2)", color: "#00C4E8" }}
+              >
+                <Hash className="w-3 h-3 opacity-70" />
+                {h.name}
+              </span>
+            ))}
+          </div>
+          {visibleCount < hashtags.length && (
+            <button
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+              className="mt-4 px-4 py-2 rounded-lg text-sm text-neon-400 transition-colors"
+              style={{ background: "rgba(0, 163, 196, 0.08)", border: "1px solid rgba(0, 163, 196, 0.2)" }}
+            >
+              Show more ({hashtags.length - visibleCount} remaining)
+            </button>
+          )}
+        </>
       )}
     </div>
   );

@@ -99,7 +99,7 @@ export default function ConnectionsPage() {
                   </thead>
                   <tbody className="divide-y divide-nebula-700/50">
                     {filtered.map((c) => (
-                      <tr key={c.id} className="hover:bg-nebula-700/30 transition-colors">
+                      <tr key={`${c.id}-${c.username}`} className="hover:bg-nebula-700/30 transition-colors">
                         <td className="px-4 py-3 font-medium text-star-200">
                           <a href={`https://instagram.com/${c.username}`} target="_blank" rel="noopener noreferrer"
                             className="hover:text-neon-400 transition-colors">
