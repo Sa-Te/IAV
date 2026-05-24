@@ -16,7 +16,7 @@ export const useOffMetaStore = create<OffMetaState>((set) => ({
   fetchOffMeta: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/off-meta-activity", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/v1/off-meta-activity", { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed to fetch off-meta activity");
       const data = await res.json();
       set({ activities: data ?? [], loading: false });

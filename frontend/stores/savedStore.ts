@@ -22,7 +22,7 @@ export const useSavedStore = create<SavedState>((set) => ({
   fetchSaved: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/saved", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/v1/saved", { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed to fetch saved");
       const data = await res.json();
       set({ saved_media: data.saved_media ?? [], collections: data.collections ?? [], collection_items: data.collection_items ?? [], loading: false });

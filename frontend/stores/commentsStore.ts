@@ -19,7 +19,7 @@ export const useCommentsStore = create<CommentsState>((set) => ({
   fetchComments: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/comments", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/v1/comments", { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed to fetch comments");
       const data = await res.json();
       set({ post_comments: data.post_comments ?? [], reel_comments: data.reel_comments ?? [], loading: false });

@@ -28,7 +28,7 @@ export const useStoryStore = create<StoryState>((set) => ({
   fetchStoryInteractions: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/story-interactions", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/v1/story-interactions", { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed to fetch story interactions");
       const data = await res.json();
       set({ polls: data.polls ?? [], quizzes: data.quizzes ?? [], questions: data.questions ?? [], emoji_sliders: data.emoji_sliders ?? [], reactions: data.reactions ?? [], loading: false });

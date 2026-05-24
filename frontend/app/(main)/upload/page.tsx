@@ -56,7 +56,7 @@ export default function UploadPage() {
         setMessage("Network error — check that the server is running.");
       };
 
-      xhr.open("POST", "http://localhost:8080/api/v1/upload");
+      xhr.open("POST", "/api/v1/upload");
       xhr.setRequestHeader("Authorization", `Bearer ${token}`);
       xhr.send(formData);
     },

@@ -21,35 +21,62 @@ interface MessagesState {
   messages: Message[];
   activeConversation: string | null;
   loading: boolean;
+  loadingMessages: boolean;
   error: string | null;
   fetchMessages: (token: string) => Promise<void>;
-  setActiveConversation: (id: string | null) => void;
+  fetchConversationMessages: (token: string, conversationId: string) => Promise<void>;
+  setActiveConversation: (token: string, id: string | null) => void;
 }
 
-export const useMessagesStore = create<MessagesState>((set) => ({
+export const useMessagesStore = create<MessagesState>((set, get) => ({
   conversations: [],
   messages: [],
   activeConversation: null,
   loading: false,
+  loadingMessages: false,
   error: null,
+
   fetchMessages: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/messages", {
+      const res = await fetch("/api/v1/messages", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch messages");
       const data = await res.json();
       const convs: Conversation[] = data.conversations ?? [];
-      set({
-        conversations: convs,
-        messages: data.messages ?? [],
-        activeConversation: convs[0]?.conversation_id ?? null,
-        loading: false,
-      });
+      const msgs: Message[] = data.messages ?? [];
+      const firstConvId = convs[0]?.conversation_id ?? null;
+      set({ conversations: convs, messages: msgs, activeConversation: firstConvId, loading: false });
     } catch (e) {
       set({ error: (e as Error).message, loading: false });
     }
   },
-  setActiveConversation: (id) => set({ activeConversation: id }),
+
+  fetchConversationMessages: async (token, conversationId) => {
+    set({ loadingMessages: true });
+    try {
+      const res = await fetch(`/api/v1/messages?conversation_id=${encodeURIComponent(conversationId)}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const newMsgs: Message[] = data.messages ?? [];
+      set((state) => {
+        const existing = state.messages.filter((m) => m.conversation_id !== conversationId);
+        return { messages: [...existing, ...newMsgs], loadingMessages: false };
+      });
+    } catch {
+      set({ loadingMessages: false });
+    }
+  },
+
+  setActiveConversation: (token, id) => {
+    set({ activeConversation: id });
+    if (!id) return;
+    const loaded = get().messages.filter((m) => m.conversation_id === id);
+    if (loaded.length === 0) {
+      get().fetchConversationMessages(token, id);
+    }
+  },
 }));

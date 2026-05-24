@@ -19,7 +19,7 @@ export default function InterestsPage() {
 
   useEffect(() => {
     if (!token) return;
-    fetch("http://localhost:8080/api/v1/ad-interests", { headers: { Authorization: `Bearer ${token}` } })
+    fetch("/api/v1/ad-interests", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then(setData)
       .catch(console.error)

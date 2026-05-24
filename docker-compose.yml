@@ -39,6 +39,8 @@ services:
     restart: always
     ports:
       - "3000:3000" # Map port 3000 for Next.js
+    environment:
+      - BACKEND_URL=http://iav-backend:8080
     volumes:
       # This mounts your local code into the container, allowing for hot-reloading on changes.
       - ./frontend:/app

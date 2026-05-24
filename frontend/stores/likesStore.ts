@@ -22,7 +22,7 @@ export const useLikesStore = create<LikesState>((set) => ({
   fetchLikes: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/likes", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/v1/likes", { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed to fetch likes");
       const data = await res.json();
       set({ post_likes: data.post_likes ?? [], comment_likes: data.comment_likes ?? [], story_likes: data.story_likes ?? [], loading: false });

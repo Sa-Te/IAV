@@ -22,11 +22,11 @@ type MediaItem struct {
 }
 
 type Connection struct {
-	ID             int       `db:"id"`
-	UserID         int       `db:"user_id"`
-	Username       string    `db:"username"`
+	ID             int       `db:"id" json:"id"`
+	UserID         int       `db:"user_id" json:"user_id"`
+	Username       string    `db:"username" json:"username"`
 	ConnectionType string    `db:"connection_type" json:"connection_type"`
-	Timestamp      time.Time `db:"timestamp"`
+	Timestamp      time.Time `db:"timestamp" json:"timestamp"`
 	ContactInfo    *string   `db:"contact_info" json:"contact_info,omitempty"`
 }
 

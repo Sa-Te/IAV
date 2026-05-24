@@ -37,7 +37,7 @@ export default function ConnectionsPage() {
 
   useEffect(() => {
     if (!token) return;
-    fetch("http://localhost:8080/api/v1/connections", { headers: { Authorization: `Bearer ${token}` } })
+    fetch("/api/v1/connections", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then(setConnections)
       .catch(console.error)

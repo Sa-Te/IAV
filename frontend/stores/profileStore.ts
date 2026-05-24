@@ -22,7 +22,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
   fetchProfile: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/profile", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/v1/profile", { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed to fetch profile");
       const data = await res.json();
       set({ profile: data.profile ?? null, changes: data.changes ?? [], photos: data.photos ?? [], loading: false });

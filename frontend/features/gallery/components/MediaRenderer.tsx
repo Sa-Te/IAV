@@ -17,7 +17,7 @@ export default function MediaRenderer({ uri, token }: Props) {
     const load = async () => {
       if (!token || !uri) return;
       try {
-        const res = await fetch(`http://localhost:8080/api/v1/mediafile/${uri}`, {
+        const res = await fetch(`/api/v1/mediafile/${uri}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) return;

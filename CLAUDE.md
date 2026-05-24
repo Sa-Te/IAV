@@ -379,6 +379,10 @@ The Go backend at `backend/` is already functional. Know this before touching it
 
 ---
 
+## Git commit rules
+
+- **Never add a `Co-Authored-By` line** to commit messages.
+
 ## Things Claude MUST NOT do
 
 - Never modify parser without explaining and getting approval

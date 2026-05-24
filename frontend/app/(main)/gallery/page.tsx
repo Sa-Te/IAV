@@ -27,7 +27,7 @@ export default function GalleryPage() {
   useEffect(() => {
     if (!token) return;
     setLoading(true);
-    fetch("http://localhost:8080/api/v1/media", { headers: { Authorization: `Bearer ${token}` } })
+    fetch("/api/v1/media", { headers: { Authorization: `Bearer ${token}` } })
       .then((r) => r.json())
       .then((data: MediaItem[]) => {
         const unique = Array.from(new Map(data.map((i) => [i.id, i])).values());

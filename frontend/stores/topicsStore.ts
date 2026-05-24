@@ -24,7 +24,7 @@ export const useTopicsStore = create<TopicsState>((set) => ({
   fetchTopics: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch("http://localhost:8080/api/v1/topics", { headers: { Authorization: `Bearer ${token}` } });
+      const res = await fetch("/api/v1/topics", { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error("Failed to fetch topics");
       const data = await res.json();
       set({ ai_interests: data.ai_interests ?? [], topics: data.topics ?? [], inferred_location: data.inferred_location ?? null, locations_of_interest: data.locations_of_interest ?? [], loading: false });

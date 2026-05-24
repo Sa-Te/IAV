@@ -31,6 +31,7 @@ func runMigrations(db *pgxpool.Pool) {
 	applyMigration(db, "migrations/017_create_messages_tables.sql", "messages")
 	applyMigration(db, "migrations/018_create_devices_settings_tables.sql", "devices_settings")
 	applyMigration(db, "migrations/019_create_misc_tables.sql", "misc")
+	applyMigration(db, "migrations/020_dedup_messages_and_activity.sql", "dedup")
 }
 
 func applyMigration(db *pgxpool.Pool, filepath string, tableName string) {

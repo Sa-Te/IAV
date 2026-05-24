@@ -43,7 +43,7 @@ export const useActivityStore = create<ActivityState>((set, get) => ({
 
     set({ loading: true, error: null });
     try {
-      const response = await fetch("http://localhost:8080/api/v1/activity", {
+      const response = await fetch("/api/v1/activity", {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok)

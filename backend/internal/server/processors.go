@@ -738,7 +738,7 @@ func (s *APIServer) processMessageFile(path string, userID int) error {
 	}
 
 	msgSQL := `INSERT INTO messages (user_id, conversation_id, sender_name, content, sent_at)
-	           VALUES ($1,$2,$3,$4,$5)`
+	           VALUES ($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`
 	for _, msg := range mf.Messages {
 		sentAt := time.UnixMilli(msg.TimestampMs)
 		_, err := s.db.Exec(context.Background(), msgSQL, userID,

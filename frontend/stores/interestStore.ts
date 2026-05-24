@@ -25,7 +25,7 @@ export const useInterestStore = create<InterestState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await fetch(
-        "http://localhost:8080/api/v1/ad-interests",
+        "/api/v1/ad-interests",
         {
           headers: { Authorization: `Bearer ${token}` },
         }

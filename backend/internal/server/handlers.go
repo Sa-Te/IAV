@@ -1609,7 +1609,10 @@ func (s *APIServer) getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if rows, err := s.db.Query(context.Background(),
-		`SELECT id, user_id, conversation_id, participants, COALESCE(thread_type,'') FROM message_conversations WHERE user_id=$1`, userID); err == nil {
+		`SELECT id, user_id, conversation_id, participants, COALESCE(thread_type,'')
+		 FROM message_conversations mc WHERE mc.user_id=$1
+		 ORDER BY (SELECT MAX(sent_at) FROM messages m WHERE m.user_id=$1 AND m.conversation_id=mc.conversation_id) DESC NULLS LAST`,
+		userID); err == nil {
 		defer rows.Close()
 		for rows.Next() {
 			var c models.MessageConversation
@@ -1619,15 +1622,30 @@ func (s *APIServer) getMessagesHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Return only the most recent 500 messages across all conversations
-	if rows, err := s.db.Query(context.Background(),
-		`SELECT id, user_id, conversation_id, sender_name, COALESCE(content,''), sent_at
-		 FROM messages WHERE user_id=$1 ORDER BY sent_at DESC LIMIT 500`, userID); err == nil {
-		defer rows.Close()
-		for rows.Next() {
-			var m models.Message
-			if err := rows.Scan(&m.ID, &m.UserID, &m.ConversationID, &m.SenderName, &m.Content, &m.SentAt); err == nil {
-				resp.Messages = append(resp.Messages, m)
+	// If a specific conversation is requested, return all its messages; otherwise return recent 100 per conversation
+	convID := r.URL.Query().Get("conversation_id")
+	if convID != "" {
+		if rows, err := s.db.Query(context.Background(),
+			`SELECT id, user_id, conversation_id, sender_name, COALESCE(content,''), sent_at
+			 FROM messages WHERE user_id=$1 AND conversation_id=$2 ORDER BY sent_at ASC`, userID, convID); err == nil {
+			defer rows.Close()
+			for rows.Next() {
+				var m models.Message
+				if err := rows.Scan(&m.ID, &m.UserID, &m.ConversationID, &m.SenderName, &m.Content, &m.SentAt); err == nil {
+					resp.Messages = append(resp.Messages, m)
+				}
+			}
+		}
+	} else {
+		if rows, err := s.db.Query(context.Background(),
+			`SELECT id, user_id, conversation_id, sender_name, COALESCE(content,''), sent_at
+			 FROM messages WHERE user_id=$1 ORDER BY sent_at DESC LIMIT 2000`, userID); err == nil {
+			defer rows.Close()
+			for rows.Next() {
+				var m models.Message
+				if err := rows.Scan(&m.ID, &m.UserID, &m.ConversationID, &m.SenderName, &m.Content, &m.SentAt); err == nil {
+					resp.Messages = append(resp.Messages, m)
+				}
 			}
 		}
 	}
