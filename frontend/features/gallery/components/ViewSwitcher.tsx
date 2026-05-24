@@ -9,35 +9,29 @@ interface Props {
   onChange: (v: GalleryView) => void;
 }
 
-const VIEWS: { key: GalleryView; icon: React.ElementType; label: string; phase?: string }[] = [
+const VIEWS: { key: GalleryView; icon: React.ElementType; label: string; soon?: boolean }[] = [
   { key: "Grid", icon: LayoutGrid, label: "Grid" },
   { key: "Timeline", icon: Rows3, label: "Timeline" },
-  { key: "Map", icon: Map, label: "Map", phase: "Phase 3" },
-  { key: "Cyclone", icon: Wind, label: "Cyclone", phase: "Phase 4" },
+  { key: "Cyclone", icon: Wind, label: "Cyclone" },
+  { key: "Map", icon: Map, label: "Map", soon: true },
 ];
 
 export default function ViewSwitcher({ current, onChange }: Props) {
   return (
     <div className="flex items-center gap-1 glass-card p-1 rounded-xl">
-      {VIEWS.map(({ key, icon: Icon, label, phase }) => {
+      {VIEWS.map(({ key, icon: Icon, label, soon }) => {
         const isActive = current === key;
-        const isPlanned = !!phase;
         return (
           <button
             key={key}
-            onClick={() => !isPlanned && onChange(key)}
-            title={phase ? `${label} — coming in ${phase}` : label}
+            onClick={() => !soon && onChange(key)}
+            title={soon ? `${label} — coming soon` : label}
             className={`relative flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-150
-              ${isActive ? "bg-neon-500/20 text-neon-300" : "text-star-400 hover:text-star-200"}
-              ${isPlanned ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+              ${isActive ? "bg-neon-500/20 text-neon-300 shadow-[0_0_12px_rgba(0,163,196,0.2)]" : "text-star-400 hover:text-star-200"}
+              ${soon ? "opacity-35 cursor-not-allowed" : "cursor-pointer"}`}
           >
             <Icon className="w-4 h-4" />
             <span className="hidden sm:inline">{label}</span>
-            {phase && (
-              <span className="hidden sm:inline text-[9px] font-bold px-1 py-0.5 rounded bg-star-500/20 text-star-400 ml-1">
-                {phase}
-              </span>
-            )}
           </button>
         );
       })}

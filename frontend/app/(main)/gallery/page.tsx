@@ -1,17 +1,19 @@
 "use client";
 
 import { useAuthStore } from "@/stores/authStore";
-import { useMediaStore } from "@/stores/mediaStore";
-import { useEffect, useMemo, useState } from "react";
+import { useGalleryStore } from "@/stores/galleryStore";
+import { useEffect, useMemo } from "react";
 import { LayoutGrid } from "lucide-react";
+import { AnimatePresence } from "framer-motion";
 import PageHeader from "@/components/ui/PageHeader";
 import TabNav from "@/components/ui/TabNav";
 import EmptyState from "@/components/ui/EmptyState";
-import ViewSwitcher, { GalleryView } from "@/features/gallery/components/ViewSwitcher";
-import GridView, { MediaItem } from "@/features/gallery/components/GridView";
+import ViewSwitcher, { type GalleryView } from "@/features/gallery/components/ViewSwitcher";
+import GridView from "@/features/gallery/components/GridView";
 import TimelineView from "@/features/gallery/components/TimelineView";
 import MapView from "@/features/gallery/components/MapView";
 import CycloneView from "@/features/gallery/components/CycloneView";
+import DetailModal from "@/features/gallery/components/DetailModal";
 
 const TABS = [
   { key: "Posts", label: "Posts" },
@@ -20,43 +22,49 @@ const TABS = [
 
 export default function GalleryPage() {
   const token = useAuthStore((s) => s.token);
-  const { activeTab, setActiveTab, currentView, setCurrentView } = useMediaStore();
-  const [media, setMedia] = useState<MediaItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    items, loading, activeTab, setActiveTab,
+    currentView, setCurrentView,
+    selectedIndex, setSelectedIndex,
+    fetchMedia,
+  } = useGalleryStore();
 
   useEffect(() => {
-    if (!token) return;
-    setLoading(true);
-    fetch("/api/v1/media", { headers: { Authorization: `Bearer ${token}` } })
-      .then((r) => r.json())
-      .then((data: MediaItem[]) => {
-        const unique = Array.from(new Map(data.map((i) => [i.id, i])).values());
-        setMedia(unique);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, [token]);
+    if (token) fetchMedia(token);
+  }, [token, fetchMedia]);
 
   const filtered = useMemo(() => {
     const type = activeTab === "Posts" ? "post" : "story";
-    return media.filter((i) => i.media_type.toLowerCase() === type)
+    return items
+      .filter((i) => i.media_type.toLowerCase() === type)
       .sort((a, b) => new Date(b.taken_at).getTime() - new Date(a.taken_at).getTime());
-  }, [media, activeTab]);
+  }, [items, activeTab]);
 
   const grouped = useMemo(() => {
-    return filtered.reduce((acc, item) => {
+    return filtered.reduce<Record<string, typeof filtered>>((acc, item) => {
       const key = new Date(item.taken_at).toLocaleString("default", { month: "long", year: "numeric" });
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(item);
+      (acc[key] = acc[key] ?? []).push(item);
       return acc;
-    }, {} as Record<string, MediaItem[]>);
+    }, {});
   }, [filtered]);
 
-  const postCount = media.filter((i) => i.media_type === "post").length;
-  const storyCount = media.filter((i) => i.media_type === "story").length;
+  const postCount = items.filter((i) => i.media_type === "post").length;
+  const storyCount = items.filter((i) => i.media_type === "story").length;
 
   return (
     <div>
+      <AnimatePresence>
+        {selectedIndex !== null && (
+          <DetailModal
+            items={filtered}
+            index={selectedIndex}
+            token={token}
+            onClose={() => setSelectedIndex(null)}
+            onNav={setSelectedIndex}
+          />
+        )}
+      </AnimatePresence>
+
       <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
         <PageHeader
           icon={LayoutGrid}
@@ -67,10 +75,7 @@ export default function GalleryPage() {
             { label: "Stories", value: storyCount },
           ]}
         />
-        <ViewSwitcher
-          current={currentView as GalleryView}
-          onChange={(v) => setCurrentView(v)}
-        />
+        <ViewSwitcher current={currentView as GalleryView} onChange={setCurrentView} />
       </div>
 
       <TabNav
@@ -94,13 +99,13 @@ export default function GalleryPage() {
       ) : filtered.length === 0 ? (
         <EmptyState icon={LayoutGrid} title="No media yet" message="Upload your Instagram archive to see your photos and videos here." />
       ) : currentView === "Grid" ? (
-        <GridView media={filtered} token={token} />
+        <GridView media={filtered} token={token} onSelect={setSelectedIndex} />
       ) : currentView === "Timeline" ? (
-        <TimelineView groupedMedia={grouped} token={token} />
-      ) : currentView === "Map" ? (
-        <MapView />
+        <TimelineView groupedMedia={grouped} allItems={filtered} token={token} onSelect={setSelectedIndex} />
+      ) : currentView === "Cyclone" ? (
+        <CycloneView items={filtered} token={token} onSelect={setSelectedIndex} />
       ) : (
-        <CycloneView />
+        <MapView />
       )}
     </div>
   );
