@@ -19,6 +19,18 @@ func runMigrations(db *pgxpool.Pool) {
 	applyMigration(db, "migrations/005_create_connections_table.sql", "connections")
 	applyMigration(db, "migrations/006_add_contact_info_to_connections.sql", "connections")
 	applyMigration(db, "migrations/007_create_followed_hashtags_table.sql", "followed_hashtags")
+	applyMigration(db, "migrations/008_create_ad_interests_tables.sql", "ad_interests")
+	applyMigration(db, "migrations/009_create_activity_log_table.sql", "activity_log")
+	applyMigration(db, "migrations/010_create_likes_tables.sql", "likes")
+	applyMigration(db, "migrations/011_create_comments_tables.sql", "comments")
+	applyMigration(db, "migrations/012_create_saved_tables.sql", "saved")
+	applyMigration(db, "migrations/013_create_profile_tables.sql", "profile")
+	applyMigration(db, "migrations/014_create_security_tables.sql", "security")
+	applyMigration(db, "migrations/015_create_story_interactions_tables.sql", "story_interactions")
+	applyMigration(db, "migrations/016_create_search_history_table.sql", "search_history")
+	applyMigration(db, "migrations/017_create_messages_tables.sql", "messages")
+	applyMigration(db, "migrations/018_create_devices_settings_tables.sql", "devices_settings")
+	applyMigration(db, "migrations/019_create_misc_tables.sql", "misc")
 }
 
 func applyMigration(db *pgxpool.Pool, filepath string, tableName string) {
@@ -36,7 +48,12 @@ func applyMigration(db *pgxpool.Pool, filepath string, tableName string) {
 }
 
 func main() {
-	connStr := "postgres://postgres:letmeinfast@localhost:5432/postgres?client_encoding=utf8"
+	connStr := os.Getenv("DATABASE_URL")
+	if connStr == "" {
+		// We can set a fallback for local running without Docker, but the env var is primary.
+		connStr = "postgres://postgres:letmeinfast@localhost:5432/postgres?client_encoding=utf8"
+		log.Println("DATABASE_URL not set, using default fallback.")
+	}
 
 	db, err := pgxpool.New(context.Background(), connStr)
 	if err != nil {
