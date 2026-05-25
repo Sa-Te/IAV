@@ -12,11 +12,18 @@ async function proxy(req: NextRequest): Promise<NextResponse> {
   if (ct) headers.set("content-type", ct);
 
   const body =
-    req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined;
+    req.method !== "GET" && req.method !== "HEAD"
+      ? await req.arrayBuffer()
+      : undefined;
 
-  const upstream = await fetch(url, { method: req.method, headers, body });
+  let upstream: Response;
+  try {
+    upstream = await fetch(url, { method: req.method, headers, body });
+  } catch (err) {
+    console.error("[proxy] upstream fetch failed:", err);
+    return NextResponse.json({ error: "Backend unreachable" }, { status: 502 });
+  }
 
-  // Stream the response directly — never buffer large payloads
   return new NextResponse(upstream.body, {
     status: upstream.status,
     headers: {

@@ -103,7 +103,16 @@ export default function GalleryPage() {
       ) : currentView === "Timeline" ? (
         <TimelineView groupedMedia={grouped} allItems={filtered} token={token} onSelect={setSelectedIndex} />
       ) : currentView === "Cyclone" ? (
-        <CycloneView items={filtered} token={token} onSelect={setSelectedIndex} />
+        <CycloneView
+            items={filtered}
+            token={token}
+            onSelect={setSelectedIndex}
+            onClose={() => setCurrentView("Grid")}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            postCount={postCount}
+            storyCount={storyCount}
+          />
       ) : (
         <MapView />
       )}

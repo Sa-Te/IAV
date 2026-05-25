@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Stars, Html, OrbitControls } from "@react-three/drei";
+import { useRef, useMemo, useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { Html, OrbitControls } from "@react-three/drei";
+import { FogExp2, Color } from "three";
 import type { Group } from "three";
 import type { MediaItem } from "@/stores/galleryStore";
 import { fixInstagramEncoding } from "@/lib/fixEncoding";
@@ -23,34 +24,36 @@ function PhotoCard({ item, token, onClick }: { item: MediaItem; token: string | 
     >
       <div
         onClick={onClick}
-        className="cursor-pointer group"
+        className="cursor-pointer"
         style={{
           width: 130,
           height: 155,
-          borderRadius: 10,
+          borderRadius: 8,
           overflow: "hidden",
-          background: "rgba(8,16,32,0.95)",
-          border: "1px solid rgba(0,163,196,0.25)",
-          boxShadow: "0 0 18px rgba(0,163,196,0.12)",
-          transition: "border-color 0.2s, box-shadow 0.2s",
+          background: "#FFFFFF",
+          border: "1px solid rgba(0,0,0,0.07)",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.07)",
+          transition: "box-shadow 0.2s, transform 0.2s",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(0,163,196,0.7)";
-          (e.currentTarget as HTMLDivElement).style.boxShadow = "0 0 32px rgba(0,163,196,0.35)";
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.boxShadow = "0 8px 32px rgba(0,0,0,0.14)";
+          el.style.transform = "scale(1.02)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLDivElement).style.borderColor = "rgba(0,163,196,0.25)";
-          (e.currentTarget as HTMLDivElement).style.boxShadow = "0 0 18px rgba(0,163,196,0.12)";
+          const el = e.currentTarget as HTMLDivElement;
+          el.style.boxShadow = "0 4px 20px rgba(0,0,0,0.07)";
+          el.style.transform = "scale(1)";
         }}
       >
-        <div style={{ height: 110, overflow: "hidden", background: "#000" }}>
+        <div style={{ height: 110, overflow: "hidden", background: "#F2F2F2" }}>
           <MediaRenderer uri={item.uri} token={token} />
         </div>
-        <div style={{ padding: "4px 6px" }}>
-          <p style={{ fontSize: 9, color: "#7ba3c4", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
-            {fixInstagramEncoding(item.caption) || "No caption"}
+        <div style={{ padding: "5px 7px" }}>
+          <p style={{ fontSize: 9, color: "#333", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis", fontFamily: "serif" }}>
+            {fixInstagramEncoding(item.caption) || "—"}
           </p>
-          <p style={{ fontSize: 8, color: "#3d5a72", marginTop: 2 }}>
+          <p style={{ fontSize: 8, color: "#999", marginTop: 2, letterSpacing: "0.02em" }}>
             {new Date(item.taken_at).toLocaleDateString()}
           </p>
         </div>
@@ -60,7 +63,18 @@ function PhotoCard({ item, token, onClick }: { item: MediaItem; token: string | 
 }
 
 export default function CycloneScene({ items, token, onSelect }: Props) {
+  const { scene } = useThree();
   const helixRef = useRef<Group>(null);
+
+  useEffect(() => {
+    scene.background = new Color("#FAFAFA");
+    scene.fog = new FogExp2("#FAFAFA", 0.014);
+    return () => {
+      scene.background = null;
+      scene.fog = null;
+    };
+  }, [scene]);
+
   const VISIBLE = Math.min(items.length, 60);
   const TURNS = 3;
   const RADIUS = 7;
@@ -87,10 +101,9 @@ export default function CycloneScene({ items, token, onSelect }: Props) {
 
   return (
     <>
-      <Stars radius={120} depth={60} count={3000} factor={5} fade speed={0.6} />
-      <ambientLight intensity={0.4} />
-      <pointLight position={[10, 10, 10]} intensity={1.2} color="#00a3c4" />
-      <pointLight position={[-10, -10, -10]} intensity={0.6} color="#9b59ff" />
+      <ambientLight intensity={2.0} color="#FFFFFF" />
+      <directionalLight position={[10, 15, 10]} intensity={0.5} color="#FFFFFF" />
+      <directionalLight position={[-10, -5, -10]} intensity={0.2} color="#F8F8FF" />
       <OrbitControls enablePan={false} minDistance={8} maxDistance={40} />
       <group ref={helixRef}>
         {items.slice(0, VISIBLE).map((item, i) => (

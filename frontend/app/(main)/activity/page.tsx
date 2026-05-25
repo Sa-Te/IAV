@@ -11,7 +11,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import TabNav from "@/components/ui/TabNav";
 import EmptyState from "@/components/ui/EmptyState";
 
-const TABS: { key: ActivityType; label: string; icon: React.ElementType }[] = [
+const TABS: { key: ActivityType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { key: "ad_viewed", label: "Ads Viewed", icon: Zap },
   { key: "post_viewed", label: "Posts Viewed", icon: Eye },
   { key: "video_watched", label: "Videos Watched", icon: FileVideo },

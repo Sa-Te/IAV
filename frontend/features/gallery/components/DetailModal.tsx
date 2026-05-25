@@ -46,7 +46,7 @@ export default function DetailModal({ items, index, token, onClose, onNav }: Pro
     <AnimatePresence>
       {item && (
         <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-[60] flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -86,23 +86,21 @@ export default function DetailModal({ items, index, token, onClose, onNav }: Pro
               boxShadow: "0 0 80px rgba(0,163,196,0.15)",
               maxWidth: isVideo ? "900px" : "680px",
               width: "calc(100vw - 120px)",
-              maxHeight: "calc(100vh - 80px)",
+              height: "calc(100vh - 80px)",
             }}
             initial={{ scale: 0.92, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.92, opacity: 0 }}
             transition={{ type: "spring", stiffness: 380, damping: 30 }}
           >
-            {/* Media */}
-            <div className="relative flex-shrink-0 flex items-center justify-center"
-              style={{ background: "#000", maxHeight: "65vh", minHeight: "200px" }}>
-              <div style={{ maxHeight: "65vh", maxWidth: "100%", width: "100%" }}>
-                <MediaRenderer uri={item.uri} token={token} />
-              </div>
+            {/* Media — flex-1 min-h-0 so it fills remaining space without pushing info off-screen */}
+            <div className="relative flex-1 min-h-0 flex items-center justify-center overflow-hidden"
+              style={{ background: "#000" }}>
+              <MediaRenderer uri={item.uri} token={token} />
             </div>
 
-            {/* Info */}
-            <div className="p-5 overflow-y-auto" style={{ maxHeight: "35vh" }}>
+            {/* Info — flex-shrink-0 ensures it's always visible at the bottom */}
+            <div className="p-5 overflow-y-auto flex-shrink-0" style={{ maxHeight: "35vh" }}>
               <p className="text-xs text-star-500 mb-2">
                 {formatDistanceToNow(new Date(item.taken_at), { addSuffix: true })} ·{" "}
                 {new Date(item.taken_at).toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
