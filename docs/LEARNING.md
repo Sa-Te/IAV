@@ -94,3 +94,10 @@ progress.
   every file, sums the entries and records path/count/kind, because any fold of two
   objects has to drop a key —
   vault: `debug-log/2026-10-31_last-write-wins.md`
+- 2026-10-31 — `bounded-cache-with-explicit-release` — an object URL is a leak and a bitmap
+  is memory; one entry per path with LRU-by-count eviction that revokes then closes is the
+  smallest design that is both fast and honest —
+  vault: `architecture/2026-10-31_media-cache.md`
+- 2026-10-31 — `gate-before-the-read` — a privacy gate that hides rendered data is weaker
+  than one that never mounts the reader, so the repository call happens after the click —
+  vault: `architecture/2026-10-31_media-cache.md`

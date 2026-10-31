@@ -7,9 +7,10 @@ only when its row says parsed + rendered + tested (AGENTS.md §16).
 tested.** Plus one unrecognised bucket (ADR 0002, tier 3) that is always present by
 design.
 
-Of the 72 present in `archive-2/`, **58 render as a table** and **14 render only as
-a raw tree** — stored exactly as Instagram provided it, because their shape carries
-no labels to name a column. The fourteen absent rows stay registered: absence is a
+Of the 72 present in `archive-2/`, **58 render as a table**, **12 render only as a
+raw tree** — stored exactly as Instagram provided it, because their shape carries no
+labels to name a column — and **2 message categories render as a thread list** (M9)
+behind the T5 reveal gate. The fourteen absent rows stay registered: absence is a
 normal state (ADR 0002), and an ordinary export must not look broken.
 
 Rows are ordered by privacy weight **ascending**, so the categories that carry
@@ -142,8 +143,8 @@ are parsed, rendered and tested, and twelve are parsed but not rendered.
 
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `messages_requests` | `your_instagram_activity/messages/message_requests/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | messages | high | parsed + raw view |
-| `messages_inbox` | `your_instagram_activity/messages/inbox/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | messages | high | parsed + raw view |
+| `messages_requests` | `your_instagram_activity/messages/message_requests/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | thread list | high | parsed + rendered (M9: thread list behind the T5 gate) |
+| `messages_inbox` | `your_instagram_activity/messages/inbox/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | thread list | high | parsed + rendered (M9: thread list behind the T5 gate) |
 | `ai_conversations` | `your_instagram_activity/messages/ai_conversations.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
 | `checkout_payment_information` | `your_instagram_activity/shopping/checkout_payment_information.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
 | `threads_viewed` | `your_instagram_activity/threads/threads_viewed.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |

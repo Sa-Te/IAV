@@ -841,3 +841,49 @@ them — never by inference alone (AGENTS.md §6).
 - **Decision:** two schemas, identical today, deliberately not shared — so either file can
   grow a field without silently loosening the other. `archived_posts` is identified by its
   `ig_archived_post_media` wrapper, not by shape, because its shape *is* posts'.
+
+### Q6 — integer values of `joinable_mode.mode`
+
+- **Probe:** every `message_*.json` under `messages/` in `archive-2/` (264 files, 263
+  thread folders), reading `joinable_mode`.
+- **Measured:** `joinable_mode` is present on **65 of 264** files, always as an object with
+  a single key `mode`. Observed values: `mode: 1` in **63** files, `mode: 2` in **2**. No
+  other value, and no other key inside the object.
+- **Confidence:** distribution certain for this export. **Meaning unresolved:** two values
+  are not enough to name a vocabulary, and nothing in the export labels them.
+- **Decision:** the schema stores `joinable_mode` verbatim as an opaque object; the thread
+  list does not branch on it. A third value in a future export is data, not an error.
+
+### Q7 — `is_unsent_image_by_messenger_kid_parent`
+
+- **Probe:** every message in the same 264 files.
+- **Measured:** present on **33,700** messages and **`true` on 0**. **3** messages omit the
+  key entirely. There is no message where the flag marks anything as unsent.
+- **Confidence:** distribution certain. **Meaning unresolved:** "never true here" cannot
+  distinguish "the export never records it" from "nothing in this archive was unsent".
+- **Decision:** stored verbatim; no parser or view reads it. It must not be used to hide a
+  message, because a false flag would then delete data silently.
+
+### Q8 — audio call vs video call
+
+- **Probe:** every message in the same files, for any call-related key; then the full key set
+  of every message that carries `call_duration`, plus a raw search for `call_type` in a file.
+- **Measured:** `call_duration` appears on **34** messages. Their complete key set (besides
+  `sender_name`/`timestamp_ms`) is `{call_duration, content, is_geoblocked_for_viewer,
+  is_unsent_image_by_messenger_kid_parent}`. Durations: **21 are `0`**, the other **13** are
+  17–1372. The string `call_type` occurs nowhere, and there is no `type` field on a message.
+- **Confidence:** the *absence* of a distinguishing field is certain for this export.
+  **Meaning unresolved:** whether a call was audio or video is not recorded.
+- **Decision:** calls are rendered as ordinary messages; `call_duration` is stored verbatim
+  and never interpreted into "missed/answered/video". Inventing a call type would be a lie
+  the user could not check.
+
+### Q11 — `magic_words`
+
+- **Probe:** `magic_words` on every thread file in `archive-2/` (264 files), compared with the
+  old export (254 threads at M2).
+- **Measured:** empty (`[]`) in **264 of 264** files in the new export, and in all 254 in the
+  old one. No non-empty sample has ever been observed in either export.
+- **Confidence:** distribution certain for both exports. **Meaning unresolved:** there is no
+  element shape to inspect.
+- **Decision:** stored verbatim as an opaque array; no parser reads it.

@@ -82,6 +82,11 @@ asset. You can turn Wi-Fi off after the page loads and everything still works.
 "Wipe archive" deletes the archive, every category and every media file in one
 transaction.
 
+**Some categories ask before they show.** Categories that hold other people's words
+(messages, AI conversations, payment records) render behind a single "Show this
+category" button, so a route click on a shared screen does not open someone's
+conversation. The reveal is not remembered: reloading the page gates them again.
+
 **Every parsed category has a page.** `/categories` lists all of them by privacy
 tier; a category whose shape carries no labels renders as a collapsible JSON tree
 behind a banner that says so: that category is stored exactly as Instagram

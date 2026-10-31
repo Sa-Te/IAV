@@ -21,6 +21,9 @@ const TIERS: readonly { readonly tier: 1 | 2 | 3 | 4 | 5; readonly heading: stri
   { tier: 5, heading: "T5 — third-party authored text" },
 ];
 
+/** Categories whose generic route renders a purpose-built panel, not a table/tree. */
+const THREAD_CATEGORIES = new Set(["messages_inbox", "messages_requests"]);
+
 /** Categories that already have a dedicated route; the index links there instead. */
 const DEDICATED: Readonly<Record<string, string>> = {
   posts: "/posts",
@@ -41,7 +44,7 @@ interface Row {
   readonly entries: number;
   readonly media: number;
   readonly files: number;
-  readonly view: "gallery" | "table" | "raw tree" | "—";
+  readonly view: "gallery" | "table" | "raw tree" | "thread list" | "—";
   readonly href: string | null;
 }
 
@@ -95,11 +98,13 @@ export function CategoryIndex(): JSX.Element {
               media,
               files: record.sources?.length ?? 1,
               view:
-                DEDICATED[category.id] === undefined
-                  ? view.kind === "table"
-                    ? "table"
-                    : "raw tree"
-                  : "gallery",
+                DEDICATED[category.id] !== undefined
+                  ? "gallery"
+                  : THREAD_CATEGORIES.has(category.id)
+                    ? "thread list"
+                    : view.kind === "table"
+                      ? "table"
+                      : "raw tree",
               href: DEDICATED[category.id] ?? `/categories/${encodeURIComponent(category.id)}`,
             };
           },

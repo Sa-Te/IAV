@@ -21,6 +21,19 @@ export {
   THUMBNAIL_QUALITY,
 } from "./media/thumbnail.js";
 export type { Dimensions, ThumbnailEncoder } from "./media/thumbnail.js";
+export {
+  locateThread,
+  sortThreads,
+  threadMessages,
+  toThreadSummaries,
+  toThreadSummary,
+} from "./messages/threads.js";
+export type {
+  ThreadAttachment,
+  ThreadFolder,
+  ThreadMessage,
+  ThreadSummary,
+} from "./messages/threads.js";
 export { isT5, revealCopy } from "./categories/privacy.js";
 export type { RevealCopy } from "./categories/privacy.js";
 export { PAGE_SIZE, toTableView } from "./categories/toTableView.js";

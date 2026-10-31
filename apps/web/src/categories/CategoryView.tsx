@@ -1,11 +1,21 @@
-import { findCategory, isT5, toTableView, type CategoryViewData } from "@instavault/core";
+import {
+  findCategory,
+  isT5,
+  toTableView,
+  type CategoryRecord,
+  type CategoryViewData,
+} from "@instavault/core";
 import { useCallback, useEffect, useState, type JSX } from "react";
 import { useParams } from "react-router-dom";
 
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
+import { ThreadList } from "../messages/ThreadList.js";
 import { CategoryTable } from "./CategoryTable.js";
 import { CategoryTree } from "./CategoryTree.js";
 import { RevealGate } from "./RevealGate.js";
+
+/** Categories that have a purpose-built view inside the generic route. */
+const THREAD_CATEGORIES = new Set(["messages_inbox", "messages_requests"]);
 
 /**
  * `/categories/:id` — the generic view for any parsed category.
@@ -23,7 +33,11 @@ type State =
   | { readonly status: "loading" }
   | { readonly status: "failed"; readonly message: string }
   | { readonly status: "missing" }
-  | { readonly status: "ready"; readonly view: CategoryViewData };
+  | {
+      readonly status: "ready";
+      readonly view: CategoryViewData;
+      readonly record: CategoryRecord;
+    };
 
 /** The reader. It is only mounted once the gate (if any) has been opened. */
 function CategoryData({ id }: { id: string }): JSX.Element {
@@ -41,7 +55,9 @@ function CategoryData({ id }: { id: string }): JSX.Element {
         const record = await repository.getCategory(id);
         if (cancelled) return;
         setState(
-          record === null ? { status: "missing" } : { status: "ready", view: toTableView(record) },
+          record === null
+            ? { status: "missing" }
+            : { status: "ready", view: toTableView(record), record },
         );
       } catch (error) {
         if (!cancelled) {
@@ -80,15 +96,23 @@ function CategoryData({ id }: { id: string }): JSX.Element {
         </div>
       )}
 
-      {state.status === "ready" && state.view.kind === "table" && state.view.total === 0 && (
-        <p className="state state-empty">This category is in this export but holds no entries.</p>
+      {state.status === "ready" && THREAD_CATEGORIES.has(id) && (
+        <ThreadList record={state.record} />
       )}
 
-      {state.status === "ready" && state.view.kind === "table" && state.view.total > 0 && (
-        <CategoryTable view={state.view} caption={label} />
-      )}
+      {state.status === "ready" &&
+        !THREAD_CATEGORIES.has(id) &&
+        state.view.kind === "table" &&
+        state.view.total === 0 && (
+          <p className="state state-empty">This category is in this export but holds no entries.</p>
+        )}
 
-      {state.status === "ready" && state.view.kind === "tree" && (
+      {state.status === "ready" &&
+        !THREAD_CATEGORIES.has(id) &&
+        state.view.kind === "table" &&
+        state.view.total > 0 && <CategoryTable view={state.view} caption={label} />}
+
+      {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.view.kind === "tree" && (
         <CategoryTree view={state.view} caption={label} />
       )}
     </>

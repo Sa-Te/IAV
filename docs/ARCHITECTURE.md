@@ -61,6 +61,10 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `strings/fixMojibake.ts` | Repairs Instagram's double-encoded text in a single string (ADR 0003). |
 | `strings/normaliseStrings.ts` | Applies that repair to every string value in a parsed archive, without mutating the input. |
 | `categories/toTableView.ts` | Interprets a category payload: four observed shapes → a table with labels taken verbatim, or a raw tree. Pagination constant lives here. |
+| `categories/privacy.ts` | Which categories are T5, and the copy shown before one is revealed; reads the registry, never a hardcoded id list. |
+| `media/cache.ts` | Bounded media cache: one entry and one in-flight decode per path, LRU by count at 150, evict = revoke URL then close bitmap, `releaseAll` for teardown. |
+| `media/thumbnail.ts` | Thumbnail geometry and the encode contract: max edge 512, aspect preserved, never upscaled, type taken from what the encoder produced. |
+| `messages/threads.ts` | Thread identity from the path (family + folder), summaries, newest-first ordering, and one thread's messages in chronological order. |
 
 The registry is **data, not code**: adding a category is one row. `registry.test.ts`
 fails the moment a row is added without a match rule or signature, or when the
@@ -88,6 +92,12 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/categories/CategoryTable.tsx` | Semantic table, sticky header, 100 rows per page; long values keep their full text in `title`. |
 | `apps/web/src/categories/CategoryTree.tsx` | Collapsible JSON tree that builds children only on expand, behind the "we have not interpreted it" banner. |
 | `apps/web/src/categories/CategoryIndex.tsx` | `/categories`: every registry row grouped by privacy tier, absent rows greyed rather than hidden. |
+| `apps/web/src/categories/RevealGate.tsx` | T5 gate: renders copy + one button, mounts the reader only after the click, never persists the reveal. |
+| `apps/web/src/media/MediaCaches.tsx` | Creates the per-root original and thumbnail caches from the repository; releases both on teardown. |
+| `apps/web/src/media/useInViewport.ts` | IntersectionObserver with a 200px margin; once seen, stays seen, so scrolling back does not re-request. |
+| `packages/worker/src/thumbnails.ts` | Decode → OffscreenCanvas → webp (whatever type comes back), off the main thread. |
+| `apps/web/src/messages/ThreadList.tsx` | Message categories as a thread list: participants, count, newest date, empty threads marked, inside the T5 gate. |
+| `apps/web/src/messages/ThreadConversation.tsx` | One conversation chronologically with media through the cache, and the read-only note. |
 
 **Dependency direction: worker → core → nothing. Storage implements core's ports.**
 
