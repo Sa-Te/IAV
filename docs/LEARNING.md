@@ -64,3 +64,10 @@ progress.
 - 2026-10-31 — `render-what-you-measured` — `/` shows 376 items because the archive
   measures 376 media references, not because posts were the only thing built —
   vault: `learning-notes/2026-10-31_session-05.md`
+- 2026-10-31 — `drift-detection` — two exports of one product can disagree about a file's
+  shape while agreeing about its name; comparing measured shapes is how you find out before a
+  user does —
+  vault: `architecture/2026-10-31_format-migration-drift.md`
+- 2026-10-31 — `additive-tolerance` — a category needs one measured signature per format it
+  has been seen in; a changed shape means *more* signatures, never a looser one —
+  vault: `debug-log/2026-10-31_format-envelope-migration.md`
