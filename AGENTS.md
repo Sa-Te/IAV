@@ -184,6 +184,8 @@ the upgrade path.
   an ADR.
 - Field names follow the domain model. Instagram's `ig_` prefixes exist only
   inside `packages/core/parsers/`.
+- Category resolution never matches an exact path. Matching is basename pattern
+  first, structural signature second, unrecognised bucket last. See ADR 0002.
 
 ---
 
@@ -433,6 +435,12 @@ You DO still stop and ask for:
 
 Rule of thumb: if you cannot state the correction as "this sentence is now
 false because Y", it is not housekeeping — ask.
+
+### Needs the human
+
+End every report with a numbered list titled "Needs the human": every action only I can
+take, each with the exact command or the exact decision required. If there is nothing,
+write "Nothing." Never leave an action implied.
 
 ---
 
