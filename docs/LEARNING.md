@@ -49,3 +49,11 @@ progress.
 - 2026-10-31 — `ingestion-pipeline` — validate, then stream, then store in
   batches, committing the archive row last —
   vault: `architecture/2026-10-31_ingestion-pipeline.md`
+- 2026-10-31 — `reference-driven-storage` — media is stored because a resolved
+  reference points at it, not because its filename has a media extension; orphans
+  are counted, missing references are counted, nothing is guessed from a suffix —
+  vault: `debug-log/2026-10-31_thread-relative-media.md`
+- 2026-10-31 — `three-state-media` — a media URL is `pending`, `ready` or
+  `failed` with a reason; there is no null-as-loading, and a missing blob can
+  never render as a spinner —
+  vault: `architecture/2026-10-31_read-path.md`

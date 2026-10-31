@@ -188,6 +188,10 @@ the upgrade path.
   inside `packages/core/parsers/`.
 - Category resolution never matches an exact path. Matching is basename pattern
   first, structural signature second, unrecognised bucket last. See ADR 0002.
+- Open questions in `docs/archive-manifest.md` §10 are resolved inside the parser that
+  consumes them, not in advance. Each resolution commits its probe, records the measured
+  evidence and a confidence level in §11, and stores any uninterpretable value verbatim as
+  opaque. A question is never answered by inference alone.
 
 ---
 

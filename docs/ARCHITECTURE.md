@@ -75,6 +75,9 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `packages/storage/src/localArchiveRepository.ts` | IndexedDB implementation of `IngestSink` and `ArchiveRepository`; batched transactions, quota estimate, atomic clear. |
 | `packages/storage/src/db.ts` | The versioned schema and its single upgrader. |
 | `packages/worker/src/index.ts` | Worker host: owns the run, posts progress, depends only on the port. |
+| `apps/web/src/repository/RepositoryContext.tsx` | The read path: the one place a view obtains an `ArchiveRepository`; components never touch IndexedDB. |
+| `apps/web/src/media/useMediaUrl.ts` | Three-state media (`pending` / `ready` / `failed`), one shared request per id, object URLs revoked on unmount. |
+| `apps/web/src/routes/Gallery.tsx` | Post grid: three visibly distinct tile states, honest empty and error states, keyboard-openable tiles. |
 
 **Dependency direction: worker → core → nothing. Storage implements core's ports.**
 

@@ -778,3 +778,28 @@ Each of these needs the owner's knowledge. Do not guess.
 | Q17 | Is `string_list_data[].href` on `liked_posts` ever the liked post's permalink, or always the owner's profile? | `your_instagram_activity/likes/liked_posts.json` | `[].string_list_data[].href` |
 | Q18 | How does a saved post belong to a saved collection? No membership list was found. | `your_instagram_activity/saved/*.json` | — |
 | Q19 | How does a story interaction (poll, quiz, question) link back to the story? No story id was found. | `your_instagram_activity/story_interactions/*.json` | — |
+
+---
+
+## 11. Resolved empirically
+
+Open questions from §10 are settled here, one at a time, by the parser that needs
+them — never by inference alone (AGENTS.md §6).
+
+### Q3 — values of `cross_post_source.source_app`
+
+- **Probe:** read every post in `your_instagram_activity/media/posts_1.json` and
+  count `media[].cross_post_source.source_app` by value, treating an absent key as
+  its own bucket.
+- **Method:** `JSON.parse` in Node, one pass, no sampling. Re-runnable with
+  `node -e` over the same file; not part of `pnpm verify` (AGENTS.md §9).
+- **Measured:** `{"FB": 51}` — 51 of 51 posts carry the value `FB`; zero posts
+  omit the field.
+- **Confidence:** the *distribution* is certain for this export (every post
+  counted). The *meaning* is not: `FB` is a two-character app code and is almost
+  certainly Facebook, but this export contains no mapping and no second value to
+  compare against. One value cannot establish a vocabulary.
+- **Decision:** the schema stores `source_app` **verbatim** as an opaque string.
+  The UI may label a known value, but the parser never translates it and never
+  rejects an unknown one. A second export with a different value is what would
+  settle the vocabulary.

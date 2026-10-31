@@ -9,6 +9,8 @@ export default defineConfig({
       "apps/*/src/**/*.test.tsx",
     ],
     environment: "node",
+    // jsdom tests abort the default fork pool on this machine; threads are stable.
+    pool: "threads",
     passWithNoTests: false,
   },
 });

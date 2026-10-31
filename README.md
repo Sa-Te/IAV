@@ -57,33 +57,33 @@ pnpm verify         # everything CI runs, locally
 
 ## Try it
 
-The importer works; the gallery does not exist yet. There is a dev harness route
-that proves the pipeline end to end.
-
 ```bash
 pnpm install
 pnpm dev
-# open http://localhost:5173/dev/ingest
+# open http://localhost:5173/
 ```
 
-Drop in your Instagram export ZIP (request it as **JSON**, not HTML). You should
-see phases `reading → resolving → storing`, then a summary table:
+You need an Instagram export ZIP (request it as **JSON**, not HTML).
 
-| Field | Meaning |
-| --- | --- |
-| `categories` | how many of the 74 categories were recognised |
-| `entries` | total records across them |
-| `mediaStored` | media files written to IndexedDB on this device |
-| `mediaMissing` | media references that pointed at a file the archive does not contain |
-| `unrecognised` | files no rule matched, listed with their shape (name, kind, keys) and no content |
-| `fingerprint` | the archive's shape id (`fmt-xxxxxx`), used to warn when a later export differs |
+1. Open `/dev/ingest` and drop the ZIP in. It parses in a Web Worker and writes
+   categories and media to IndexedDB on this device. You should see
+   `reading → resolving → storing`, then a summary: categories, entries,
+   media stored, media missing, unrecognised files, and a shape fingerprint.
+2. Open `/`. You should see a grid of your posts — one tile per post, real
+   photos, and a line above saying how many posts and media files are on the
+   device. Click a tile for the full-size image, caption and date; Escape closes
+   and returns focus to the tile.
 
-**Media stays in the browser.** The ZIP is read in a Web Worker, parsed there, and
-written to IndexedDB on your device. Nothing is uploaded, and the dev harness makes
-no network requests.
+**What privacy means in practice.** The ZIP is read with the browser's own file
+API, parsed in a worker in the same tab, and stored in IndexedDB. Nothing is
+uploaded, there is no server, no analytics, and the page fetches no third-party
+asset. You can turn Wi-Fi off after the page loads and everything still works.
+"Wipe archive" deletes the archive, every category and every media file in one
+transaction.
 
-Re-importing replaces the archive; the "Wipe archive" button deletes it and tells
-you exactly what it is deleting.
+**If something is wrong.** A tile that shows a dashed red box is media the archive
+references but does not contain — the archive itself is fine, that file is absent.
+A tile with a striped grey box is still loading; it will not stay that way.
 
 ## Local gates
 
