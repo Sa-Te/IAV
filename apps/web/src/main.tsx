@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import "./styles/app.css";
+import { MediaCachesProvider } from "./media/MediaCaches.js";
 import { RepositoryProvider } from "./repository/RepositoryContext.js";
 import { buildRoutes } from "./routes/routes.js";
 
@@ -22,7 +23,11 @@ createRoot(container).render(
           <Route
             key={route.path}
             path={route.path}
-            element={<RepositoryProvider>{route.element}</RepositoryProvider>}
+            element={
+              <RepositoryProvider>
+                <MediaCachesProvider>{route.element}</MediaCachesProvider>
+              </RepositoryProvider>
+            }
           />
         ))}
       </Routes>

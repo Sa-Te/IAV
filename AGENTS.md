@@ -210,6 +210,9 @@ These are checked, not hoped for.
   `OffscreenCanvas` in the worker). Never decode full-res media for a grid tile.
 - Blob URLs live in one LRU cache with an explicit revoke policy. Unbounded blob
   growth is a bug.
+- One media cache module, LRU by count with explicit revoke and close. No
+  module-level singleton. Grid tiles use thumbnails; only the detail view decodes
+  an original.
 - IndexedDB writes are batched in transactions. One transaction per record is a
   bug.
 - Importing a 160MB export must emit progress at least every 2 seconds and must never

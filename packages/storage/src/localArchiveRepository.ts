@@ -13,6 +13,7 @@ import {
   STORE_ARCHIVE,
   STORE_CATEGORIES,
   STORE_MEDIA,
+  STORE_THUMBS,
   transactionDone,
 } from "./db.js";
 
@@ -22,6 +23,19 @@ export interface MediaRow {
   readonly path: string;
   readonly bytes: number;
   readonly mime: string;
+}
+
+/**
+ * A generated grid thumbnail. `type` follows the bytes the encoder actually
+ * produced (WebP in Chromium, sometimes PNG elsewhere), never the type requested.
+ */
+export interface StoredThumbnail {
+  readonly path: string;
+  readonly blob: Blob;
+  readonly type: string;
+  readonly width: number;
+  readonly height: number;
+  readonly sourceBytes: number;
 }
 
 export interface Page<T> {
@@ -45,6 +59,8 @@ export interface ArchiveRepository {
   getCategory(id: string): Promise<CategoryRecord | null>;
   listCategories(): Promise<readonly CategoryRecord[]>;
   summary(): Promise<ArchiveRow | null>;
+  getThumbnail(path: string): Promise<StoredThumbnail | null>;
+  putThumbnail(thumbnail: StoredThumbnail): Promise<void>;
 }
 
 interface StoredMedia {
@@ -109,12 +125,16 @@ export class LocalArchiveRepository implements IngestSink, ArchiveRepository {
     await transactionDone(tx);
   }
 
-  /** Archive, categories and media together: no half-deleted archive. */
+  /** Archive, categories, media and thumbnails together: no half-deleted archive. */
   async clear(): Promise<void> {
-    const tx = this.db.transaction([STORE_ARCHIVE, STORE_CATEGORIES, STORE_MEDIA], "readwrite");
+    const tx = this.db.transaction(
+      [STORE_ARCHIVE, STORE_CATEGORIES, STORE_MEDIA, STORE_THUMBS],
+      "readwrite",
+    );
     tx.objectStore(STORE_ARCHIVE).clear();
     tx.objectStore(STORE_CATEGORIES).clear();
     tx.objectStore(STORE_MEDIA).clear();
+    tx.objectStore(STORE_THUMBS).clear();
     await transactionDone(tx);
   }
 
@@ -178,6 +198,19 @@ export class LocalArchiveRepository implements IngestSink, ArchiveRepository {
       this.db.transaction(STORE_CATEGORIES, "readonly").objectStore(STORE_CATEGORIES).getAll(),
     )) as CategoryRecord[];
     return rows;
+  }
+
+  async getThumbnail(path: string): Promise<StoredThumbnail | null> {
+    const row = (await requestToPromise(
+      this.db.transaction(STORE_THUMBS, "readonly").objectStore(STORE_THUMBS).get(path),
+    )) as StoredThumbnail | undefined;
+    return row ?? null;
+  }
+
+  async putThumbnail(thumbnail: StoredThumbnail): Promise<void> {
+    const tx = this.db.transaction(STORE_THUMBS, "readwrite");
+    tx.objectStore(STORE_THUMBS).put(thumbnail);
+    await transactionDone(tx);
   }
 
   async summary(): Promise<ArchiveRow | null> {

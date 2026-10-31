@@ -1,25 +1,33 @@
 /**
  * The IndexedDB schema and its single upgrader.
  *
- * Version 1 only. Future versions append a block; they never rewrite an existing
- * one, so a v2 store is an addition to this function and not a migration script
- * over user data.
+ * Every version appends a block; none rewrites an earlier one. A new store is an
+ * addition to this function, never a migration script over user data — which is
+ * also why an upgrade must not touch the archive, categories or media stores.
+ *
+ * v1: archive, categories, media.
+ * v2 (M9): thumbs — lazily generated grid thumbnails, keyed by media path.
  */
 
 export const DB_NAME = "instavault";
-export const DB_VERSION = 1;
+export const DB_VERSION = 2;
 
 export const STORE_ARCHIVE = "archive";
 export const STORE_CATEGORIES = "categories";
 export const STORE_MEDIA = "media";
+export const STORE_THUMBS = "thumbs";
 
-export type StoreName = typeof STORE_ARCHIVE | typeof STORE_CATEGORIES | typeof STORE_MEDIA;
+export type StoreName =
+  typeof STORE_ARCHIVE | typeof STORE_CATEGORIES | typeof STORE_MEDIA | typeof STORE_THUMBS;
 
 export function upgrade(db: IDBDatabase, oldVersion: number): void {
   if (oldVersion < 1) {
     db.createObjectStore(STORE_ARCHIVE, { keyPath: "id" });
     db.createObjectStore(STORE_CATEGORIES, { keyPath: "id" });
     db.createObjectStore(STORE_MEDIA, { keyPath: "path" });
+  }
+  if (oldVersion < 2) {
+    db.createObjectStore(STORE_THUMBS, { keyPath: "path" });
   }
 }
 

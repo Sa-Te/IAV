@@ -1,4 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import type { MediaState } from "@instavault/core";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+
+import { MediaCachesContext } from "./MediaCaches.js";
 
 /**
  * The three-state media loader. This is the regression test for the original bug:
@@ -6,10 +9,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
  * meaning "loading" anywhere in the union.
  */
 
-export type MediaState =
-  | { readonly status: "pending" }
-  | { readonly status: "ready"; readonly url: string; readonly mime: string }
-  | { readonly status: "failed"; readonly reason: "missing" | "decode" };
+export type { MediaState };
 
 export interface MediaSource {
   getMediaBlob(id: string): Promise<Blob | null>;
@@ -80,7 +80,9 @@ export function useMediaUrl(
   id: string | null,
   source: MediaSource,
   imageDecoder: (blob: Blob) => Promise<boolean> = defaultImageDecoder,
+  variant: "original" | "thumb" = "original",
 ): MediaState {
+  const caches = useContext(MediaCachesContext);
   const [state, setState] = useState<MediaState>({ status: "pending" });
   const urlRef = useRef<string | null>(null);
 
@@ -92,13 +94,26 @@ export function useMediaUrl(
   }, []);
 
   useEffect(() => {
+    // Nothing asked for yet: the tile is still outside the viewport.
     if (id === null) {
-      setState({ status: "failed", reason: "missing" });
+      setState({ status: "pending" });
       return;
     }
 
     let cancelled = false;
     setState({ status: "pending" });
+
+    const cache = caches === null ? undefined : caches[variant];
+    if (cache !== undefined) {
+      // The cache owns the object URL: it revokes on evict and on releaseAll, not
+      // on this component's unmount, or a scroll back would re-decode.
+      void cache.getUrl(id).then((next) => {
+        if (!cancelled) setState(next);
+      });
+      return () => {
+        cancelled = true;
+      };
+    }
 
     void (async () => {
       const loaded = await loadMedia(id, source, imageDecoder);
@@ -111,14 +126,14 @@ export function useMediaUrl(
 
       const url = URL.createObjectURL(loaded.blob);
       urlRef.current = url;
-      setState({ status: "ready", url, mime: loaded.blob.type });
+      setState({ status: "ready", url, mime: loaded.blob.type, bitmap: null });
     })();
 
     return () => {
       cancelled = true;
       revoke();
     };
-  }, [id, source, imageDecoder, revoke]);
+  }, [id, source, imageDecoder, revoke, caches, variant]);
 
   return state;
 }

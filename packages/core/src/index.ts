@@ -11,6 +11,16 @@ export { toMediaItems } from "./domain/media.js";
 export type { MediaItemView } from "./domain/media.js";
 export { toPostEntries } from "./domain/posts.js";
 export type { PostEntry } from "./domain/posts.js";
+export { createMediaCache, MEDIA_CACHE_CAP } from "./media/cache.js";
+export type { MediaCache, MediaCacheRuntime } from "./media/cache.js";
+export type { DecodedBitmap, DecodedMedia, MediaBytes, MediaState } from "./media/state.js";
+export {
+  makeThumbnail,
+  thumbnailDimensions,
+  THUMBNAIL_MAX_EDGE,
+  THUMBNAIL_QUALITY,
+} from "./media/thumbnail.js";
+export type { Dimensions, ThumbnailEncoder } from "./media/thumbnail.js";
 export { isT5, revealCopy } from "./categories/privacy.js";
 export type { RevealCopy } from "./categories/privacy.js";
 export { PAGE_SIZE, toTableView } from "./categories/toTableView.js";

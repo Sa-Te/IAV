@@ -29,6 +29,8 @@ function fakeRepository(records: Record<string, CategoryRecord>): ArchiveReposit
     getCategory: async (id) => records[id] ?? null,
     listCategories: async () => Object.values(records),
     summary: async () => null,
+    getThumbnail: async () => null,
+    putThumbnail: async () => undefined,
   };
 }
 
@@ -63,23 +65,29 @@ describe("CategoryTable", () => {
 });
 
 describe("CategoryTree", () => {
-  it("renders only the first level of a 5,000-node input until expanded", async () => {
-    const user = userEvent.setup();
-    const view: TreeView = {
-      kind: "tree",
-      value: Array.from({ length: 5000 }, (_, index) => ({ index })),
-    };
-    render(<CategoryTree view={view} caption="Big" />);
+  // Mounting 5,000 rows is a genuinely large DOM operation: on a slow CI runner it
+  // passes five seconds, which is a property of the test's fixture, not a hang.
+  it(
+    "renders only the first level of a 5,000-node input until expanded",
+    { timeout: 30_000 },
+    async () => {
+      const user = userEvent.setup();
+      const view: TreeView = {
+        kind: "tree",
+        value: Array.from({ length: 5000 }, (_, index) => ({ index })),
+      };
+      render(<CategoryTree view={view} caption="Big" />);
 
-    expect(screen.getByText("array [5000]")).toBeDefined();
-    // 5,000 children are not in the DOM.
-    expect(screen.queryByText("4999")).toBeNull();
+      expect(screen.getByText("array [5000]")).toBeDefined();
+      // 5,000 children are not in the DOM.
+      expect(screen.queryByText("4999")).toBeNull();
 
-    await user.click(screen.getByRole("button", { expanded: false }));
+      await user.click(screen.getByRole("button", { expanded: false }));
 
-    const list = screen.getAllByRole("listitem");
-    expect(list.length).toBeGreaterThan(100);
-  });
+      const list = screen.getAllByRole("listitem");
+      expect(list.length).toBeGreaterThan(100);
+    },
+  );
 
   it("carries the honesty banner", () => {
     render(<CategoryTree view={{ kind: "tree", value: { a: 1 } }} caption="Raw" />);

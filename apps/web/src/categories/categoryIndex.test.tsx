@@ -18,6 +18,8 @@ function repositoryWith(records: readonly CategoryRecord[]): ArchiveRepository {
     getCategory: async (id) => records.find((record) => record.id === id) ?? null,
     listCategories: async () => records,
     summary: async () => null,
+    getThumbnail: async () => null,
+    putThumbnail: async () => undefined,
   };
 }
 

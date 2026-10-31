@@ -184,3 +184,79 @@ describe("LocalArchiveRepository", () => {
     expect(await repository.estimateFreeBytes()).toBeNull();
   });
 });
+
+describe("schema v2 — thumbnails", () => {
+  it("upgrades a v1 database without losing archive, categories or media", async () => {
+    const name = `instavault-migrate-${Date.now()}`;
+
+    // A real v1 database: only the three v1 stores exist.
+    const v1 = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open(name, 1);
+      request.onupgradeneeded = () => {
+        const db = request.result;
+        db.createObjectStore("archive", { keyPath: "id" });
+        db.createObjectStore("categories", { keyPath: "id" });
+        db.createObjectStore("media", { keyPath: "path" });
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      const tx = v1.transaction(["archive", "categories", "media"], "readwrite");
+      tx.objectStore("archive").put({
+        id: "current",
+        fingerprint: "fmt-v1",
+        job: { status: "idle" },
+      });
+      tx.objectStore("categories").put(CATEGORY);
+      tx.objectStore("media").put({
+        path: "media/posts/a.jpg",
+        blob: new Blob([new Uint8Array([1, 2, 3, 4])], { type: "image/jpeg" }),
+        bytes: 4,
+        mime: "image/jpeg",
+      });
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => reject(tx.error);
+    });
+    v1.close();
+
+    const { db, version } = await openDatabase(indexedDB, name);
+    expect(version).toBe(DB_VERSION);
+    expect(DB_VERSION).toBe(2);
+
+    const repository = new LocalArchiveRepository(db);
+    expect((await repository.getCategory("posts"))?.entryCount).toBe(2);
+    expect((await repository.getMediaBlob("media/posts/a.jpg"))?.size).toBe(4);
+    expect((await repository.summary())?.fingerprint).toBe("fmt-v1");
+
+    // The new store exists and round-trips.
+    await repository.putThumbnail({
+      path: "media/posts/a.jpg",
+      blob: new Blob([new Uint8Array([9])], { type: "image/webp" }),
+      type: "image/webp",
+      width: 512,
+      height: 384,
+      sourceBytes: 4,
+    });
+    const thumb = await repository.getThumbnail("media/posts/a.jpg");
+    expect(thumb?.width).toBe(512);
+    expect(thumb?.type).toBe("image/webp");
+  });
+
+  it("removes thumbnails when the archive is cleared", async () => {
+    const repository = await freshRepository();
+    await repository.putThumbnail({
+      path: "media/posts/a.jpg",
+      blob: new Blob([new Uint8Array([1])], { type: "image/webp" }),
+      type: "image/webp",
+      width: 1,
+      height: 1,
+      sourceBytes: 4,
+    });
+
+    await repository.clear();
+
+    expect(await repository.getThumbnail("media/posts/a.jpg")).toBeNull();
+  });
+});

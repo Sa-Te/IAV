@@ -86,6 +86,8 @@ function repository(overrides: Partial<ArchiveRepository> = {}): ArchiveReposito
     getMediaBlob: async (id: string) => (id === "media/stories/s.mp4" ? MP4 : JPEG),
     getCategory: async (id: string) => CATEGORIES.find((record) => record.id === id) ?? null,
     summary: async () => SUMMARY,
+    getThumbnail: async () => null,
+    putThumbnail: async () => undefined,
     ...overrides,
   };
 }

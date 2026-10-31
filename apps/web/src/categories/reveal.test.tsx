@@ -34,6 +34,8 @@ function repositoryWith(
     getCategory,
     listCategories: async () => [...records.values()],
     summary: async () => null,
+    getThumbnail: async () => null,
+    putThumbnail: async () => undefined,
   };
 }
 
