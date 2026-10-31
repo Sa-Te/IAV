@@ -101,3 +101,30 @@ of the key:
   `posts_you're_not_interested_in.json`). Apostrophes appear in shell quoting,
   archives and URLs differently; the name rule must be written for the raw
   basename, not for a quoted or URL-encoded form.
+
+## Amendment — M3 implementation (2026-10-31)
+
+The Decision above describes three tiers but not two details that the code needs.
+Both are recorded here rather than in the Context or Decision, which stay as written.
+
+**1. `absentKeys` on a signature.** A signature is a set of required keys, but two
+categories can be structurally identical except for a flag one of them never
+carries. A message request object has `is_pending`; an inbox thread does not, yet
+both carry `is_still_participant`. Required keys alone cannot separate them, so a
+signature may also declare `absentKeys`, which must **not** be present. Only
+`messages_inbox` uses it today (absent: `is_pending`). Without it, every thread
+whose folder name is unrecognisable would be a hard ambiguity error — safe, but it
+would lose messages.
+
+**2. Specificity among tier-2 candidates.** Subset matching is too permissive on
+its own: `posts` is measured with exactly one top-level key (`media`), so any
+array entry carrying a `media` field also "matches" posts — including
+`{fbid, label_values, media, timestamp}` rows that belong to
+`interest_categories` or `link_history`. The implementation therefore keeps only
+the candidates that require the **most** keys, and if two of those tie it is still
+the hard error described above. This is a deterministic ordering, not a
+first-match-wins shortcut: a sample that satisfies four required keys is a better
+fit for the row that asks for four than for the row that asks for one.
+
+Both rules are exercised by `packages/core/src/registry/resolve.test.ts`; the
+first is also covered by the fixture archive in `packages/core/test/`.

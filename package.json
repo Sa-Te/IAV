@@ -20,6 +20,7 @@
     "test:watch": "vitest",
     "check:boundaries": "node scripts/check-boundaries.mjs",
     "check:filesize": "node scripts/check-file-size.mjs",
+    "ci:status": "node scripts/ci-status.mjs",
     "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm check:boundaries && pnpm check:filesize && pnpm build"
   },
   "devDependencies": {

@@ -30,23 +30,8 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
-        run: pnpm typecheck
-
-      - name: Lint
-        run: pnpm lint
-
-      - name: Format check
-        run: pnpm format:check
-
-      - name: Test
-        run: pnpm test
-
-      - name: Boundaries
-        run: pnpm check:boundaries
-
-      - name: File size
-        run: pnpm check:filesize
-
-      - name: Build
-        run: pnpm build
+      # Exactly what the pre-push hook runs. Do not add or remove steps here
+      # without changing the hook too: two check lists is how local and CI drift
+      # apart (AGENTS.md §10, "CI is truth").
+      - name: Verify
+        run: pnpm verify

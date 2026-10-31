@@ -59,15 +59,26 @@ pnpm verify         # everything CI runs, locally
 
 The repository enforces its own rules; they are not conventions to remember.
 
-- **Pre-push hook** (`.githooks/pre-push`, installed by `pnpm install` through
-  `git config core.hooksPath .githooks`): runs the fast lane — `typecheck`,
-  `lint`, `test` — and blocks the push, naming the step that failed. Bypassing
-  it with `--no-verify` to get past a real failure is the wrong move; if it is
-  too slow, cut scope instead.
+- **One command, one meaning.** The pre-push hook (`.githooks/pre-push`,
+  installed by `pnpm install` through `git config core.hooksPath .githooks`) and
+  CI both run exactly `pnpm verify`. There is no separate "fast lane" list to
+  keep in sync — two lists drift, and the drift is invisible until a push fails.
+- **`pnpm verify`** runs typecheck, lint, format check, unit + integration tests,
+  the boundary check, the file-size check and the build.
 - **`pnpm check:boundaries`** fails if `packages/core` or `packages/storage`
   import React, reach into `apps/`, touch the network, or escape their package.
 - **`pnpm check:filesize`** warns above 250 lines and fails above 400.
-- **`pnpm verify`** runs the full suite that CI runs.
+- **`pnpm ci:status`** prints the latest CI run for your commit, or the manual
+  `gh` commands if `gh` is unavailable.
+
+**The one residual gap:** the hook cannot cheaply detect a stale lockfile. CI
+installs with `--frozen-lockfile` and will fail if `package.json` and
+`pnpm-lock.yaml` disagree; a local `pnpm install` silently rewrites the lockfile
+instead. So after any dependency change, run `pnpm ci:status` once the push
+lands — that check is the safety net, not the hook.
+
+Do not bypass the hook with `--no-verify` to get past a real failure. If it is
+too slow, cut scope instead.
 
 ## Contributing
 

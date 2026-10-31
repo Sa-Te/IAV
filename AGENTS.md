@@ -296,6 +296,14 @@ Green check on a fresh clone is a feature.
   commits, work stays on `main` directly and the pre-push hook is the local gate.
 - Continuous deployment needs a deployment target. There is none until M13. Do not build a
   deploy job for an endpoint that does not exist.
+- **CI is truth.** After every push, before any other work, confirm the run for your own
+  commit is green: `pnpm ci:status`, or `gh run list --limit 1` then
+  `gh run view <id> --log-failed` if red. You may not begin the next milestone while CI is
+  red or while you have not checked it.
+- A local green is not a green. If local and CI disagree, CI wins and the difference is a
+  bug in the local gate.
+- Never fix red CI by removing a check, skipping a test, or adding --no-verify. If a check
+  is wrong, say so and get approval.
 
 ---
 
@@ -483,6 +491,9 @@ learning note.
 
 **A category is not done until:** it's in `docs/DATA-MAP.md` and its row says
 parsed + rendered + tested.
+
+**A milestone is not done while CI is red, or while the CI run for its commit is
+unknown.**
 
 ---
 

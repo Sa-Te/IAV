@@ -6,3 +6,8 @@ dist/
 coverage/
 pnpm-lock.yaml
 *.md
+
+# Test fixtures are deliberately malformed: invalid JSON, an empty file, an
+# unknown shape. Prettier cannot parse them and must not rewrite them — their
+# exact bytes are the test input, and "fixing" them would delete the test case.
+packages/*/test/fixtures/

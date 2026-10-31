@@ -1,24 +1,17 @@
 #!/bin/sh
-# Fast lane (AGENTS.md §9): typecheck + lint + unit tests, target under 10 seconds.
-# Installed by `pnpm install` via the root "prepare" script (core.hooksPath).
+# The same command CI runs. AGENTS.md §10: a local green is not a green, and two
+# check lists drift — so there is exactly one here.
 #
-# The point is that --no-verify is never tempting: if this gets slow, cut scope,
-# do not move the gate to CI.
+# Installed by `pnpm install` through the root "prepare" script
+# (`git config core.hooksPath .githooks`).
 
-fail() {
-  printf '\n[pre-push] BLOCKED: %s failed. Push aborted.\n' "$1"
-  printf '[pre-push] Fix it. Do not use --no-verify to get past a real failure.\n\n'
+printf '[pre-push] running `pnpm verify` — identical to CI\n\n'
+
+if ! pnpm verify; then
+  printf '\n[pre-push] BLOCKED: `pnpm verify` failed. Push aborted.\n'
+  printf '[pre-push] Fix the failing step above. Do not use --no-verify.\n\n'
   exit 1
-}
+fi
 
-printf '[pre-push] fast lane: typecheck\n'
-pnpm typecheck || fail "typecheck"
-
-printf '\n[pre-push] fast lane: lint\n'
-pnpm lint || fail "lint"
-
-printf '\n[pre-push] fast lane: tests\n'
-pnpm test || fail "tests"
-
-printf '\n[pre-push] fast lane passed.\n\n'
+printf '\n[pre-push] verify passed.\n\n'
 exit 0
