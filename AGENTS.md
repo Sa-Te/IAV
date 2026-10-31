@@ -317,6 +317,9 @@ Green check on a fresh clone is a feature.
   bug in the local gate.
 - Never fix red CI by removing a check, skipping a test, or adding --no-verify. If a check
   is wrong, say so and get approval.
+- A milestone may be reported as partial. Finish the commit you are in, run `pnpm verify`,
+  push, confirm CI, then report what is done and what is not. An uncommitted half-change is
+  never acceptable; a committed, green, explicitly partial milestone is.
 
 ---
 
