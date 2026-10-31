@@ -99,7 +99,10 @@ export function renderDrift(report: DriftReport, date: string, note?: string): s
     "",
   );
 
-  lines.push(`## Categories only in \`${a}/\` (${report.categoriesOnlyInA.length})`, "");
+  lines.push(
+    `## Categories only in the older export, \`${a}/\` (${report.categoriesOnlyInA.length})`,
+    "",
+  );
   lines.push(
     "Absence is normal (ADR 0002): these rows are not deleted, they are simply not in the",
     "second export.",
@@ -108,7 +111,10 @@ export function renderDrift(report: DriftReport, date: string, note?: string): s
     "",
   );
 
-  lines.push(`## Categories only in \`${b}/\` (${report.categoriesOnlyInB.length})`, "");
+  lines.push(
+    `## Categories only in the newer export, \`${b}/\` (${report.categoriesOnlyInB.length})`,
+    "",
+  );
   lines.push(list(report.categoriesOnlyInB, "None."), "");
 
   const shapeChanges = report.changed.filter(isShapeChange);

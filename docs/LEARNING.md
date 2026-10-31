@@ -77,3 +77,13 @@ progress.
 - 2026-10-31 — `signatures-per-format` — a category carries one signature per export format
   it has been measured in, and the tie-break is scored per signature, not per row —
   see `docs/adr/0008-multiple-signatures-per-category.md`
+- 2026-10-31 — `drift-report-privacy` — a committed comparison document may carry ids,
+  key names, counts and fingerprints, and nothing else; a test enforces the "nothing
+  else" —
+  vault: `architecture/2026-10-31_drift-tooling.md`
+- 2026-10-31 — `measure-then-promote` — a newly seen file becomes a registry row through a
+  measurement printed by the tool, never through a hand-written guess —
+  vault: `learning-notes/2026-10-31_session-07.md`
+- 2026-10-31 — `known-unknown` — a category can be resolved and stored verbatim while
+  nothing about its values is interpreted, so it has no view and no route —
+  vault: `learning-notes/2026-10-31_session-07.md`

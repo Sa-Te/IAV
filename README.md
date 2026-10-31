@@ -85,6 +85,42 @@ transaction.
 references but does not contain — the archive itself is fine, that file is absent.
 A tile with a striped grey box is still loading; it will not stay that way.
 
+## Handling a new export
+
+Instagram changes the shape of its export without warning. Two exports of the same
+account can disagree about a file's structure while agreeing about its name, so
+"it still opens" is not evidence that nothing moved.
+
+**`archive-2/` is the current baseline.** It is the export the registry was last
+measured against, and it is gitignored. `archive/` (the older export) stays on
+disk only as the drift reference and is never imported again.
+
+When a new export arrives:
+
+```bash
+# 1. Extract it into its own directory. Never overwrite the baseline.
+unzip ~/Downloads/instagram-<user>.zip -d archive-3/
+
+# 2. Compare it with the export the registry was measured against.
+pnpm drift archive-2/ archive-3/
+#    Prints a summary and writes docs/DRIFT-<today>.md — structure only: ids, key
+#    names, counts, fingerprints. No captions, no usernames, no filenames. Read it.
+
+# 3. For each file the report lists as unrecognised, ask what it would need:
+pnpm drift --propose archive-3/ <basename>
+#    Prints a registry row, a schema skeleton, a synthetic fixture and a DATA-MAP
+#    row. It never writes a file — the paste is a human decision.
+
+# 4. Promote what you accept (registry row, schema, parser, fixtures, tests,
+#    DATA-MAP row), then re-import and confirm the numbers:
+pnpm ingest:report archive-3/
+#    Expect: unrecognised 0, mediaMissing 0, and orphans 0 or an explanation.
+```
+
+A changed shape is **more** signatures on the existing row, never a looser one
+(ADR 0008). A category that is absent from the new export is normal, not an error:
+mark it, do not delete it (ADR 0002).
+
 ## Local gates
 
 The repository enforces its own rules; they are not conventions to remember.
