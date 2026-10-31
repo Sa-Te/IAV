@@ -107,3 +107,10 @@ progress.
 - 2026-10-31 — `contrast-fixes-the-token` — a failing contrast pair changes the token,
   never the threshold; two palette values moved because of measurement —
   vault: `architecture/2026-10-31_design-system.md`
+- 2026-10-31 — `instanced-drawing` — one unit quad, per-instance offset/scale/layer/alpha,
+  one draw call for every visible card; the loop belongs to the caller, not the renderer —
+  vault: `architecture/2026-10-31_instanced-rendering.md`
+- 2026-10-31 — `texture-array-vs-atlas` — a sampler2DArray gives every card a layer, so
+  `vec3(uv, layer)` needs no padding, packing or re-packing; an atlas is the same memory
+  with more arithmetic —
+  vault: `architecture/2026-10-31_instanced-rendering.md`

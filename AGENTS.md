@@ -206,6 +206,8 @@ These are checked, not hoped for.
   every category; a grid of everything fits without virtualisation. Revisit when a real
   archive exceeds the ceiling, and record the measurement that triggered it.
 - Tables paginate at 100 rows. Virtualise only above 2,000 rendered tiles.
+- 3D views hold at most 96 textures at 256px (≈25 MB). The window advances; it never
+  grows. Report resident bytes in the dev overlay.
 - Thumbnails generated off the main thread (`createImageBitmap` +
   `OffscreenCanvas` in the worker). Never decode full-res media for a grid tile.
 - Blob URLs live in one LRU cache with an explicit revoke policy. Unbounded blob
@@ -254,9 +256,9 @@ view — DOM, canvas or WebGL — reads the same tokens.
 - **Empty, loading, error and unavailable are four visibly different states**, rendered
   through one component (`apps/web/src/ui/State.tsx`). This is non-negotiable and it is
   the second half of the original bug.
-- **3D views (cyclone, map):** WebGL is opt-in. Load dynamically with `ssr: false`,
-  ship a non-WebGL fallback, cap the item count, and share the same media URL cache as
-  the DOM views.
+- **3D views (cyclone, map):** WebGL is opt-in. Load with a dynamic import so the GL
+  code is its own chunk, ship a non-WebGL fallback, cap the item count, and share the
+  same media URL cache as the DOM views.
 
 ---
 

@@ -103,8 +103,16 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/ui/AppShell.tsx` | Skip link, header (wordmark, nav, theme), one main landmark, honest footer. |
 | `apps/web/src/ui/ThemeSwitch.tsx` | System/Umber/Paper as a native radio group; stores only an explicit choice. |
 | `scripts/check-styles.mjs` | Fails the build on a raw hex, an arbitrary Tailwind value or a gradient outside the tokens package. |
+| `packages/core/src/cyclone/layout.ts` | Golden-angle spiral with a wrapping vertical coordinate: deterministic, endless, no accumulated state. |
+| `packages/core/src/cyclone/projection.ts` | Hand-written perspective projection with DOM-consistent screen coordinates; the source of picking and focus positions. |
+| `packages/core/src/cyclone/{picking,window,motion}.ts` | Nearest-visible picking with depth tie-break, the 96-card resident window, and motion that is a no-op under reduced motion. |
+| `apps/web/src/cyclone/gl/*` | WebGL2 only: context/caps, one instanced program on a sampler2DArray, the bounded texture window, and a renderer with no clock. |
+| `apps/web/src/cyclone/{CyclonePage,CycloneStage}.tsx` | Route and interaction: canvas is aria-hidden, a hidden button list mirrors the sequence, fallbacks for no-GL, few items and reduced motion. |
 
 **Dependency direction: worker → core → nothing. Storage implements core's ports.**
+For the cyclone: `gl/` imports core maths and nothing else — no React, no storage;
+the route imports `gl/` and the media views; core imports neither. That is what lets
+the entire interaction be tested without a GPU.
 
 ```
 apps/web ──┬─> packages/worker ──> packages/core

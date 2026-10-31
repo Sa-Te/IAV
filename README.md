@@ -69,8 +69,8 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
    categories and media to IndexedDB on this device. You should see
    `reading → resolving → storing`, then a summary: categories, entries,
    media stored, media missing, unrecognised files, and a shape fingerprint.
-2. Open `/` for everything, `/categories` for every parsed category, or `/posts`,
-   `/stories`, `/archived` for one gallery. — one tile per post, real
+2. Open `/` for everything, `/categories` for every parsed category, `/posts`,
+   `/stories`, `/archived` for one gallery, or `/cyclone` for the 3D view. — one tile per post, real
    photos, and a line above saying how many posts and media files are on the
    device. Click a tile for the full-size image, caption and date; Escape closes
    and returns focus to the tile.
@@ -81,6 +81,10 @@ uploaded, there is no server, no analytics, and the page fetches no third-party
 asset. You can turn Wi-Fi off after the page loads and everything still works.
 "Wipe archive" deletes the archive, every category and every media file in one
 transaction.
+
+**The cyclone needs WebGL2.** It shows the archive as a spiral of up to 96 resident
+cards; without WebGL2, or with fewer than eight items, or with reduced motion on, it
+falls back to the grid and says why rather than showing a dead canvas.
 
 **Two themes, no remote assets.** Umber (dark) and Paper (light) come from one token
 file (`packages/tokens`); the switch is in the header and your choice is stored only

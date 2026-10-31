@@ -8,6 +8,12 @@ import { DevIngest } from "./DevIngest.js";
 import { DevTokens } from "./DevTokens.js";
 
 /** Its own chunk: the GL code must not sit in the initial download. */
+/** Dev-only, but still lazy: it imports the GL module, which must not enter the entry chunk. */
+const LazyDevCycloneStats = lazy(async () => {
+  const module = await import("./DevCycloneStats.js");
+  return { default: module.DevCycloneStats };
+});
+
 const LazyCyclone = lazy(async () => {
   const module = await import("../cyclone/CyclonePage.js");
   return { default: module.CyclonePage };
@@ -47,6 +53,14 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
   if (dev) {
     routes.push({ path: "/dev/ingest", element: <DevIngest /> });
     routes.push({ path: "/dev/tokens", element: <DevTokens /> });
+    routes.push({
+      path: "/dev/cyclone-stats",
+      element: (
+        <Suspense fallback={<State kind="loading" message="Loading the stats view…" />}>
+          <LazyDevCycloneStats />
+        </Suspense>
+      ),
+    });
   }
 
   return routes;
