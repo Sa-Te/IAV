@@ -1,6 +1,26 @@
 import { describe, expect, it } from "vitest";
 
-import { mergePayloads } from "./payload.js";
+import { entryCountOf, mergePayloads } from "./payload.js";
+
+describe("entryCountOf", () => {
+  it("counts a single label/value envelope as one entry, not one per label", () => {
+    expect(
+      entryCountOf({ fbid: "1", media: [], label_values: [{ label: "A" }, { label: "B" }] }),
+    ).toBe(1);
+    // The reported bug: empty labels used to make the whole category look empty.
+    expect(entryCountOf({ fbid: "1", media: [], label_values: [] })).toBe(1);
+  });
+
+  it("still counts a named wrapper by the list it wraps", () => {
+    expect(entryCountOf({ ig_stories: [{}, {}] })).toBe(2);
+  });
+
+  it("counts a bare array by its length and an object with no list as zero", () => {
+    expect(entryCountOf([1, 2, 3])).toBe(3);
+    expect(entryCountOf({ fbid: "1" })).toBe(0);
+    expect(entryCountOf(null)).toBe(0);
+  });
+});
 
 describe("mergePayloads", () => {
   it("concatenates lists, keeping every entry", () => {

@@ -16,6 +16,10 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 export function entryCountOf(value: unknown): number {
   if (Array.isArray(value)) return value.length;
   if (isPlainObject(value)) {
+    // A single label/value envelope is ONE entry. Its `label_values` array
+    // describes that entry, so counting it would report "3 entries" for a row
+    // with three labels — and "0" when the labels happened to be empty.
+    if (Array.isArray(value.label_values)) return 1;
     for (const child of Object.values(value)) {
       if (Array.isArray(child)) return child.length;
     }

@@ -58,3 +58,35 @@ a privacy decision taken by accident.
 - The three T5 rows that M7b registered as "no UI in v1" now render through this
   generic view; their registry comments say so. Bespoke UI for them is still not
   built, and is not planned in v1.
+
+## Amendment — explicit reveal (2026-10-31, M9)
+
+The Decision above said T5 content is visible on-device. It did not say under what
+circumstances, and "the person who opened the tab" is not the same person as "the
+person whose conversations are on screen". This amendment adds a gate rather than
+changing the reasoning.
+
+**Why.** The realistic exposure is a shared screen: a laptop on a desk, a demo in a
+room, someone looking over a shoulder. Rendering a conversation because the route
+was clicked makes a private message an accident of navigation.
+
+**What is gated.** Every category whose registry `privacyTier` is 5, decided by
+`isT5()` reading the registry — not by a list of ids in the view layer. Today that
+is `messages_inbox`, `messages_requests`, `ai_conversations`,
+`checkout_payment_information` and `threads_viewed`. T1–T4 are untouched.
+
+**The gate defers the read, it does not hide rendered data.** The reading component
+is not mounted until "Show this category" is clicked, so no repository call happens
+before it. Hiding a rendered table with CSS would leave the data read and in memory,
+which is a weaker property than it looks.
+
+**Nothing is persisted.** The revealed set is module state, in memory only: no
+`sessionStorage`, no `localStorage`, no IndexedDB. A page reload re-gates every
+category. Within one page session a category that was revealed stays revealed,
+including after its component unmounts and mounts again — otherwise every
+navigation inside `/categories` would demand the same click again.
+
+**What is still true from the Decision.** No search, share, copy-all or export; no
+aggregation; the raw tree still starts closed; tier is a label, not a lock. A future
+feature that remembers a reveal, or offers one, extends this amendment and does not
+pretend to be covered by it.

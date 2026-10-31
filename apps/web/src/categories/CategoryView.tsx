@@ -1,10 +1,11 @@
-import { findCategory, toTableView, type CategoryViewData } from "@instavault/core";
+import { findCategory, isT5, toTableView, type CategoryViewData } from "@instavault/core";
 import { useCallback, useEffect, useState, type JSX } from "react";
 import { useParams } from "react-router-dom";
 
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
 import { CategoryTable } from "./CategoryTable.js";
 import { CategoryTree } from "./CategoryTree.js";
+import { RevealGate } from "./RevealGate.js";
 
 /**
  * `/categories/:id` — the generic view for any parsed category.
@@ -12,6 +13,10 @@ import { CategoryTree } from "./CategoryTree.js";
  * The interpretation (what is a column, what is a tree) happened in core; this
  * component only decides which panel to show and what to say while it waits.
  * Media categories keep their own routes and are not duplicated here.
+ *
+ * A T5 category is wrapped in `RevealGate`, and the gate is outside the component
+ * that reads the repository — so before the click there is no read at all, not a
+ * read whose result is hidden (ADR 0009 amendment).
  */
 
 type State =
@@ -20,11 +25,11 @@ type State =
   | { readonly status: "missing" }
   | { readonly status: "ready"; readonly view: CategoryViewData };
 
-export function CategoryView({ id }: { id: string }): JSX.Element {
+/** The reader. It is only mounted once the gate (if any) has been opened. */
+function CategoryData({ id }: { id: string }): JSX.Element {
   const repository = useArchiveRepository();
   const [state, setState] = useState<State>({ status: "loading" });
   const [attempt, setAttempt] = useState(0);
-
   const label = findCategory(id)?.label ?? id;
 
   useEffect(() => {
@@ -56,12 +61,7 @@ export function CategoryView({ id }: { id: string }): JSX.Element {
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
 
   return (
-    <main className="gallery">
-      <p>
-        <a href="/categories">All categories</a>
-      </p>
-      <h1>{label}</h1>
-
+    <>
       {state.status === "loading" && <p role="status">Reading this category…</p>}
 
       {state.status === "failed" && (
@@ -91,6 +91,22 @@ export function CategoryView({ id }: { id: string }): JSX.Element {
       {state.status === "ready" && state.view.kind === "tree" && (
         <CategoryTree view={state.view} caption={label} />
       )}
+    </>
+  );
+}
+
+export function CategoryView({ id }: { id: string }): JSX.Element {
+  const label = findCategory(id)?.label ?? id;
+  const content = <CategoryData id={id} />;
+
+  return (
+    <main className="gallery">
+      <p>
+        <a href="/categories">All categories</a>
+      </p>
+      <h1>{label}</h1>
+
+      {isT5(id) ? <RevealGate categoryId={id}>{content}</RevealGate> : content}
     </main>
   );
 }

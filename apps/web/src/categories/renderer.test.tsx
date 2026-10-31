@@ -196,6 +196,10 @@ describe("CategoryView — one category per privacy tier", () => {
         </RepositoryProvider>,
       );
 
+      // T5 is gated: the table only exists after the reveal (ADR 0009 amendment).
+      const gate = screen.queryByRole("button", { name: "Show this category" });
+      if (gate !== null) await userEvent.setup().click(gate);
+
       expect(await screen.findByRole("table")).toBeDefined();
       expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0);
       expect(screen.getAllByRole("row").length).toBeGreaterThan(1);
