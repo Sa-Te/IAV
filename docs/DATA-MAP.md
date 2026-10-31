@@ -3,8 +3,14 @@
 Completion tracker for "every archive category implemented". A category is done
 only when its row says parsed + rendered + tested (AGENTS.md §16).
 
-**74 categories inventoried, 0 parsed, 0 rendered, 0 tested.** Plus one
+**86 categories inventoried, 14 parsed, 2 rendered, 2 tested.** Plus one
 unrecognised bucket (ADR 0002, tier 3) that is always present by design.
+
+Twelve of the 86 were promoted in M7b from the `archive-2/` baseline: they are
+`parsed (opaque) — no view in v1`, stored verbatim, and none of them is rendered.
+Fourteen rows carry `not present in the current baseline` because they are absent
+from `archive-2/`; they stay registered, because absence is a normal state
+(ADR 0002).
 
 Rows are ordered by privacy weight **ascending**, so the categories that carry
 other people's identities and words (connections, messages) sit at the bottom
@@ -27,8 +33,9 @@ resolution, per `docs/ARCHIVE-VARIANTS.md`.
 | `medium` | The shape is known, but the file sits in a near-duplicate name cluster, is a near-twin of another file, or has an open question about a *value vocabulary* only. |
 | `low` | A single stable filename with a distinct shape, no open questions. |
 
-Paths are proposals under `packages/core/` per AGENTS.md §2. **None of them
-exist yet.** Status is `not started` everywhere: nothing has been parsed.
+Paths are real module paths under `packages/core/src/` per AGENTS.md §2. A path is
+a plan until its Status says otherwise; two categories (stories, archived posts)
+are parsed, rendered and tested, and twelve are parsed but not rendered.
 
 ## T1 — settings and mechanics
 
@@ -52,6 +59,8 @@ exist yet.** Status is `not started` everywhere: nothing has been parsed.
 | `your_information_download_requests` | `personal_information/information_about_you/your_information_download_requests.json` | `packages/core/schema/download-requests.ts` | `packages/core/parsers/download-requests.ts` | table | low | not started |
 | `avatar_items` | `your_instagram_activity/avatars_store/avatar_items.json` | `packages/core/schema/avatar-items.ts` | `packages/core/parsers/avatar-items.ts` | none | high | not started |
 | `devices` | `personal_information/device_information/devices.json` | `packages/core/schema/devices.ts` | `packages/core/parsers/devices.ts` | table | low | not started — not present in the current baseline |
+| `ad_preferences` | `ads_information/instagram_ads_and_businesses/ad_preferences.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no view in v1 |
+| `device_camera_effects_support` | `personal_information/device_information/device_camera_effects_support.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no view in v1 |
 
 ## T2 — your own behaviour and security history
 
@@ -81,6 +90,11 @@ exist yet.** Status is `not started` everywhere: nothing has been parsed.
 | `suggested_profiles_viewed` | `your_instagram_activity/other_activity/suggested_profiles_viewed.json` | `packages/core/schema/suggested-profiles-viewed.ts` | `packages/core/parsers/suggested-profiles-viewed.ts` | list | low | not started |
 | `videos_watched` | `your_instagram_activity/other_activity/videos_watched.json` | `packages/core/schema/videos-watched.ts` | `packages/core/parsers/videos-watched.ts` | list | low | not started |
 | `advertisers_using_your_activity_or_information` | `ads_information/instagram_ads_and_businesses/advertisers_using_your_activity_or_information.json` | `packages/core/schema/advertisers.ts` | `packages/core/parsers/advertisers.ts` | table | low | not started |
+| `posts_you're_interested_or_not_interested_in` | `ads_information/ads_and_topics/posts_you're_interested_or_not_interested_in.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | high | parsed (opaque) — no view in v1 |
+| `subscription_for_no_ads` | `ads_information/instagram_ads_and_businesses/subscription_for_no_ads.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no view in v1 |
+| `profile_activity` | `security_and_login_information/login_and_profile_creation/profile_activity.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no view in v1 |
+| `stories_viewed` | `your_instagram_activity/story_interactions/stories_viewed.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no view in v1 |
+| `your_ownership_of_digital_items` | `your_instagram_activity/other_activity/your_ownership_of_digital_items.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no view in v1 |
 
 ## T3 — your own media and content
 
@@ -102,6 +116,8 @@ exist yet.** Status is `not started` everywhere: nothing has been parsed.
 | `polls` | `your_instagram_activity/story_interactions/polls.json` | `packages/core/schema/story-polls.ts` | `packages/core/parsers/story-polls.ts` | list | high | not started |
 | `saved_posts` | `your_instagram_activity/saved/saved_posts.json` | `packages/core/schema/saved-posts.ts` | `packages/core/parsers/saved-posts.ts` | list | high | not started |
 | `liked_posts` | `your_instagram_activity/likes/liked_posts.json` | `packages/core/schema/liked-posts.ts` | `packages/core/parsers/liked-posts.ts` | list | medium | not started |
+| `instants_interactions` | `your_instagram_activity/instants/instants_interactions.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no view in v1 |
+| `other_content` | `your_instagram_activity/media/other_content.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no view in v1 |
 
 ## T4 — third-party identities
 
@@ -128,6 +144,9 @@ exist yet.** Status is `not started` everywhere: nothing has been parsed.
 | --- | --- | --- | --- | --- | --- | --- |
 | `messages_requests` | `your_instagram_activity/messages/message_requests/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | messages | high | not started |
 | `messages_inbox` | `your_instagram_activity/messages/inbox/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | messages | high | not started |
+| `ai_conversations` | `your_instagram_activity/messages/ai_conversations.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no UI in v1 (T5) |
+| `checkout_payment_information` | `your_instagram_activity/shopping/checkout_payment_information.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no UI in v1 (T5) |
+| `threads_viewed` | `your_instagram_activity/threads/threads_viewed.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed (opaque) — no UI in v1 (T5) |
 
 ## Unrecognised bucket — not a category
 
@@ -140,7 +159,10 @@ no rule matches is parsed generically and surfaced here.
 
 ## Status values
 
-`not started` · `schema` · `parsed` · `rendered` · `tested`
+`not started` · `schema` · `parsed` · `parsed (opaque) — no view in v1` ·
+`rendered` · `tested` · `not present in the current baseline`
 
 A row is only marked `parsed` once its parser has a fixture, a malformed-input
-test and an empty-file test (AGENTS.md §9).
+test and an empty-file test (AGENTS.md §9). `parsed (opaque)` means the file is
+resolved and stored verbatim but nothing about its values is interpreted, so no
+view may show it; the three T5 rows say so in the status.

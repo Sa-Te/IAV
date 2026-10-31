@@ -205,4 +205,26 @@ export const TIER_1: readonly Category[] = [
     signatures: [{ kind: "object", requiredKeys: ["devices_devices"] }],
     mediaPath: "none",
   },
+  {
+    id: "ad_preferences",
+    label: "Ad preferences",
+    privacyTier: 1,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1.
+    match: { basenames: [/^ad_preferences(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "object", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "none",
+  },
+  {
+    id: "device_camera_effects_support",
+    label: "Device camera effects support",
+    privacyTier: 1,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1.
+    match: { basenames: [/^device_camera_effects_support(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "none",
+  },
 ];

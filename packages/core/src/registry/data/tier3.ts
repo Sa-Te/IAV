@@ -188,4 +188,26 @@ export const TIER_3: readonly Category[] = [
     ],
     mediaPath: "none",
   },
+  {
+    id: "instants_interactions",
+    label: "Instants interactions",
+    privacyTier: 3,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1.
+    match: { basenames: [/^instants_interactions(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "none",
+  },
+  {
+    id: "other_content",
+    label: "Other content",
+    privacyTier: 3,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1.
+    match: { basenames: [/^other_content(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "root-relative",
+  },
 ];

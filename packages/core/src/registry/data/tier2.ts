@@ -262,4 +262,60 @@ export const TIER_2: readonly Category[] = [
     ],
     mediaPath: "none",
   },
+  {
+    id: "posts_you're_interested_or_not_interested_in",
+    label: "Posts you are interested or not interested in",
+    privacyTier: 2,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1. The id keeps the apostrophe, like its sibling row
+    // `posts_you're_not_interested_in` (ADR 0002 naming hazard).
+    match: { basenames: [/^posts_you're_interested_or_not_interested_in(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "none",
+  },
+  {
+    id: "subscription_for_no_ads",
+    label: "Subscription for no ads",
+    privacyTier: 2,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1.
+    match: { basenames: [/^subscription_for_no_ads(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "object", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "none",
+  },
+  {
+    id: "profile_activity",
+    label: "Profile activity",
+    privacyTier: 2,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1.
+    match: { basenames: [/^profile_activity(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "none",
+  },
+  {
+    id: "stories_viewed",
+    label: "Stories viewed",
+    privacyTier: 2,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1.
+    match: { basenames: [/^stories_viewed(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "none",
+  },
+  {
+    id: "your_ownership_of_digital_items",
+    label: "Your ownership of digital items",
+    privacyTier: 2,
+    variantRisk: "medium",
+    // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
+    // verbatim; no view in v1. This is the file that referenced the 6 orphan PNGs.
+    match: { basenames: [/^your_ownership_of_digital_items(?:_\d+)?\.json$/i] },
+    signatures: [{ kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
+    mediaPath: "root-relative",
+  },
 ];
