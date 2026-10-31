@@ -82,6 +82,11 @@ asset. You can turn Wi-Fi off after the page loads and everything still works.
 "Wipe archive" deletes the archive, every category and every media file in one
 transaction.
 
+**Two themes, no remote assets.** Umber (dark) and Paper (light) come from one token
+file (`packages/tokens`); the switch is in the header and your choice is stored only
+on this device. Fonts are self-hosted, and `pnpm check:styles` refuses a raw colour,
+an arbitrary utility value or a gradient outside the token file.
+
 **Some categories ask before they show.** Categories that hold other people's words
 (messages, AI conversations, payment records) render behind a single "Show this
 category" button, so a route click on a shared screen does not open someone's

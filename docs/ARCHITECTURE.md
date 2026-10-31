@@ -98,6 +98,11 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `packages/worker/src/thumbnails.ts` | Decode → OffscreenCanvas → webp (whatever type comes back), off the main thread. |
 | `apps/web/src/messages/ThreadList.tsx` | Message categories as a thread list: participants, count, newest date, empty threads marked, inside the T5 gate. |
 | `apps/web/src/messages/ThreadConversation.tsx` | One conversation chronologically with media through the cache, and the read-only note. |
+| `packages/tokens/src/tokens.css` | Every colour, space, radius, type, shadow and glass value; Umber and Paper as data, plus the system fallback. |
+| `apps/web/src/ui/State.tsx` | The four async states — loading, empty, error, unavailable — announced and styled once. |
+| `apps/web/src/ui/AppShell.tsx` | Skip link, header (wordmark, nav, theme), one main landmark, honest footer. |
+| `apps/web/src/ui/ThemeSwitch.tsx` | System/Umber/Paper as a native radio group; stores only an explicit choice. |
+| `scripts/check-styles.mjs` | Fails the build on a raw hex, an arbitrary Tailwind value or a gradient outside the tokens package. |
 
 **Dependency direction: worker → core → nothing. Storage implements core's ports.**
 

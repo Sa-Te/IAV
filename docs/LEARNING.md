@@ -101,3 +101,9 @@ progress.
 - 2026-10-31 — `gate-before-the-read` — a privacy gate that hides rendered data is weaker
   than one that never mounts the reader, so the repository call happens after the click —
   vault: `architecture/2026-10-31_media-cache.md`
+- 2026-10-31 — `tokens-as-data` — one CSS file of custom properties; Tailwind, the DOM
+  and any future canvas read the same values, and a gate refuses escapes —
+  vault: `architecture/2026-10-31_design-system.md`
+- 2026-10-31 — `contrast-fixes-the-token` — a failing contrast pair changes the token,
+  never the threshold; two palette values moved because of measurement —
+  vault: `architecture/2026-10-31_design-system.md`
