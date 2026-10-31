@@ -1,0 +1,8 @@
+reference-backend/
+reference-frontend/
+archive/
+node_modules/
+dist/
+coverage/
+pnpm-lock.yaml
+*.md

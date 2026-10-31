@@ -53,7 +53,7 @@ as something to run in v1.
 Dependency direction points inward. Nothing may import outward.
 
 ```
-apps/web/            Next.js, static export. UI, routes, React state.
+apps/web/            Vite + React Router, static build. UI, routes, React state.
   └─ features/       one folder per view (gallery, stories, messages, ...)
 packages/core/       Pure TypeScript. Parsers, schemas, domain model.
   └─ parsers/        one file per archive category
@@ -72,6 +72,8 @@ Rules:
 - **The render layer never touches network or storage directly.** Views read
   through a repository object passed down or from a store; they never call
   `fetch`.
+- **Build tool is Vite (ADR 0004). Next.js appears only in `reference-frontend/`
+  and is never imported.**
 
 ### The seam that keeps offline mode possible
 
@@ -180,8 +182,8 @@ the upgrade path.
 
 - Unknown or unmapped fields are preserved in `raw` and reachable through the
   "Raw data" fallback view. Nothing is silently dropped.
-- Every schema carries the export format version it targets. A schema change is
-  an ADR.
+- Every schema records the archive's shape fingerprint (ADR 0005). There is no
+  format version in the export to read.
 - Field names follow the domain model. Instagram's `ig_` prefixes exist only
   inside `packages/core/parsers/`.
 - Category resolution never matches an exact path. Matching is basename pattern
@@ -249,6 +251,7 @@ reserved for floating layers, Inter / Lora / JetBrains Mono. Themes are data
 - No test may touch the network or IndexedDB directly; use in-memory fakes.
 - Coverage is not a target. A number that goes up because someone tested a
   getter is noise.
+- The first module is `fixMojibake` — pure, no dependencies, tests written first.
 
 ---
 

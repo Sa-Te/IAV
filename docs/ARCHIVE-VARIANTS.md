@@ -10,7 +10,7 @@ by other tools and unverified here (**INFERENCE**) — each row says which.
 | 1 | **Folder prefix** — `your_instagram_activity/` present, absent, or a `content/` wrapper | FACT: present in our sample, 3 levels deep under `your_instagram_activity/<area>/` | Tier 1 (basename, path-independent) + tier 2 | A whole area of the app reads "not in this export" even though the data is there. Partial data with no error. |
 | 2 | **Numeric suffix style** — `_1`, `_2`, `(1)`, none, multiple parts | FACT: `posts_1.json`, `followers_1.json`, `post_comments_1.json`; all others have no suffix | Tier 1 (suffix optional in the rule) | Duplicate or missing records: a `posts_2.json` that is not matched silently loses half the posts. |
 | 3 | **Filename case** | FACT: all lowercase in our sample | Tier 1 (case-insensitive match) | Linux and macOS disagree about case; a mismatch is invisible on one platform and fatal on the other. Covered by the case-insensitive rule. |
-| 4 | **JSON vs HTML export variant** | FACT: our sample is JSON. The Instagram export dialog offers both. **INFERENCE:** choosing HTML produces `.html` twins of some files | None yet — the resolver is JSON-only | The app finds no data at all and must say so. Today it would say "not in this export" for every category, which is misleading. |
+| 4 | **JSON vs HTML export variant** | FACT: our sample is JSON. The Instagram export dialog offers both. **INFERENCE:** choosing HTML produces `.html` twins of some files | **Decided (M1):** detect `.html` files with no JSON siblings and refuse with an actionable message — the export is not parsed as HTML | A clear screen stating the export is the HTML variant and telling the user to re-request it as JSON. It must never fall back to "not in this export" for all 74 categories. |
 | 5 | **Category entirely absent** | FACT: 5 categories the old CLAUDE.md assumed are absent here (recently deleted, guide posts, autofill, shopping, ads clicked) | Tier 3 semantics: absence is a normal state | Nothing, if the absence is modelled as "not in this export". It is a bug if a view renders an empty container or an error. |
 | 6 | **Category present but new to us** | FACT: none unrecognised in our sample | Tier 3 — unrecognised bucket | An "unrecognised data" section listing the raw structure. The data is kept; nothing is dropped. |
 | 7 | **New field inside a known category** | FACT: `media_variants` exists on some stories only; `share` has 5 optional keys; `is_unsent` appears once in 28,498 messages | Schema (optional / passthrough) + `raw` | Nothing, if the schema allows unknown keys. It is a bug if the schema is strict and the parse fails on a new key. |
@@ -28,10 +28,11 @@ by other tools and unverified here (**INFERENCE**) — each row says which.
 
 Honest list of gaps, ordered by how likely they are to hurt.
 
-1. **HTML export variant (row 4).** The resolver is JSON-only. If a user picks
-   the HTML option in Instagram's export dialog, the app currently has no story
-   for that. It must detect the variant and say so explicitly, rather than
-   reporting 74 absent categories.
+1. **HTML export variant (row 4).** Decided in M1: v1 detects `.html` twins
+   with no JSON siblings and refuses with a message telling the user to
+   re-request the export as JSON. It does not parse HTML. The detection is not
+   built yet (it lands with the archive loader), so today the behaviour is
+   still undefined.
 2. **Renamed categories (row 8).** Tier 2 can only identify a file by the
    key-set of its top-level elements. Several categories share a shape
    (`posts` vs `archived_posts`; `followers` vs `following`), so a rename that

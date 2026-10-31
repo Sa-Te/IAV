@@ -35,3 +35,6 @@ progress.
 - 2026-10-31 — `privacy-tiered-build-order` — categories are ordered by whose
   data they contain, so third-party messages and identities are built last —
   see `docs/DATA-MAP.md`
+- 2026-10-31 — `mojibake` — corruption stored inside string values, not a file
+  encoding; repaired by reinterpret-as-bytes → decode UTF-8, once, per string —
+  vault: `learning-notes/concepts/mojibake.md`

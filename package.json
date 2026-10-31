@@ -1,0 +1,31 @@
+{
+  "name": "instavault",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @instavault/web dev",
+    "build": "pnpm --filter @instavault/web build",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "check:filesize": "node scripts/check-file-size.mjs",
+    "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm check:boundaries && pnpm check:filesize && pnpm build"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1",
+    "vitest": "5.0.5"
+  }
+}
