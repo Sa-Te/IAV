@@ -205,6 +205,7 @@ These are checked, not hoped for.
 - Virtualise only above 2,000 rendered tiles. The measured archive is 376 media items across
   every category; a grid of everything fits without virtualisation. Revisit when a real
   archive exceeds the ceiling, and record the measurement that triggered it.
+- Tables paginate at 100 rows. Virtualise only above 2,000 rendered tiles.
 - Thumbnails generated off the main thread (`createImageBitmap` +
   `OffscreenCanvas` in the worker). Never decode full-res media for a grid tile.
 - Blob URLs live in one LRU cache with an explicit revoke policy. Unbounded blob

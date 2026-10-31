@@ -27,6 +27,10 @@ export function Nav({ counts }: { counts: Readonly<Record<string, number>> }): J
           {entry.label} <span className="nav-count">{counts[entry.category]}</span>
         </NavLink>
       ))}
+      {/* One entry for every parsed category, not 72 links. */}
+      <NavLink to="/categories" className="nav-link">
+        All categories
+      </NavLink>
     </nav>
   );
 }

@@ -1,5 +1,6 @@
 import type { JSX } from "react";
 
+import { CategoryRoute } from "../categories/CategoryView.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { DevIngest } from "./DevIngest.js";
 
@@ -22,6 +23,7 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
       path: "/archived",
       element: <CategoryGallery category="archived_posts" title="Archived posts" />,
     },
+    { path: "/categories/:id", element: <CategoryRoute /> },
   ];
 
   if (dev) {
