@@ -18,7 +18,6 @@ import {
   entryCountOf,
   firstEntryKeys,
   isPlainObject,
-  mergeValues,
   unrecognisedShape,
 } from "../ingest/payload.js";
 import type { UnrecognisedShape } from "../ingest/job.js";
@@ -133,7 +132,8 @@ function mediaPathUsedOf(bases: readonly MediaBase[]): MediaPathUsed {
 
 interface CategoryAccumulator {
   tier: 1 | 2;
-  value: unknown;
+  /** Every file that resolved to this id, kept apart so nothing is folded away. */
+  payloads: unknown[];
   bases: MediaBase[];
   refs: number;
   missing: number;
@@ -167,17 +167,14 @@ export function buildArchiveShape(
       continue;
     }
 
-    const existing = byId.get(resolved.id);
-    const accumulator: CategoryAccumulator = existing ?? {
+    const accumulator: CategoryAccumulator = byId.get(resolved.id) ?? {
       tier: resolved.tier,
-      value: file.value,
+      payloads: [],
       bases: [],
       refs: 0,
       missing: 0,
     };
-    if (existing !== undefined) {
-      accumulator.value = mergeValues(existing.value, file.value);
-    }
+    accumulator.payloads.push(file.value);
 
     const declared = declaredBase(rows.get(resolved.id));
     if (declared !== null) {
@@ -199,13 +196,21 @@ export function buildArchiveShape(
 
   const categories: CategoryShape[] = [...byId.entries()].map(([id, accumulator]) => {
     const row = rows.get(id);
+    const [firstPayload] = accumulator.payloads;
     return {
       id,
       tier: accumulator.tier,
-      entryCount: entryCountOf(accumulator.value),
-      keys: firstEntryKeys(accumulator.value),
+      // Summed across files, exactly as ingestion counts a category.
+      entryCount: accumulator.payloads.reduce<number>(
+        (sum, payload) => sum + entryCountOf(payload),
+        0,
+      ),
+      // ADR 0005's "first entry": the first file's, for a multi-file category.
+      keys: firstEntryKeys(firstPayload),
+      // A signature is satisfied if *any* file the row claimed matches it: that is
+      // what "this row describes this export" means once a row spans two files.
       signaturesStillSatisfied: (row?.signatures ?? []).map((signature) =>
-        signatureMatches(signature, accumulator.value),
+        accumulator.payloads.some((payload) => signatureMatches(signature, payload)),
       ),
       mediaPathUsed: mediaPathUsedOf(accumulator.bases),
       mediaRefs: accumulator.refs,
@@ -215,7 +220,10 @@ export function buildArchiveShape(
 
   const categoriesWithMojibake = categories.filter((category) => {
     const accumulator = byId.get(category.id);
-    return accumulator !== undefined && countMojibake(accumulator.value) > 0;
+    return (
+      accumulator !== undefined &&
+      accumulator.payloads.some((payload) => countMojibake(payload) > 0)
+    );
   }).length;
 
   return {

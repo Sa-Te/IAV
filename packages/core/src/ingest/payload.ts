@@ -49,17 +49,27 @@ export function collectUris(value: unknown, out: string[] = []): string[] {
   return out;
 }
 
-/** Two files for one category (`posts_1.json`, `posts_2.json`) merge, never replace. */
-export function mergeValues(a: unknown, b: unknown): unknown {
-  if (Array.isArray(a) && Array.isArray(b)) return [...a, ...b];
-  if (isPlainObject(a) && isPlainObject(b)) {
-    const merged: Record<string, unknown> = { ...a };
-    for (const key of Object.keys(b)) {
-      merged[key] = key in merged ? mergeValues(merged[key], b[key]) : b[key];
-    }
-    return merged;
+/**
+ * One category can arrive as several files (`posts_1.json` + `posts_2.json`), so
+ * merging must be **additive**: nothing a file contains may be dropped.
+ *
+ * - every payload an array → one concatenated list (the same category split by
+ *   Instagram, which is what the two files mean);
+ * - otherwise → the payloads themselves, one per file, in file order.
+ *
+ * The second rule is why this is not a deep object merge: merging two thread
+ * objects key-by-key keeps the last `title` and `thread_path`, i.e. one file
+ * silently overwrites another. A list of payloads loses nothing, and the record's
+ * `sources` says which file each entry came from.
+ */
+export function mergePayloads(payloads: readonly unknown[]): unknown {
+  const [first] = payloads;
+  if (payloads.length === 1) return first;
+  if (payloads.length === 0) return undefined;
+  if (payloads.every((payload) => Array.isArray(payload))) {
+    return payloads.flatMap((payload) => payload as readonly unknown[]);
   }
-  return b;
+  return [...payloads];
 }
 
 export function computeDrift(

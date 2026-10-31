@@ -158,3 +158,43 @@ describe("toTableView — edges", () => {
     expect(data).toEqual(frozen);
   });
 });
+
+describe("toTableView — a category fed by several files", () => {
+  it("concatenates rows when every source file is a list", () => {
+    const view = toTableView({
+      id: "saved_posts",
+      data: [
+        { fbid: "1", media: [], label_values: [{ label: "A", value: "a" }] },
+        { fbid: "2", media: [], label_values: [{ label: "B", value: "b" }] },
+      ],
+      sources: [
+        { path: "saved_1.json", entryCount: 1, kind: "array" },
+        { path: "saved_2.json", entryCount: 1, kind: "array" },
+      ],
+    });
+
+    expect(view.kind).toBe("table");
+    if (view.kind !== "table") return;
+    expect(view.total).toBe(2);
+    expect(view.columns).toEqual(["A", "B"]);
+  });
+
+  it("falls back to a tree when one file cannot be read as a table", () => {
+    // The measured follow_requests_you've_received shape: a list plus an object.
+    const data = [
+      [{ fbid: "1", media: [], label_values: [{ label: "A", value: "a" }] }],
+      { text_post_app_follow_requests: [{ string_list_data: [{ value: "x" }] }] },
+    ];
+    const view = toTableView({
+      id: "follow_requests_you've_received",
+      data,
+      sources: [
+        { path: "connections/follow_requests_you've_received.json", entryCount: 1, kind: "array" },
+        { path: "threads/follow_requests_you've_received.json", entryCount: 1, kind: "object" },
+      ],
+    });
+
+    // The unreadable half must not be hidden behind a table built from the other.
+    expect(view).toEqual({ kind: "tree", value: data });
+  });
+});

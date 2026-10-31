@@ -44,6 +44,7 @@ function countingSink() {
     batches: 0,
     categories: 0,
     ids: new Set(),
+    sources: new Map(),
     media: new Set(),
     archive: null,
     async readJob() {
@@ -55,7 +56,10 @@ function countingSink() {
     async writeBatch(batch) {
       this.batches += 1;
       this.categories += batch.categories?.length ?? 0;
-      for (const record of batch.categories ?? []) this.ids.add(record.id);
+      for (const record of batch.categories ?? []) {
+        this.ids.add(record.id);
+        if ((record.sources?.length ?? 0) > 0) this.sources.set(record.id, record.sources);
+      }
       for (const record of batch.media ?? []) this.media.add(record.path);
     },
     async commitArchive(row) {
@@ -115,3 +119,22 @@ for (const [key, value] of rows) {
 }
 console.log(`\nstored category ids (${sink.categories} records):`);
 console.log(`  ${[...sink.ids].sort().join(", ")}`);
+
+// A category that arrived as several files must show the split and the sum, or a
+// merge defect is invisible in the one report we read after every import.
+const multiFile = [...sink.sources.entries()]
+  .filter(([, sources]) => sources.length > 1)
+  .sort(([a], [b]) => (a < b ? -1 : 1));
+if (multiFile.length > 0) {
+  console.log(`\nmulti-file categories (${multiFile.length}):`);
+  for (const [id, sources] of multiFile) {
+    const total = sources.reduce((sum, source) => sum + source.entryCount, 0);
+    // A per-file list is readable for a handful of files; 142 threads are not, so
+    // the long tail keeps the count that matters (the sum) and nothing else.
+    const detail =
+      sources.length <= 5
+        ? `${sources.map((source) => source.entryCount).join(" + ")} entries`
+        : `${total} entries total`;
+    console.log(`  ${id}: ${sources.length} files (${detail})`);
+  }
+}

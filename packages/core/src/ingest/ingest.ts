@@ -17,7 +17,8 @@ import {
   computeDrift,
   entryCountOf,
   firstEntryKeys,
-  mergeValues,
+  kindOf,
+  mergePayloads,
   unrecognisedShape,
 } from "./payload.js";
 import {
@@ -135,7 +136,11 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
   // Media is NOT stored while scanning: a file is stored because something
   // references it, not because its name looks like media.
   const entryNames = new Set(names);
-  const rawById = new Map<string, { tier: 1 | 2; value: unknown }>();
+  // One entry per resolved category, holding *every* file that resolved to it.
+  // Keeping the files apart is what makes the merge additive (M8): a fold would
+  // need a rule for "two objects disagree", and the only lossless rule is "do not
+  // fold".
+  const filesById = new Map<string, { tier: 1 | 2; files: { path: string; value: unknown }[] }>();
   const unrecognised: UnrecognisedShape[] = [];
   const references: { uri: string; dir: string; threadFirst: boolean }[] = [];
 
@@ -155,11 +160,9 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
       return;
     }
 
-    const existing = rawById.get(resolved.id);
-    rawById.set(resolved.id, {
-      tier: resolved.tier,
-      value: existing === undefined ? parsed : mergeValues(existing.value, parsed),
-    });
+    const existing = filesById.get(resolved.id) ?? { tier: resolved.tier, files: [] };
+    existing.files.push({ path: name, value: parsed });
+    filesById.set(resolved.id, existing);
 
     const mediaPath = findCategory(resolved.id)?.mediaPath ?? "none";
     if (mediaPath === "none") return;
@@ -261,16 +264,29 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
   }
 
   // --- normalise ------------------------------------------------------------
-  const categories: CategoryRecord[] = [...rawById.entries()].map(([id, entry]) => ({
+  const categories: CategoryRecord[] = [...filesById.entries()].map(([id, entry]) => ({
     id,
     resolvedTier: entry.tier,
-    entryCount: entryCountOf(entry.value),
-    data: normaliseStrings(entry.value),
+    // The count is the sum across files; one file's count would under-report a
+    // category that arrived in parts.
+    entryCount: entry.files.reduce((sum, file) => sum + entryCountOf(file.value), 0),
+    data: normaliseStrings(mergePayloads(entry.files.map((file) => file.value))),
+    sources: entry.files.map((file) => ({
+      path: file.path,
+      entryCount: entryCountOf(file.value),
+      kind: kindOf(file.value),
+    })),
     warnings: [],
   }));
 
-  const resolvedForFingerprint: ResolvedCategory[] = categories
-    .map((record) => ({ id: record.id, keys: firstEntryKeys(record.data) }))
+  // ADR 0005 hashes "the key-set of each category's first entry". For a category
+  // fed by several files, that is the first *file's* first entry — the same
+  // definition a single-file category gets, applied to the first file read.
+  const resolvedForFingerprint: ResolvedCategory[] = [...filesById.entries()]
+    .map(([id, entry]) => ({
+      id,
+      keys: firstEntryKeys(entry.files[0]?.value),
+    }))
     .sort((a, b) => (a.id < b.id ? -1 : 1));
 
   // --- store ----------------------------------------------------------------

@@ -195,3 +195,94 @@ describe("runIngest — failure modes", () => {
     expect(job.reason).toBe("corrupt-entry");
   });
 });
+
+describe("runIngest — a category that arrives as several files", () => {
+  /** The real archive-2 shape: the same basename under two folders, two shapes. */
+  function twoFileArchive(): Uint8Array {
+    return zipSync({
+      "connections/followers_and_following/follow_requests_you've_received.json": strToU8(
+        JSON.stringify([
+          { fbid: "1", media: [], timestamp: 1, label_values: [{ label: "A", value: "a" }] },
+          { fbid: "2", media: [], timestamp: 2, label_values: [{ label: "A", value: "b" }] },
+        ]),
+      ),
+      "your_instagram_activity/threads/follow_requests_you've_received.json": strToU8(
+        JSON.stringify({
+          text_post_app_text_post_app_follow_requests_received: [
+            { string_list_data: [{ href: "h", value: "threads-user", timestamp: 3 }] },
+          ],
+        }),
+      ),
+    });
+  }
+
+  it("keeps both files, sums their entries and records provenance", async () => {
+    const sink = new MemorySink();
+    const job = await runIngest({ zip: twoFileArchive(), sink, now: advancingClock() });
+
+    expect(job.status).toBe("ready");
+    const record = sink.categories.get("follow_requests_you've_received");
+    expect(record).toBeDefined();
+    if (record === undefined) return;
+
+    expect(record.sources).toEqual([
+      {
+        path: "connections/followers_and_following/follow_requests_you've_received.json",
+        entryCount: 2,
+        kind: "array",
+      },
+      {
+        path: "your_instagram_activity/threads/follow_requests_you've_received.json",
+        entryCount: 1,
+        kind: "object",
+      },
+    ]);
+    expect(record.entryCount).toBe(3);
+
+    // Neither file's data was dropped: one payload per file, in file order.
+    expect(record.data).toHaveLength(2);
+    expect(JSON.stringify(record.data)).toContain("threads-user");
+    expect(JSON.stringify(record.data)).toContain('"fbid":"1"');
+  });
+
+  it("concatenates lists when every file is a list, and still sums provenance", async () => {
+    const zip = zipSync({
+      "posts_1.json": strToU8(JSON.stringify([{ media: [{ uri: "media/a.jpg" }] }])),
+      "posts_2.json": strToU8(
+        JSON.stringify([{ media: [{ uri: "media/b.jpg" }] }, { media: [{ uri: "media/c.jpg" }] }]),
+      ),
+      "media/a.jpg": new Uint8Array([0xff, 0xd8, 0xff, 0xe0]),
+      "media/b.jpg": new Uint8Array([0xff, 0xd8, 0xff, 0xe1]),
+      "media/c.jpg": new Uint8Array([0xff, 0xd8, 0xff, 0xe2]),
+    });
+    const sink = new MemorySink();
+    await runIngest({ zip, sink, now: advancingClock() });
+
+    const record = sink.categories.get("posts");
+    expect(record?.entryCount).toBe(3);
+    expect(record?.data).toHaveLength(3);
+    expect(record?.sources?.map((source) => source.entryCount)).toEqual([1, 2]);
+  });
+
+  it("sums three files and keeps a provenance entry for each", async () => {
+    const zip = zipSync({
+      "posts_1.json": strToU8(JSON.stringify([{ media: [{ uri: "media/a.jpg" }] }])),
+      "posts_2.json": strToU8(JSON.stringify([{ media: [{ uri: "media/b.jpg" }] }])),
+      "posts_3.json": strToU8(JSON.stringify([{ media: [{ uri: "media/c.jpg" }] }])),
+      "media/a.jpg": new Uint8Array([0xff, 0xd8, 0xff, 0xe0]),
+      "media/b.jpg": new Uint8Array([0xff, 0xd8, 0xff, 0xe1]),
+      "media/c.jpg": new Uint8Array([0xff, 0xd8, 0xff, 0xe2]),
+    });
+    const sink = new MemorySink();
+    await runIngest({ zip, sink, now: advancingClock() });
+
+    const record = sink.categories.get("posts");
+    expect(record?.entryCount).toBe(3);
+    expect(record?.sources).toHaveLength(3);
+    expect(record?.sources?.map((source) => source.path)).toEqual([
+      "posts_1.json",
+      "posts_2.json",
+      "posts_3.json",
+    ]);
+  });
+});

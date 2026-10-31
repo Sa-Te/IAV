@@ -1,3 +1,4 @@
+import type { CategorySource } from "../ingest/port.js";
 import { findCategory } from "../registry/categories.js";
 import { fixMojibake } from "../strings/fixMojibake.js";
 
@@ -148,6 +149,21 @@ function columnsForEmpty(recordId: string): readonly string[] {
 }
 
 /**
+ * A category fed by several files is stored additively (`mergePayloads`): lists
+ * concatenated when every file is a list, otherwise one payload per file. The
+ * `sources` say which of the two happened, so no shape is guessed here.
+ */
+function payloadsOf(record: {
+  readonly data: unknown;
+  readonly sources?: readonly CategorySource[];
+}): readonly unknown[] {
+  const sources = record.sources;
+  if (sources === undefined || sources.length <= 1) return [record.data];
+  if (sources.every((source) => source.kind === "array")) return [record.data];
+  return Array.isArray(record.data) ? record.data : [record.data];
+}
+
+/**
  * The four observed shapes, in order:
  *
  * 1. **array of envelopes** — one row per element, columns from `label_values`;
@@ -161,29 +177,34 @@ function columnsForEmpty(recordId: string): readonly string[] {
 export function toTableView(record: {
   readonly id: string;
   readonly data: unknown;
+  readonly sources?: readonly CategorySource[];
 }): CategoryViewData {
-  const entries = entriesOf(record.data);
-  if (entries === null) {
-    return { kind: "tree", value: record.data };
-  }
-
   const columns: string[] = [];
   const rowMaps: Map<string, Cell>[] = [];
 
-  for (const entry of entries) {
-    if (!isObject(entry)) return { kind: "tree", value: record.data };
-    const pairs = labelsOf(entry);
-    if (pairs === null) return { kind: "tree", value: record.data };
-
-    const rowCells = new Map<string, Cell>();
-    for (const [label, value] of [...pairs, ...timestampColumn(entry)]) {
-      if (!columns.includes(label)) columns.push(label);
-      // Two entries carrying the same label are two values of the same column;
-      // inside one row the later value wins, which is a shape artefact of the
-      // envelope, not a lost file.
-      rowCells.set(label, cellFor(value));
+  for (const payload of payloadsOf(record)) {
+    const entries = entriesOf(payload);
+    // One uninterpretable file makes the whole category raw: a table built from
+    // the readable half would hide the other half behind a confident-looking grid.
+    if (entries === null) {
+      return { kind: "tree", value: record.data };
     }
-    rowMaps.push(rowCells);
+
+    for (const entry of entries) {
+      if (!isObject(entry)) return { kind: "tree", value: record.data };
+      const pairs = labelsOf(entry);
+      if (pairs === null) return { kind: "tree", value: record.data };
+
+      const rowCells = new Map<string, Cell>();
+      for (const [label, value] of [...pairs, ...timestampColumn(entry)]) {
+        if (!columns.includes(label)) columns.push(label);
+        // Two entries carrying the same label are two values of the same column;
+        // inside one row the later value wins, which is a shape artefact of the
+        // envelope, not a lost file.
+        rowCells.set(label, cellFor(value));
+      }
+      rowMaps.push(rowCells);
+    }
   }
 
   // An empty payload has no label to name a column. The measured keys are the only

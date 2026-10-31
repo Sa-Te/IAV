@@ -52,15 +52,20 @@ function fromWrapper(data: unknown, key: string, category: string): MediaItemVie
 }
 
 function fromMessages(data: unknown, category: string): MediaItemView[] {
-  if (!isObject(data) || !Array.isArray(data.messages)) return [];
+  // A message category arrives as one file per thread, merged additively into a
+  // list of thread payloads (M8). A single-file export still gives one object.
+  const threads = Array.isArray(data) ? data : [data];
   const items: MediaItemView[] = [];
-  for (const message of data.messages) {
-    if (!isObject(message)) continue;
-    const takenAt = typeof message.timestamp_ms === "number" ? message.timestamp_ms / 1000 : 0;
-    for (const key of ["photos", "videos", "audio_files"]) {
-      for (const attachment of Array.isArray(message[key]) ? message[key] : []) {
-        if (!isObject(attachment) || typeof attachment.uri !== "string") continue;
-        items.push({ id: attachment.uri, caption: "", takenAt, category });
+  for (const thread of threads) {
+    if (!isObject(thread) || !Array.isArray(thread.messages)) continue;
+    for (const message of thread.messages) {
+      if (!isObject(message)) continue;
+      const takenAt = typeof message.timestamp_ms === "number" ? message.timestamp_ms / 1000 : 0;
+      for (const key of ["photos", "videos", "audio_files"]) {
+        for (const attachment of Array.isArray(message[key]) ? message[key] : []) {
+          if (!isObject(attachment) || typeof attachment.uri !== "string") continue;
+          items.push({ id: attachment.uri, caption: "", takenAt, category });
+        }
       }
     }
   }

@@ -17,11 +17,25 @@ export interface CancellationSignal {
   readonly aborted: boolean;
 }
 
+/** One file that fed a category, and what it contributed. */
+export interface CategorySource {
+  readonly path: string;
+  readonly entryCount: number;
+  /** The container kind, so a reader knows how `data` was merged (§ mergePayloads). */
+  readonly kind: "array" | "object" | "scalar";
+}
+
 export interface CategoryRecord {
   readonly id: string;
   readonly resolvedTier: 1 | 2;
+  /** The sum across every source file, never one file's count. */
   readonly entryCount: number;
   readonly data: unknown;
+  /**
+   * Provenance: every file that resolved to this id, in the order read. Absent on
+   * an archive imported before M8, which is why it is optional rather than a lie.
+   */
+  readonly sources?: readonly CategorySource[];
   readonly warnings: readonly string[];
 }
 
