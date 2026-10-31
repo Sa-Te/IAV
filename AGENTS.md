@@ -303,12 +303,12 @@ explain the code is not progress.
 Outside the repo, in the Obsidian vault. Never committed. Vault root on this machine:
 `/mnt/c/Users/Asuna/Documents/InstaVault/InstaVault/`
 
-| Folder | What goes in it | Filename |
-|---|---|---|
-| `learning-notes/` | one note per session | `YYYY-MM-DD_session-NN.md` |
-| `architecture/` | structural decisions and how things fit together | `YYYY-MM-DD_<topic>.md` |
-| `debug-log/` | non-trivial bug investigations | `YYYY-MM-DD_<bug-slug>.md` |
-| `mind-maps/` | nested bullet outlines of a concept | `YYYY-MM-DD_<topic>.md` |
+| Folder            | What goes in it                                  | Filename                   |
+| ----------------- | ------------------------------------------------ | -------------------------- |
+| `learning-notes/` | one note per session                             | `YYYY-MM-DD_session-NN.md` |
+| `architecture/`   | structural decisions and how things fit together | `YYYY-MM-DD_<topic>.md`    |
+| `debug-log/`      | non-trivial bug investigations                   | `YYYY-MM-DD_<bug-slug>.md` |
+| `mind-maps/`      | nested bullet outlines of a concept              | `YYYY-MM-DD_<topic>.md`    |
 
 The vault is the private learning trail. `docs/` in the repo is the public engineering
 record. Both exist; they are not duplicates. `docs/LEARNING.md` holds a one-line index per
@@ -329,6 +329,29 @@ Only when triggered — not after every message:
 - One file per purpose. Never dump everything into one note.
 - Never write these files into the repo.
 - An architecture note does not replace the ADR required by §12. Both are written.
+- Write everything as if teaching a smart beginner. Define a term the first time it appears.
+
+### Linking rules (for Obsidian graph view)
+
+- Link notes with Obsidian wikilinks (`[[like this]]`), never plain text or markdown
+  links. The graph view only sees wikilinks.
+- A concept referenced from more than one session gets its own standalone note in
+  `learning-notes/concepts/`, named `<concept-name>.md`, and every session note that
+  uses it links to it.
+- A note that records a decision links back to its ADR in `docs/adr/` by the ADR's
+  number and slug, e.g. `[[0001-browser-only-v1]]`.
+
+### Mind-map structure
+
+A mind-map note is a single nested bullet outline: one concept per branch, no prose
+paragraphs. The indentation is the meaning. Filename: `YYYY-MM-DD_<topic>.md` in
+`mind-maps/`.
+
+```
+- main concept
+  - sub-concept
+    - detail
+```
 
 ### Session note format
 
@@ -338,6 +361,7 @@ Only when triggered — not after every message:
 4. Logic & flow — how the pieces connect
 5. Teach-back — three sentences you could say to Peter or John without notes
 6. Open questions / TODO next session
+7. Why not the alternative — what you rejected and why
 
 ### Architecture note format
 
@@ -382,6 +406,33 @@ INFERENCE until the main agent confirms it by reading.
 - Quote code you're describing. Never paraphrase a file from memory.
 - If you couldn't read something, say which and why.
 - No "everything is now fixed" without the command and its output that proves it.
+
+### Housekeeping latitude
+
+You do not need permission for corrections that are purely internal
+consistency and carry no behaviour change. Make them, and list them in the
+report under a **Housekeeping** heading:
+
+- a stale cross-reference (a doc says `§7` where it now means `§13`, a dead
+  relative link)
+- a comment or doc describing code that has since moved, renamed or changed
+- a comment that is now false, or a `TODO` that is already done
+- a typo in prose you are already editing
+- leftovers from a move or rename: dead config pointing at old paths, build
+  caches, ignored artefacts
+
+You DO still stop and ask for:
+
+- any change to a rule in this file, or to what a rule means
+- anything that changes runtime behaviour, even by one line
+- deleting a file tracked by git
+- renaming or renumbering sections
+- anything where you would be guessing what a document _meant_ rather than
+  correcting what is now provably false
+- scope widening: "while I was in there I also refactored X" is not housekeeping
+
+Rule of thumb: if you cannot state the correction as "this sentence is now
+false because Y", it is not housekeeping — ask.
 
 ---
 

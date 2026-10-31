@@ -12,7 +12,7 @@ append; nothing is rewritten. The protocol that produces these notes is
 
 Each note lives in this repository only if it is a decision (an ADR under
 `docs/adr/`). Learning notes themselves are kept in the Obsidian vault, per
-AGENTS.md §7 "Session Notes", so registry entries link to the vault note title
+AGENTS.md §13, so registry entries link to the vault note title
 rather than to a file in this repo.
 
 A note is only added here once the author can deliver the teach-back described
