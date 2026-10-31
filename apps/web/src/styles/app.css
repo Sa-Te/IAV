@@ -97,6 +97,11 @@
     outline-offset: 2px;
   }
 
+  button,
+  a {
+    touch-action: manipulation;
+  }
+
   a {
     color: var(--token-color-accent);
   }

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type JSX } from "react";
 
 import { useMediaUrl, type MediaSource } from "./useMediaUrl.js";
 import { State } from "../ui/State.js";
+import { usePrefersReducedMotion } from "../ui/usePrefersReducedMotion.js";
 
 /**
  * Full-size view of one item. Escape closes; the gallery restores focus to the
@@ -26,10 +27,17 @@ export function MediaDetail({
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const [idle, setIdle] = useState(false);
   const idleTimer = useRef<number | null>(null);
+  const reducedMotion = usePrefersReducedMotion();
+  const dialogRef = useRef<HTMLDivElement | null>(null);
 
   // Controls fade only while the pointer is idle. A keyboard user must never lose
   // them, so any focus inside the dialog pins them visible.
   useEffect(() => {
+    // Reduced motion means no disappearing controls: the fade is decoration.
+    if (reducedMotion) {
+      setIdle(false);
+      return;
+    }
     const bump = () => {
       setIdle(false);
       if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
@@ -41,11 +49,32 @@ export function MediaDetail({
       window.removeEventListener("pointermove", bump);
       if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
     };
-  }, []);
+  }, [reducedMotion]);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onClose();
+      if (event.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      // The dialog is modal: Tab must not walk into the page behind it.
+      const dialog = dialogRef.current;
+      if (dialog === null) return;
+      const focusable = dialog.querySelectorAll<HTMLElement>(
+        'button, [href], video[controls], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (first === undefined || last === undefined) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener("keydown", onKey);
     closeRef.current?.focus();
@@ -57,6 +86,7 @@ export function MediaDetail({
 
   return (
     <div
+      ref={dialogRef}
       className={idle ? "detail is-idle" : "detail"}
       role="dialog"
       aria-modal="true"

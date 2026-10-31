@@ -165,6 +165,7 @@ th {
 }
 
 .thread-open {
+  touch-action: manipulation;
   display: grid;
   grid-template-columns: 1fr auto;
   gap: var(--token-space-1) var(--token-space-4);
@@ -179,6 +180,7 @@ th {
 
 .thread-people {
   font-weight: 500;
+  overflow-wrap: anywhere;
 }
 
 .thread-meta,
@@ -192,6 +194,10 @@ th {
   grid-row: 1 / span 2;
   align-self: center;
   font-family: var(--token-font-mono);
+}
+
+.thread-open:hover {
+  border-color: var(--token-color-border-strong);
 }
 
 .thread-empty .thread-people {
@@ -225,6 +231,8 @@ th {
 
 .message-text {
   margin: var(--token-space-1) 0 0;
+  /* A message is user data: one long unbroken string must wrap, not scroll. */
+  overflow-wrap: anywhere;
 }
 
 .message-media {

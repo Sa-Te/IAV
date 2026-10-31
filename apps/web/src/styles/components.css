@@ -194,6 +194,8 @@
 
 .detail {
   position: fixed;
+  overscroll-behavior: contain;
+  touch-action: manipulation;
   inset: 0;
   /* Near-black in both themes: the photo is the only bright thing on screen. */
   background: var(--token-color-scrim);
