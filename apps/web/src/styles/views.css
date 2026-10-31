@@ -1,0 +1,270 @@
+/*
+ * Category, table, tree, reveal and thread views. Tokens only.
+ */
+
+/* --- tables ------------------------------------------------------------- */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+caption {
+  text-align: left;
+  color: var(--token-color-text-muted);
+  padding-bottom: var(--token-space-2);
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--token-color-border);
+  padding: var(--token-space-1) var(--token-space-2);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-size: var(--token-text-13);
+  color: var(--token-color-text-muted);
+  font-weight: 500;
+}
+
+.category-table {
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.category-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--token-color-surface);
+}
+
+.cell-secondary {
+  display: block;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.absent td {
+  color: var(--token-color-text-muted);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-3);
+}
+
+.banner {
+  background: var(--token-color-surface);
+  border-left: 3px solid var(--token-color-border-strong);
+  border-radius: var(--token-radius-sm);
+  padding: var(--token-space-2) var(--token-space-3);
+}
+
+.tree-root,
+.tree-root ul {
+  list-style: none;
+  padding-left: var(--token-space-4);
+}
+
+.tree-kind,
+.tree-key {
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+}
+
+/* --- reveal gate -------------------------------------------------------- */
+
+.reveal-gate {
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-lg);
+  background: var(--token-color-surface);
+  padding: var(--token-space-6);
+  max-width: 40rem;
+}
+
+/* --- threads ------------------------------------------------------------ */
+
+.thread-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--token-space-2);
+}
+
+.thread-open {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--token-space-1) var(--token-space-4);
+  width: 100%;
+  padding: var(--token-space-3);
+  text-align: left;
+  background: var(--token-color-surface);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  color: inherit;
+}
+
+.thread-people {
+  font-weight: 500;
+}
+
+.thread-meta,
+.thread-when {
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.thread-when {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-family: var(--token-font-mono);
+}
+
+.thread-empty .thread-people {
+  color: var(--token-color-text-muted);
+}
+
+.messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--token-space-4);
+}
+
+.message-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--token-space-3);
+  margin: 0;
+}
+
+.message-sender {
+  font-weight: 500;
+}
+
+.message-time {
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-12);
+}
+
+.message-text {
+  margin: var(--token-space-1) 0 0;
+}
+
+.message-media {
+  list-style: none;
+  margin: var(--token-space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--token-space-2);
+}
+
+.message-media .tile {
+  width: 8rem;
+}
+
+/* --- application shell (M10) -------------------------------------------- */
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--token-space-3);
+  padding: var(--token-space-3) var(--token-space-6);
+  border-bottom: 1px solid var(--token-color-border);
+  background: var(--token-color-surface);
+}
+
+.wordmark {
+  font-size: var(--token-text-18);
+  font-weight: 600;
+  letter-spacing: var(--token-tracking-18);
+  color: var(--token-color-text);
+  text-decoration: none;
+}
+
+.wordmark:hover {
+  color: var(--token-color-text);
+}
+
+.app-header .nav {
+  margin: 0;
+}
+
+.app-main {
+  display: block;
+}
+
+.app-main:focus {
+  outline: none;
+}
+
+.app-footer {
+  border-top: 1px solid var(--token-color-border);
+  padding: var(--token-space-4) var(--token-space-6);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.app-footer p {
+  margin: 0;
+  max-width: 60ch;
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--token-space-2);
+  top: calc(-1 * var(--token-space-10));
+  z-index: 10;
+  padding: var(--token-space-2) var(--token-space-3);
+  background: var(--token-color-surface);
+  border: 1px solid var(--token-color-accent);
+  border-radius: var(--token-radius-sm);
+  transition: top 120ms ease-out;
+}
+
+.skip-link:focus {
+  top: var(--token-space-2);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* The shell must survive 320px and 200% zoom without sideways scrolling. */
+@media (max-width: 480px) {
+  .app-header,
+  .app-footer {
+    padding-inline: var(--token-space-3);
+  }
+
+  .gallery {
+    padding: var(--token-space-3);
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}

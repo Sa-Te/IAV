@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { clearMediaRequestCache } from "../media/useMediaUrl.js";
 import { RepositoryProvider } from "../repository/RepositoryContext.js";
+import { AppShell } from "../ui/AppShell.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { buildRoutes } from "./routes.js";
 
@@ -100,7 +101,9 @@ function renderGallery(
   return render(
     <MemoryRouter initialEntries={[path]}>
       <RepositoryProvider repository={repo}>
-        <CategoryGallery category={category} title="Everything" />
+        <AppShell>
+          <CategoryGallery category={category} title="Everything" />
+        </AppShell>
       </RepositoryProvider>
     </MemoryRouter>,
   );

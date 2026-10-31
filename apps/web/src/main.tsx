@@ -4,6 +4,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import "./styles/app.css";
 import { MediaCachesProvider } from "./media/MediaCaches.js";
+import { AppShell } from "./ui/AppShell.js";
 import { RepositoryProvider } from "./repository/RepositoryContext.js";
 import { buildRoutes } from "./routes/routes.js";
 
@@ -25,7 +26,9 @@ createRoot(container).render(
             path={route.path}
             element={
               <RepositoryProvider>
-                <MediaCachesProvider>{route.element}</MediaCachesProvider>
+                <MediaCachesProvider>
+                  <AppShell>{route.element}</AppShell>
+                </MediaCachesProvider>
               </RepositoryProvider>
             }
           />

@@ -124,14 +124,14 @@ export function CategoryView({ id }: { id: string }): JSX.Element {
   const content = <CategoryData id={id} />;
 
   return (
-    <main className="gallery">
+    <div className="gallery">
       <p>
         <a href="/categories">All categories</a>
       </p>
       <h1>{label}</h1>
 
       {isT5(id) ? <RevealGate categoryId={id}>{content}</RevealGate> : content}
-    </main>
+    </div>
   );
 }
 

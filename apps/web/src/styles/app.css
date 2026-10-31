@@ -111,3 +111,4 @@
 
 /* Component classes live in components.css; this file is the Tailwind entry. */
 @import "./components.css";
+@import "./views.css";

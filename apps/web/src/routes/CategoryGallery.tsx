@@ -4,7 +4,6 @@ import { MediaDetail } from "../media/MediaDetail.js";
 import { MediaGrid } from "../media/MediaGrid.js";
 import { useMediaList } from "../media/useMediaList.js";
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
-import { Nav } from "./Nav.js";
 
 /**
  * One page, parameterised by category. `/` passes "all"; `/posts`, `/stories`
@@ -19,7 +18,7 @@ export function CategoryGallery({
   title: string;
 }): JSX.Element {
   const repository = useArchiveRepository();
-  const { state, retry, counts } = useMediaList(category);
+  const { state, retry } = useMediaList(category);
   const [selected, setSelected] = useState<number | null>(null);
   const openerRef = useRef<HTMLElement | null>(null);
 
@@ -29,9 +28,8 @@ export function CategoryGallery({
   }, []);
 
   return (
-    <main className="gallery">
-      <h1>InstaVault</h1>
-      <Nav counts={counts} />
+    <div className="gallery">
+      <h1>{title}</h1>
 
       {state.status === "loading" && <p role="status">Reading the archive…</p>}
 
@@ -78,6 +76,6 @@ export function CategoryGallery({
           onClose={close}
         />
       )}
-    </main>
+    </div>
   );
 }

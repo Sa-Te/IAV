@@ -2,7 +2,6 @@ import { CATEGORIES, toMediaItems, toTableView } from "@instavault/core";
 import { useEffect, useState, type JSX } from "react";
 
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
-import { Nav } from "../routes/Nav.js";
 
 /**
  * `/categories` — every registry row, grouped by privacy tier.
@@ -52,7 +51,6 @@ export function CategoryIndex(): JSX.Element {
   const repository = useArchiveRepository();
   const [state, setState] = useState<State>({ status: "loading" });
   const [rows, setRows] = useState<readonly Row[]>([]);
-  const [counts, setCounts] = useState<Readonly<Record<string, number>>>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -63,7 +61,6 @@ export function CategoryIndex(): JSX.Element {
         const byId = new Map(records.map((record) => [record.id, record]));
         if (cancelled) return;
 
-        const mediaCounts: Record<string, number> = {};
         const nextRows = CATEGORIES.filter((category) => category.id !== "unrecognised").map(
           (category): Row => {
             const record = byId.get(category.id);
@@ -85,7 +82,6 @@ export function CategoryIndex(): JSX.Element {
             // shows this, add a kind probe beside toTableView instead.
             const view = toTableView(record);
             const media = toMediaItems(category.id, record.data).length;
-            if (media > 0) mediaCounts[category.id] = media;
             return {
               id: category.id,
               label: category.label,
@@ -110,7 +106,6 @@ export function CategoryIndex(): JSX.Element {
           },
         );
         setRows(nextRows);
-        setCounts(mediaCounts);
         setState({ status: "ready" });
       } catch (error) {
         if (!cancelled) {
@@ -130,11 +125,8 @@ export function CategoryIndex(): JSX.Element {
   const present = rows.filter((row) => row.present).length;
 
   return (
-    <main className="gallery">
-      <h1>InstaVault</h1>
-      <Nav counts={counts} />
-
-      <h2>All categories</h2>
+    <div className="gallery">
+      <h1>All categories</h1>
 
       {state.status === "loading" && <p role="status">Reading the archive…</p>}
 
@@ -154,7 +146,7 @@ export function CategoryIndex(): JSX.Element {
             const groupRows = rows.filter((row) => row.tier === group.tier);
             return (
               <section key={group.tier} aria-labelledby={`tier-${group.tier}`}>
-                <h3 id={`tier-${group.tier}`}>{group.heading}</h3>
+                <h2 id={`tier-${group.tier}`}>{group.heading}</h2>
                 <table>
                   <caption>{groupRows.length} categories</caption>
                   <thead>
@@ -189,6 +181,6 @@ export function CategoryIndex(): JSX.Element {
           })}
         </>
       )}
-    </main>
+    </div>
   );
 }

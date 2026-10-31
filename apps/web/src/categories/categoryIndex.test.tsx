@@ -64,7 +64,7 @@ describe("CategoryIndex", () => {
     );
 
     expect(await screen.findByText(/categories are in this export/)).toBeDefined();
-    const headings = screen.getAllByRole("heading", { level: 3 });
+    const headings = screen.getAllByRole("heading", { level: 2 });
     expect(headings.map((heading) => heading.textContent?.slice(0, 2))).toEqual([
       "T1",
       "T2",
