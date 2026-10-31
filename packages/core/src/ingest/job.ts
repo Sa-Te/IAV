@@ -31,6 +31,8 @@ export interface IngestSummary {
   readonly entries: number;
   readonly mediaStored: number;
   readonly mediaMissing: number;
+  /** Media-looking entries no reference resolved to. Counted, never stored. */
+  readonly mediaOrphans: number;
   readonly unrecognised: readonly UnrecognisedShape[];
   readonly fingerprint: string;
   readonly durationMs: number;

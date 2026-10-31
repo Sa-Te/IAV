@@ -36,6 +36,7 @@ export interface ArchiveCounts {
   readonly entries: number;
   readonly mediaStored: number;
   readonly mediaMissing: number;
+  readonly mediaOrphans: number;
   readonly unrecognised: number;
 }
 

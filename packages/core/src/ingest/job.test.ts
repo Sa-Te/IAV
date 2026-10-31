@@ -17,6 +17,7 @@ const SUMMARY = {
   entries: 10,
   mediaStored: 3,
   mediaMissing: 0,
+  mediaOrphans: 0,
   unrecognised: [],
   fingerprint: "fmt-abcdef",
   durationMs: 12,

@@ -19,7 +19,11 @@ export const TIER_5: readonly Category[] = [
       kind: "object",
       requiredKeys: ["participants", "messages", "title", "thread_path", "is_pending"],
     },
-    mediaPath: "thread-relative",
+    // Measured (M5): this export writes message media URIs already root-relative
+    // (`your_instagram_activity/messages/.../photos/<file>`), not relative to the
+    // thread directory. The pipeline still tries the thread dir as a fallback for
+    // variants that do use it.
+    mediaPath: "root-relative",
   },
   {
     id: "messages_inbox",
@@ -37,6 +41,10 @@ export const TIER_5: readonly Category[] = [
       requiredKeys: ["participants", "messages", "title", "thread_path", "is_still_participant"],
       absentKeys: ["is_pending"],
     },
-    mediaPath: "thread-relative",
+    // Measured (M5): this export writes message media URIs already root-relative
+    // (`your_instagram_activity/messages/.../photos/<file>`), not relative to the
+    // thread directory. The pipeline still tries the thread dir as a fallback for
+    // variants that do use it.
+    mediaPath: "root-relative",
   },
 ];

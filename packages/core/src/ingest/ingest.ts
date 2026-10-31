@@ -1,4 +1,4 @@
-import { Unzip, UnzipInflate } from "fflate";
+import { Unzip, UnzipInflate, unzipSync } from "fflate";
 
 import { findCategory } from "../registry/categories.js";
 import { computeFingerprint, type ResolvedCategory } from "../registry/fingerprint.js";
@@ -28,8 +28,8 @@ import {
   isMediaEntry,
   isZip,
   listNames,
-  mimeFor,
 } from "./zipEntries.js";
+import { detectMime } from "./mime.js";
 import type {
   ArchiveRow,
   CancellationSignal,
@@ -131,20 +131,13 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
     previousJob !== null && previousJob.status === "ready" ? previousJob.summary.fingerprint : null;
   await sink.clear();
 
-  // --- read: stream entries, keep one entry at a time -----------------------
-  const mediaPaths = new Set(names);
+  // --- read: stream JSON entries, collect references ------------------------
+  // Media is NOT stored while scanning: a file is stored because something
+  // references it, not because its name looks like media.
+  const entryNames = new Set(names);
   const rawById = new Map<string, { tier: 1 | 2; value: unknown }>();
   const unrecognised: UnrecognisedShape[] = [];
-  let mediaQueued: MediaRecord[] = [];
-  let mediaStored = 0;
-  let mediaMissing = 0;
-
-  const flushMedia = async (): Promise<void> => {
-    if (mediaQueued.length === 0) return;
-    const batch = mediaQueued;
-    mediaQueued = [];
-    await sink.writeBatch({ media: batch });
-  };
+  const references: { uri: string; dir: string; threadFirst: boolean }[] = [];
 
   const handleJson = (name: string, bytes: Uint8Array): void => {
     let parsed: unknown;
@@ -170,10 +163,9 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
 
     const mediaPath = findCategory(resolved.id)?.mediaPath ?? "none";
     if (mediaPath === "none") return;
-    const base = mediaPath === "thread-relative" ? dirnameOf(name) : "";
+    const dir = dirnameOf(name);
     for (const uri of collectUris(parsed)) {
-      const absolute = base === "" ? uri : `${base}/${uri}`;
-      if (!mediaPaths.has(absolute)) mediaMissing += 1;
+      references.push({ uri, dir, threadFirst: mediaPath === "thread-relative" });
     }
   };
 
@@ -184,12 +176,8 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
       chunks.push(chunk);
       if (!final) return;
       const bytes = concat(chunks);
-      const extension = extensionOf(file.name);
-      if (extension === ".json") {
+      if (extensionOf(file.name) === ".json") {
         handleJson(file.name, bytes);
-      } else if (isMediaEntry(file.name)) {
-        mediaQueued.push({ path: file.name, bytes, mime: mimeFor(file.name) });
-        mediaStored += 1;
       }
     };
     file.start();
@@ -215,11 +203,8 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
       );
     }
 
-    if (mediaQueued.length >= BATCH_SIZE) await flushMedia();
     await publish(parsing("reading", end, zip.length));
   }
-  await flushMedia();
-
   const stopAfterRead = aborted();
   if (stopAfterRead !== null) {
     await sink.clear();
@@ -227,6 +212,53 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
   }
 
   await publish(parsing("resolving", jsonNames.length, jsonNames.length), true);
+
+  // --- resolve references, then store exactly what resolved -----------------
+  // Preferred base first (the registry's declared mediaPath), the other second:
+  // exports differ, and a wrong guess must degrade to a miss, never a crash.
+  let mediaMissing = 0;
+  const resolvedPaths = new Set<string>();
+  for (const reference of references) {
+    const threadCandidate = `${reference.dir}/${reference.uri}`;
+    const candidates = reference.threadFirst
+      ? [threadCandidate, reference.uri]
+      : [reference.uri, threadCandidate];
+    const hit = candidates.find((candidate) => entryNames.has(candidate));
+    if (hit === undefined) {
+      mediaMissing += 1;
+      continue;
+    }
+    resolvedPaths.add(hit);
+  }
+
+  const mediaOrphans = names.filter(
+    (name) => isMediaEntry(name) && !resolvedPaths.has(name),
+  ).length;
+
+  await publish(parsing("storing", 0, Math.max(resolvedPaths.size, 1)), true);
+
+  let mediaStored = 0;
+  if (resolvedPaths.size > 0) {
+    // Second pass over the archive, decompressing only the entries a reference
+    // resolved to. The first pass needed names only.
+    const wanted = unzipSync(zip, { filter: (file) => resolvedPaths.has(file.name) });
+    let batch: MediaRecord[] = [];
+    for (const [path, bytes] of Object.entries(wanted) as [string, Uint8Array][]) {
+      const stop = aborted();
+      if (stop !== null) {
+        await sink.clear();
+        return finish(stop);
+      }
+      batch.push({ path, bytes, mime: detectMime(bytes, path) });
+      mediaStored += 1;
+      if (batch.length >= BATCH_SIZE) {
+        await sink.writeBatch({ media: batch });
+        await publish(parsing("storing", mediaStored, Math.max(resolvedPaths.size, 1)));
+        batch = [];
+      }
+    }
+    if (batch.length > 0) await sink.writeBatch({ media: batch });
+  }
 
   // --- normalise ------------------------------------------------------------
   const categories: CategoryRecord[] = [...rawById.entries()].map(([id, entry]) => ({
@@ -261,6 +293,7 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
     entries,
     mediaStored,
     mediaMissing,
+    mediaOrphans,
     unrecognised,
     fingerprint: computeFingerprint(resolvedForFingerprint),
     durationMs: Math.max(0, now() - startedAt),
@@ -276,6 +309,7 @@ export async function runIngest(options: RunIngestOptions): Promise<IngestJob> {
       entries: summary.entries,
       mediaStored: summary.mediaStored,
       mediaMissing: summary.mediaMissing,
+      mediaOrphans: summary.mediaOrphans,
       unrecognised: summary.unrecognised.length,
     },
     drift: computeDrift(

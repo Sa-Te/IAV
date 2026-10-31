@@ -46,6 +46,7 @@ const JOB: IngestJob = {
     entries: 2,
     mediaStored: 1,
     mediaMissing: 0,
+    mediaOrphans: 0,
     unrecognised: [],
     fingerprint: "fmt-abc123",
     durationMs: 5,
@@ -141,7 +142,14 @@ describe("LocalArchiveRepository", () => {
       fingerprint: "fmt-abc123",
       importedAt: "2026-10-31T00:00:00.000Z",
       sourceBytes: 1234,
-      counts: { categories: 1, entries: 2, mediaStored: 1, mediaMissing: 0, unrecognised: 0 },
+      counts: {
+        categories: 1,
+        entries: 2,
+        mediaStored: 1,
+        mediaMissing: 0,
+        mediaOrphans: 0,
+        unrecognised: 0,
+      },
       drift: null,
       job: JOB,
     };
