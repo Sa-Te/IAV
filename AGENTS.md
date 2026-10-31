@@ -269,6 +269,9 @@ reserved for floating layers, Inter / Lora / JetBrains Mono. Themes are data
 - Every module containing a branch, loop or parse gets at least one negative case:
   malformed input, empty input, wrong type.
 - Never `.skip` without a linked issue number in the reason string.
+- DOM tests run under happy-dom (ADR 0007 if the swap succeeds; jsdom if it does not). A
+  hook is tested through renderHook, not split into a pure function plus a route test,
+  unless the environment cannot support it — and then the reason is written down.
 - Never `passWithNoTests`. A suite that runs zero tests is a failure.
 - Coverage percentage is not a gate. Mutation testing is not adopted.
 - Integration tests use synthetic fixtures only — never `archive/`, never a redacted slice

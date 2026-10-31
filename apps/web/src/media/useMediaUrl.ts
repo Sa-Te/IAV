@@ -57,6 +57,13 @@ export type LoadedMedia =
 /**
  * The whole decision, without React: fetch, then decide whether the bytes are
  * usable. Pure enough to test in Node; the hook only adds URL lifecycle.
+ *
+ * Why the split exists (AGENTS.md §9): a `renderHook` test of the hook itself
+ * aborts the Vitest worker with `SIGABRT` after ~109s under jsdom 30 and under
+ * happy-dom 21 (both pools), for reasons not yet diagnosed. Until that is fixed,
+ * the decisions are tested here in Node and the URL lifecycle is covered through
+ * the gallery's real render. Do not "tidy" this away without a passing
+ * renderHook test to replace it.
  */
 export async function loadMedia(
   id: string,
