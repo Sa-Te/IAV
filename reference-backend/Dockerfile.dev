@@ -1,0 +1,20 @@
+# Use the full Go image because we need the compiler for live reloading
+FROM golang:1.25-alpine
+
+WORKDIR /app
+
+# Pre-copy dependencies to leverage Docker cache
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the rest of the source code
+COPY . .
+
+# Install the 'air' live-reloading tool
+RUN go install github.com/air-verse/air@latest
+
+COPY . .
+
+# The command that will be run when the container starts.
+# It simply executes 'air'.
+CMD ["air"]

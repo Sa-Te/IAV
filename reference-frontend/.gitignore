@@ -1,0 +1,28 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Miscellaneous
+.DS_Store
+*.pem
+
+# Local Environment Variables
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE / Editor specific
+.vscode/
+*.swp

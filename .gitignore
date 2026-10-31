@@ -1,0 +1,56 @@
+# =============================================================================
+# InstaVault .gitignore
+# LF endings only. One explicit pattern per concern. Anything that matches a
+# user-data pattern below must never be staged, committed, or copied into a
+# fixture (AGENTS.md §1.6, §1.7).
+# =============================================================================
+
+# --- User data: a real personal export and third-party messages ---------------
+archive/
+backend/uploads/
+reference-backend/uploads/
+*.zip
+
+# --- Secrets and local config (AGENTS.md §1.4: v1 needs none) ----------------
+.env
+.env.*
+
+# --- Dependencies ------------------------------------------------------------
+node_modules/
+
+# --- Build output ------------------------------------------------------------
+.next/
+out/
+dist/
+build/
+
+# --- Compiled artefacts ------------------------------------------------------
+*.tsbuildinfo
+backend/api
+reference-backend/api
+backend/tmp/
+reference-backend/tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+coverage/
+*.coverprofile
+profile.cov
+
+# --- Logs --------------------------------------------------------------------
+*.log
+logs/
+
+# --- OS / editor -------------------------------------------------------------
+.DS_Store
+.vscode/
+.idea/
+
+# --- Go ----------------------------------------------------------------------
+vendor/
+go.work
+go.work.sum
