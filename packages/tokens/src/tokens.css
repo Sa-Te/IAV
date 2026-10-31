@@ -98,6 +98,10 @@
   --token-color-success: #6baa8c;
   --token-color-warning: #d9a05b;
   --token-color-danger: #d4796f;
+  /* The detail view is a near-black stage in both themes: the photo is the only
+     bright thing. `on-scrim` is fixed light text on it. */
+  --token-color-scrim: #0d0b0a;
+  --token-color-on-scrim: #ede7df;
 }
 
 /* Paper — the light theme. */
@@ -118,6 +122,8 @@
   --token-color-success: #3e7f61;
   --token-color-warning: #8a5d24;
   --token-color-danger: #a8433a;
+  --token-color-scrim: #12100e;
+  --token-color-on-scrim: #ede7df;
 }
 
 /* System preference, only while no explicit choice is stored. Duplicated on
@@ -141,5 +147,7 @@
     --token-color-success: #3e7f61;
     --token-color-warning: #8a5d24;
     --token-color-danger: #a8433a;
+    --token-color-scrim: #12100e;
+    --token-color-on-scrim: #ede7df;
   }
 }

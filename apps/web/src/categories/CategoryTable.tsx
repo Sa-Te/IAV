@@ -1,5 +1,5 @@
 import { PAGE_SIZE, type TableView } from "@instavault/core";
-import { useState, type JSX } from "react";
+import { useMemo, useState, type JSX } from "react";
 
 import { State } from "../ui/State.js";
 
@@ -22,6 +22,19 @@ export function CategoryTable({
   caption: string;
 }): JSX.Element {
   const [page, setPage] = useState(0);
+
+  // A column is numeric when every non-empty cell looks like a number. Computed
+  // once per view: 42,197 rows must not be re-scanned on a page change.
+  const numeric = useMemo(
+    () =>
+      view.columns.map((_, column) =>
+        view.rows.every((row) => {
+          const text = row[column]?.text ?? "";
+          return text === "" || /^-?\d+([.,]\d+)?$/.test(text);
+        }),
+      ),
+    [view],
+  );
   const pages = Math.max(1, Math.ceil(view.total / PAGE_SIZE));
   const start = page * PAGE_SIZE;
   const rows = view.rows.slice(start, start + PAGE_SIZE);
@@ -35,8 +48,12 @@ export function CategoryTable({
         </caption>
         <thead>
           <tr>
-            {view.columns.map((column) => (
-              <th key={column} scope="col">
+            {view.columns.map((column, columnIndex) => (
+              <th
+                key={column}
+                scope="col"
+                className={numeric[columnIndex] === true ? "tabular" : undefined}
+              >
                 {column}
               </th>
             ))}
@@ -46,7 +63,10 @@ export function CategoryTable({
           {rows.map((row, rowIndex) => (
             <tr key={start + rowIndex}>
               {row.map((cell, cellIndex) => (
-                <td key={view.columns[cellIndex] ?? cellIndex}>
+                <td
+                  key={view.columns[cellIndex] ?? cellIndex}
+                  className={numeric[cellIndex] === true ? "tabular" : undefined}
+                >
                   {/* The full value is always in `title`; the visible text is cut
                       for layout only. Nothing is paraphrased. */}
                   <span title={cell.text}>{truncate(cell.text)}</span>

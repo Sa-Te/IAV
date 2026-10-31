@@ -35,6 +35,8 @@
   --color-success: var(--token-color-success);
   --color-warning: var(--token-color-warning);
   --color-danger: var(--token-color-danger);
+  --color-scrim: var(--token-color-scrim);
+  --color-on-scrim: var(--token-color-on-scrim);
 
   --spacing: var(--token-space-1);
 

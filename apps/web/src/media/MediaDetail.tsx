@@ -1,5 +1,5 @@
 import type { MediaItemView } from "@instavault/core";
-import { useEffect, useRef, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 
 import { useMediaUrl, type MediaSource } from "./useMediaUrl.js";
 import { State } from "../ui/State.js";
@@ -24,6 +24,24 @@ export function MediaDetail({
 }): JSX.Element {
   const media = useMediaUrl(item.id, source);
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const [idle, setIdle] = useState(false);
+  const idleTimer = useRef<number | null>(null);
+
+  // Controls fade only while the pointer is idle. A keyboard user must never lose
+  // them, so any focus inside the dialog pins them visible.
+  useEffect(() => {
+    const bump = () => {
+      setIdle(false);
+      if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
+      idleTimer.current = window.setTimeout(() => setIdle(true), 2500);
+    };
+    bump();
+    window.addEventListener("pointermove", bump);
+    return () => {
+      window.removeEventListener("pointermove", bump);
+      if (idleTimer.current !== null) window.clearTimeout(idleTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -38,7 +56,13 @@ export function MediaDetail({
   const when = item.takenAt > 0 ? new Date(item.takenAt * 1000).toLocaleString() : "Date unknown";
 
   return (
-    <div className="detail" role="dialog" aria-modal="true" aria-label="Media detail">
+    <div
+      className={idle ? "detail is-idle" : "detail"}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Media detail"
+      onPointerEnter={() => setIdle(false)}
+    >
       <button ref={closeRef} type="button" className="detail-close" onClick={onClose}>
         Close
       </button>
@@ -61,8 +85,12 @@ export function MediaDetail({
       </div>
 
       <div className="detail-info">
-        {caption === "" ? <p className="muted">No caption</p> : <p>{caption}</p>}
-        <p className="muted">
+        {caption === "" ? (
+          <p className="detail-meta">No caption</p>
+        ) : (
+          <p className="detail-caption">{caption}</p>
+        )}
+        <p className="detail-meta">
           <time
             dateTime={item.takenAt > 0 ? new Date(item.takenAt * 1000).toISOString() : undefined}
           >

@@ -44,6 +44,18 @@ th {
   display: block;
   color: var(--token-color-text-muted);
   font-size: var(--token-text-13);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Numeric columns: right-aligned and tabular, so digits line up down the column. */
+.tabular {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Zebra by token, never by an alpha overlay: Paper and Umber must both stay flat. */
+.category-table tbody tr:nth-child(even) {
+  background: var(--token-color-surface);
 }
 
 .absent td {
@@ -67,6 +79,41 @@ th {
 .tree-root ul {
   list-style: none;
   padding-left: var(--token-space-4);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-13);
+}
+
+/* Indent guides: a 1px border, not a background image. */
+.tree-root ul {
+  border-left: 1px solid var(--token-color-border);
+  margin-left: var(--token-space-2);
+}
+
+.tree-root > li > ul {
+  border-left: 0;
+  margin-left: 0;
+}
+
+/* The expand control is the whole row, not the word. */
+.tree-root button {
+  display: block;
+  width: 100%;
+  padding: var(--token-space-1) 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.tree-root button:hover {
+  background: var(--token-color-sunken);
+}
+
+.tree-root button:focus-visible {
+  outline: 2px solid var(--token-color-accent);
+  outline-offset: -2px;
 }
 
 .tree-kind,
@@ -77,12 +124,34 @@ th {
 
 /* --- reveal gate -------------------------------------------------------- */
 
+/* A considered caution, not a browser alert: no red, one strong left edge. */
 .reveal-gate {
   border: 1px solid var(--token-color-border);
+  border-left: 3px solid var(--token-color-warning);
   border-radius: var(--token-radius-lg);
   background: var(--token-color-surface);
   padding: var(--token-space-6);
   max-width: 40rem;
+}
+
+.reveal-gate h2 {
+  margin-top: 0;
+}
+
+.reveal-gate .button,
+.button {
+  padding: var(--token-space-2) var(--token-space-4);
+  border: 1px solid var(--token-color-accent);
+  border-radius: var(--token-radius-md);
+  background: var(--token-color-accent);
+  color: var(--token-color-on-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--token-color-accent-hover);
+  border-color: var(--token-color-accent-hover);
 }
 
 /* --- threads ------------------------------------------------------------ */
