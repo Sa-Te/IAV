@@ -518,5 +518,6 @@ unknown.**
 - E2EE sync design — deliberately postponed to v2. Do not build toward it
   speculatively beyond the repository seam.
 - Retention/erase UX for an archive the user wants to remove from the device.
-- One archive per device. Importing a new archive replaces the previous one after an
-  explicit confirmation naming what will be deleted (ADR 0006).
+- One archive in storage at a time. Multiple archives may exist on disk for drift
+  comparison; only one is ever imported. `archive-2/` is the working baseline; `archive/`
+  stays on disk as the drift reference and is never imported again.

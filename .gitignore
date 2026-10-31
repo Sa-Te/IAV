@@ -7,6 +7,8 @@
 
 # --- User data: a real personal export and third-party messages ---------------
 archive/
+# Second export, kept on disk for drift comparison. Explicit, never a glob.
+archive-2/
 backend/uploads/
 reference-backend/uploads/
 *.zip
