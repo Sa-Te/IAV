@@ -13,6 +13,7 @@ import { ThreadList } from "../messages/ThreadList.js";
 import { CategoryTable } from "./CategoryTable.js";
 import { CategoryTree } from "./CategoryTree.js";
 import { RevealGate } from "./RevealGate.js";
+import { State } from "../ui/State.js";
 
 /** Categories that have a purpose-built view inside the generic route. */
 const THREAD_CATEGORIES = new Set(["messages_inbox", "messages_requests"]);
@@ -78,22 +79,22 @@ function CategoryData({ id }: { id: string }): JSX.Element {
 
   return (
     <>
-      {state.status === "loading" && <p role="status">Reading this category…</p>}
+      {state.status === "loading" && <State kind="loading" message="Reading this category…" />}
 
       {state.status === "failed" && (
-        <div role="alert" className="state state-error">
-          <p>This category could not be read: {state.message}</p>
-          <button type="button" onClick={retry}>
-            Try again
-          </button>
-        </div>
+        <State
+          kind="error"
+          message="This category could not be read."
+          detail={state.message}
+          onRetry={retry}
+        />
       )}
 
       {state.status === "missing" && (
-        <div className="state state-empty">
-          <p>This category is not in this export.</p>
-          <p>That is normal — Instagram does not include every category in every export.</p>
-        </div>
+        <State
+          kind="unavailable"
+          detail="That is normal — Instagram does not include every category in every export."
+        />
       )}
 
       {state.status === "ready" && THREAD_CATEGORIES.has(id) && (
@@ -104,7 +105,7 @@ function CategoryData({ id }: { id: string }): JSX.Element {
         !THREAD_CATEGORIES.has(id) &&
         state.view.kind === "table" &&
         state.view.total === 0 && (
-          <p className="state state-empty">This category is in this export but holds no entries.</p>
+          <State kind="empty" message="This category is in this export but holds no entries." />
         )}
 
       {state.status === "ready" &&

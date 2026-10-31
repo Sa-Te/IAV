@@ -82,7 +82,7 @@
   font-size: var(--token-text-13);
 }
 
-/* --- states (one system; see ui/State.tsx) ------------------------------ */
+/* --- the four states, styled once --------------------------------------- */
 
 .state {
   border: 1px solid var(--token-color-border);
@@ -92,17 +92,100 @@
   background: var(--token-color-surface);
 }
 
+.state-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-2);
+  margin: 0 0 var(--token-space-1);
+  font-weight: 500;
+}
+
+.state-icon {
+  width: var(--token-space-2);
+  height: var(--token-space-2);
+  border-radius: var(--token-radius-full);
+  background: var(--token-color-text-muted);
+}
+
+.state-body,
+.state-detail {
+  margin: 0 0 var(--token-space-2);
+  color: var(--token-color-text-muted);
+}
+
+.state-detail {
+  font-size: var(--token-text-13);
+}
+
+/* loading: no alarm, no spinner, just quiet movement. */
+.state-loading {
+  border-style: dashed;
+}
+
+.state-loading .state-icon {
+  background: var(--token-color-border-strong);
+}
+
+.state-skeleton {
+  display: grid;
+  gap: var(--token-space-2);
+}
+
+.state-skeleton-bar {
+  display: block;
+  height: var(--token-space-3);
+  border-radius: var(--token-radius-sm);
+  background: var(--token-color-sunken);
+  animation: state-shimmer 1.8s ease-in-out infinite;
+}
+
+.state-skeleton-bar-short {
+  width: 60%;
+  animation-delay: 0.2s;
+}
+
+@keyframes state-shimmer {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* empty: informational, not a warning. */
+.state-empty .state-icon {
+  background: var(--token-color-text-muted);
+}
+
+/* error: danger is the border and the icon, not the whole surface. */
 .state-error {
   border-color: var(--token-color-danger);
+}
+
+.state-error .state-icon {
+  background: var(--token-color-danger);
+}
+
+.state-error .state-body {
   color: var(--token-color-text);
 }
 
-.state-empty {
+/* unavailable: greyed, quiet, obviously normal. */
+.state-unavailable {
+  border-style: dashed;
   color: var(--token-color-text-muted);
 }
 
-.muted {
-  color: var(--token-color-text-muted);
+.state-unavailable .state-icon {
+  background: var(--token-color-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .state-skeleton-bar {
+    animation: none;
+  }
 }
 
 /* --- detail ------------------------------------------------------------- */

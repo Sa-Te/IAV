@@ -7,6 +7,7 @@ import {
 } from "@instavault/core";
 import { useState, type JSX } from "react";
 
+import { State } from "../ui/State.js";
 import { ThreadConversation } from "./ThreadConversation.js";
 
 /**
@@ -42,7 +43,7 @@ export function ThreadList({ record }: { record: CategoryRecord }): JSX.Element 
   }
 
   if (threads.length === 0) {
-    return <p className="state state-empty">This category holds no conversations.</p>;
+    return <State kind="empty" message="This category holds no conversations." />;
   }
 
   return (

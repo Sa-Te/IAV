@@ -4,6 +4,7 @@ import { MediaDetail } from "../media/MediaDetail.js";
 import { MediaGrid } from "../media/MediaGrid.js";
 import { useMediaList } from "../media/useMediaList.js";
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
+import { State } from "../ui/State.js";
 
 /**
  * One page, parameterised by category. `/` passes "all"; `/posts`, `/stories`
@@ -31,24 +32,16 @@ export function CategoryGallery({
     <div className="gallery">
       <h1>{title}</h1>
 
-      {state.status === "loading" && <p role="status">Reading the archive…</p>}
+      {state.status === "loading" && <State kind="loading" message="Reading the archive…" />}
 
-      {state.status === "error" && (
-        <div role="alert" className="state state-error">
-          <p>{state.message}</p>
-          <button type="button" onClick={retry}>
-            Try again
-          </button>
-        </div>
-      )}
+      {state.status === "error" && <State kind="error" message={state.message} onRetry={retry} />}
 
       {state.status === "ready" && state.items.length === 0 && (
-        <div className="state state-empty">
-          <p>This archive has no {title.toLowerCase()}.</p>
-          <p>
-            If you expected media, import your export on the <a href="/dev/ingest">import page</a>.
-          </p>
-        </div>
+        <State
+          kind="empty"
+          message={`This archive has no ${title.toLowerCase()}.`}
+          detail="If you expected media, import your export on the import page."
+        />
       )}
 
       {state.status === "ready" && state.items.length > 0 && (

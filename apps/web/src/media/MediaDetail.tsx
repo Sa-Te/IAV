@@ -2,6 +2,7 @@ import type { MediaItemView } from "@instavault/core";
 import { useEffect, useRef, type JSX } from "react";
 
 import { useMediaUrl, type MediaSource } from "./useMediaUrl.js";
+import { State } from "../ui/State.js";
 
 /**
  * Full-size view of one item. Escape closes; the gallery restores focus to the
@@ -43,11 +44,7 @@ export function MediaDetail({
       </button>
 
       <div className="detail-media">
-        {media.status === "pending" && (
-          <span className="tile-pending detail-pending" role="status">
-            Loading…
-          </span>
-        )}
+        {media.status === "pending" && <State kind="loading" message="Loading this item…" />}
         {media.status === "failed" && (
           <span className="tile-failed" role="alert">
             {media.reason === "missing"

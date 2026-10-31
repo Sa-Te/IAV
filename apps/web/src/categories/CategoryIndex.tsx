@@ -2,6 +2,7 @@ import { CATEGORIES, toMediaItems, toTableView } from "@instavault/core";
 import { useEffect, useState, type JSX } from "react";
 
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
+import { State } from "../ui/State.js";
 
 /**
  * `/categories` — every registry row, grouped by privacy tier.
@@ -128,13 +129,9 @@ export function CategoryIndex(): JSX.Element {
     <div className="gallery">
       <h1>All categories</h1>
 
-      {state.status === "loading" && <p role="status">Reading the archive…</p>}
+      {state.status === "loading" && <State kind="loading" message="Reading the archive…" />}
 
-      {state.status === "failed" && (
-        <div role="alert" className="state state-error">
-          <p>{state.message}</p>
-        </div>
-      )}
+      {state.status === "failed" && <State kind="error" message={state.message} />}
 
       {state.status === "ready" && (
         <>

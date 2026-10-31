@@ -1,6 +1,8 @@
 import { PAGE_SIZE, type TableView } from "@instavault/core";
 import { useState, type JSX } from "react";
 
+import { State } from "../ui/State.js";
+
 /**
  * 100 rows per page (AGENTS.md §7). Pagination, not virtualisation: the largest
  * category in the measured archive is 42,197 rows, which is a page-count problem,
@@ -59,7 +61,7 @@ export function CategoryTable({
       </table>
 
       {view.total === 0 ? (
-        <p className="state state-empty">No rows in this category.</p>
+        <State kind="empty" message="No rows in this category." />
       ) : (
         <div className="pager">
           <button type="button" disabled={page === 0} onClick={() => setPage(page - 1)}>

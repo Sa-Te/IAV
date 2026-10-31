@@ -4,6 +4,7 @@ import { useState, type JSX } from "react";
 import { MediaDetail } from "../media/MediaDetail.js";
 import { MediaTile } from "../media/MediaTile.js";
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
+import { State } from "../ui/State.js";
 
 /**
  * One conversation, chronological, with attachments through the media layer.
@@ -61,7 +62,7 @@ export function ThreadConversation({
       </p>
 
       {messages.length === 0 ? (
-        <p className="state state-empty">This conversation has no messages in this export.</p>
+        <State kind="empty" message="This conversation has no messages in this export." />
       ) : (
         <ol className="messages">
           {messages.map((message, index) => (
