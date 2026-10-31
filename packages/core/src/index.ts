@@ -3,6 +3,8 @@ export { resolveCategory } from "./registry/resolve.js";
 export type { ResolveInput, ResolveResult } from "./registry/resolve.js";
 export { computeFingerprint } from "./registry/fingerprint.js";
 export type { ResolvedCategory } from "./registry/fingerprint.js";
+export { toMediaItems } from "./domain/media.js";
+export type { MediaItemView } from "./domain/media.js";
 export { toPostEntries } from "./domain/posts.js";
 export type { PostEntry } from "./domain/posts.js";
 export { fixMojibake } from "./strings/fixMojibake.js";

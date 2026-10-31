@@ -43,6 +43,7 @@ export interface ArchiveRepository {
   listMedia(filter: MediaFilter): Promise<Page<MediaRow>>;
   getMediaBlob(id: string): Promise<Blob | null>;
   getCategory(id: string): Promise<CategoryRecord | null>;
+  listCategories(): Promise<readonly CategoryRecord[]>;
   summary(): Promise<ArchiveRow | null>;
 }
 
@@ -170,6 +171,13 @@ export class LocalArchiveRepository implements IngestSink, ArchiveRepository {
       this.db.transaction(STORE_CATEGORIES, "readonly").objectStore(STORE_CATEGORIES).get(id),
     )) as CategoryRecord | undefined;
     return row ?? null;
+  }
+
+  async listCategories(): Promise<readonly CategoryRecord[]> {
+    const rows = (await requestToPromise(
+      this.db.transaction(STORE_CATEGORIES, "readonly").objectStore(STORE_CATEGORIES).getAll(),
+    )) as CategoryRecord[];
+    return rows;
   }
 
   async summary(): Promise<ArchiveRow | null> {

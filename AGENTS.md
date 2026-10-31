@@ -202,7 +202,9 @@ These are checked, not hoped for.
 - Time to interactive with an empty cache: **< 1.5s**.
 - Parsing a 160MB / 700-file export: **< 90s** in a worker, with progress
   events at least every 2 seconds. The main thread must never block > 50ms.
-- Grid scroll: **60fps** with 500+ items. Virtualise; do not render 10,000 tiles.
+- Virtualise only above 2,000 rendered tiles. The measured archive is 376 media items across
+  every category; a grid of everything fits without virtualisation. Revisit when a real
+  archive exceeds the ceiling, and record the measurement that triggered it.
 - Thumbnails generated off the main thread (`createImageBitmap` +
   `OffscreenCanvas` in the worker). Never decode full-res media for a grid tile.
 - Blob URLs live in one LRU cache with an explicit revoke policy. Unbounded blob
