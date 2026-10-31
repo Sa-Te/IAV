@@ -1,6 +1,8 @@
 import type { JSX } from "react";
 import { NavLink } from "react-router-dom";
 
+import { ThemeSwitch } from "../ui/ThemeSwitch.js";
+
 /**
  * Categories that have a route and at least one media item. A category with no
  * media is not shown; a category with no route (messages, profile photo) is
@@ -18,6 +20,7 @@ export function Nav({ counts }: { counts: Readonly<Record<string, number>> }): J
 
   return (
     <nav aria-label="Categories" className="nav">
+      <ThemeSwitch />
       {/* NavLink marks the current route itself; one source of truth, not two. */}
       <NavLink to="/" end className="nav-link">
         Everything <span className="nav-count">{total}</span>

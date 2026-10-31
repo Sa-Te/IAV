@@ -4,6 +4,29 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>InstaVault</title>
+    <!--
+      Runs before paint, before React, before the stylesheet is parsed into layout:
+      an explicit choice is applied as data-theme, "system" is left to the CSS
+      media query. This is why there is no flash of the wrong theme.
+    -->
+    <script>
+      (function () {
+        try {
+          var choice = localStorage.getItem("instavault-theme");
+          var root = document.documentElement;
+          if (choice === "umber" || choice === "paper") {
+            root.dataset.theme = choice;
+            root.style.colorScheme = choice === "paper" ? "light" : "dark";
+          } else {
+            root.style.colorScheme = window.matchMedia("(prefers-color-scheme: light)").matches
+              ? "light"
+              : "dark";
+          }
+        } catch (error) {
+          /* storage blocked: fall back to the CSS default, which is Umber */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

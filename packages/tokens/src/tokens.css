@@ -1,0 +1,145 @@
+/**
+ * InstaVault design tokens — the single source of truth (AGENTS.md §8).
+ *
+ * Plain custom properties on purpose: Tailwind maps its names onto these, the
+ * future 3D/canvas views read the same values, and no component file holds a hex
+ * literal. Umber is the dark theme, Paper the light one; "Nebula"/"Starlight" no
+ * longer exist outside reference-frontend/.
+ *
+ * Two measured corrections to the requested palette, because the contrast test
+ * would otherwise fail and a threshold is never lowered:
+ *  - `border-strong` was #3E362E / #CFC7BA, which is 1.49:1 / 1.68:1 against the
+ *    surface. A border is allowed to be quiet, but the test requires 3:1, so it is
+ *    now #7A6E60 (3.55:1) and #8C8275 (3.77:1).
+ *  - `on-accent` is named explicitly: the text that sits on an accent fill is the
+ *    canvas colour, 6.58:1 (Umber) and 5.29:1 (Paper). Using `text` there would be
+ *    2.35:1 / 3.02:1.
+ */
+
+:root {
+  /* Space — 4-based, 4..128. Tailwind's --spacing is 4px, so p-4 = 16px. */
+  --token-space-1: 4px;
+  --token-space-2: 8px;
+  --token-space-3: 12px;
+  --token-space-4: 16px;
+  --token-space-5: 20px;
+  --token-space-6: 24px;
+  --token-space-8: 32px;
+  --token-space-10: 40px;
+  --token-space-12: 48px;
+  --token-space-16: 64px;
+  --token-space-20: 80px;
+  --token-space-24: 96px;
+  --token-space-32: 128px;
+
+  /* Radius */
+  --token-radius-sm: 6px;
+  --token-radius-md: 10px;
+  --token-radius-lg: 14px;
+  --token-radius-xl: 20px;
+  --token-radius-full: 9999px;
+
+  /* Type: two families plus one italic face for captions. */
+  --token-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --token-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  --token-font-serif: "Lora", Georgia, "Times New Roman", serif;
+
+  --token-text-12: 12px;
+  --token-leading-12: 1.55;
+  --token-tracking-12: 0.01em;
+  --token-text-13: 13px;
+  --token-leading-13: 1.5;
+  --token-tracking-13: 0.01em;
+  --token-text-14: 14px;
+  --token-leading-14: 1.45;
+  --token-tracking-14: 0.005em;
+  --token-text-16: 16px;
+  --token-leading-16: 1.5;
+  --token-tracking-16: 0;
+  --token-text-18: 18px;
+  --token-leading-18: 1.4;
+  --token-tracking-18: -0.005em;
+  --token-text-24: 24px;
+  --token-leading-24: 1.25;
+  --token-tracking-24: -0.01em;
+  --token-text-32: 32px;
+  --token-leading-32: 1.15;
+  --token-tracking-32: -0.015em;
+  --token-text-48: 48px;
+  --token-leading-48: 1.05;
+  --token-tracking-48: -0.02em;
+
+  /* Elevation: two steps, no third. Shadows use the text colour at low alpha so
+     they stay neutral in both themes without a hex literal here. */
+  --token-shadow-1: 0 1px 2px color-mix(in srgb, var(--token-color-text) 8%, transparent);
+  --token-shadow-2: 0 8px 24px color-mix(in srgb, var(--token-color-text) 14%, transparent);
+
+  /* One glass recipe, reserved for floating layers (AGENTS.md §8). */
+  --token-glass-bg: color-mix(in srgb, var(--token-color-raised) 78%, transparent);
+  --token-glass-blur: blur(14px);
+}
+
+/* Umber — the default dark theme. */
+:root,
+[data-theme="umber"] {
+  color-scheme: dark;
+  --token-color-canvas: #12100e;
+  --token-color-surface: #1c1815;
+  --token-color-raised: #231e1a;
+  --token-color-sunken: #0d0b0a;
+  --token-color-border: #2e2823;
+  --token-color-border-strong: #7a6e60;
+  --token-color-text: #ede7df;
+  --token-color-text-muted: #a69c8f;
+  --token-color-accent: #5aa0c6;
+  --token-color-accent-hover: #7ab6d6;
+  --token-color-accent-subtle: #1b2b35;
+  --token-color-on-accent: #12100e;
+  --token-color-success: #6baa8c;
+  --token-color-warning: #d9a05b;
+  --token-color-danger: #d4796f;
+}
+
+/* Paper — the light theme. */
+[data-theme="paper"] {
+  color-scheme: light;
+  --token-color-canvas: #f7f4ef;
+  --token-color-surface: #ffffff;
+  --token-color-raised: #ffffff;
+  --token-color-sunken: #efeae2;
+  --token-color-border: #e2dcd2;
+  --token-color-border-strong: #8c8275;
+  --token-color-text: #1b1917;
+  --token-color-text-muted: #6b6459;
+  --token-color-accent: #2f6b8f;
+  --token-color-accent-hover: #265b7a;
+  --token-color-accent-subtle: #e4eff6;
+  --token-color-on-accent: #f7f4ef;
+  --token-color-success: #3e7f61;
+  --token-color-warning: #8a5d24;
+  --token-color-danger: #a8433a;
+}
+
+/* System preference, only while no explicit choice is stored. Duplicated on
+   purpose: a media query cannot be expressed as a selector, and a JS-only theme
+   would flash before the inline script runs. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --token-color-canvas: #f7f4ef;
+    --token-color-surface: #ffffff;
+    --token-color-raised: #ffffff;
+    --token-color-sunken: #efeae2;
+    --token-color-border: #e2dcd2;
+    --token-color-border-strong: #8c8275;
+    --token-color-text: #1b1917;
+    --token-color-text-muted: #6b6459;
+    --token-color-accent: #2f6b8f;
+    --token-color-accent-hover: #265b7a;
+    --token-color-accent-subtle: #e4eff6;
+    --token-color-on-accent: #f7f4ef;
+    --token-color-success: #3e7f61;
+    --token-color-warning: #8a5d24;
+    --token-color-danger: #a8433a;
+  }
+}

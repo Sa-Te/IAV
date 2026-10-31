@@ -1,0 +1,385 @@
+/*
+ * Component classes for the shell, media, tables and threads.
+ * Values are tokens only; `pnpm check:styles` fails on a hex literal, an arbitrary
+ * Tailwind value or a gradient.
+ */
+
+/* --- layout ------------------------------------------------------------- */
+
+.gallery {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--token-space-6);
+}
+
+.summary {
+  color: var(--token-color-text-muted);
+}
+
+/* --- media grid --------------------------------------------------------- */
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: var(--token-space-3);
+}
+
+.tile {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  background: var(--token-color-surface);
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: var(--token-shadow-1);
+}
+
+/* A border change, not a scale: scaling a grid item reflows its neighbours. */
+.tile:hover {
+  border-color: var(--token-color-border-strong);
+}
+
+.tile:focus-visible {
+  outline: 2px solid var(--token-color-accent);
+  outline-offset: 2px;
+}
+
+.tile-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  overflow: hidden;
+  background: var(--token-color-sunken);
+}
+
+.tile-body img,
+.tile-body video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tile-pending {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--token-color-sunken);
+}
+
+.tile-failed {
+  flex-direction: column;
+  gap: var(--token-space-1);
+  background: var(--token-color-surface);
+  border: 1px dashed var(--token-color-danger);
+  color: var(--token-color-danger);
+  font-size: var(--token-text-13);
+}
+
+/* --- states (one system; see ui/State.tsx) ------------------------------ */
+
+.state {
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  padding: var(--token-space-4);
+  max-width: 40rem;
+  background: var(--token-color-surface);
+}
+
+.state-error {
+  border-color: var(--token-color-danger);
+  color: var(--token-color-text);
+}
+
+.state-empty {
+  color: var(--token-color-text-muted);
+}
+
+.muted {
+  color: var(--token-color-text-muted);
+}
+
+/* --- detail ------------------------------------------------------------- */
+
+.detail {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--token-color-sunken) 96%, transparent);
+  color: var(--token-color-text);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: var(--token-space-4);
+  overflow: auto;
+}
+
+.detail-close {
+  justify-self: end;
+}
+
+.detail-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.detail-media img,
+.detail-media video {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.detail-info {
+  max-width: 60ch;
+  margin: 0 auto;
+}
+
+.detail-caption {
+  font-family: var(--token-font-serif);
+  font-style: italic;
+  font-size: var(--token-text-18);
+  line-height: var(--token-leading-18);
+}
+
+.detail-meta {
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-13);
+  color: var(--token-color-text-muted);
+}
+
+/* --- theme switch ------------------------------------------------------- */
+
+.theme-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-2);
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  font-size: var(--token-text-13);
+  color: var(--token-color-text-muted);
+}
+
+.theme-switch legend {
+  float: left;
+  padding: 0 var(--token-space-1) 0 0;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-1);
+}
+
+/* --- navigation --------------------------------------------------------- */
+
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--token-space-2);
+  margin: 0 0 var(--token-space-4);
+}
+
+.nav-link {
+  padding: var(--token-space-1) var(--token-space-3);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-full);
+  text-decoration: none;
+  color: var(--token-color-text);
+}
+
+.nav-link:hover {
+  border-color: var(--token-color-border-strong);
+  color: var(--token-color-text);
+}
+
+.nav-link[aria-current="page"] {
+  background: var(--token-color-accent);
+  border-color: var(--token-color-accent);
+  color: var(--token-color-on-accent);
+}
+
+.nav-count {
+  color: var(--token-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nav-link[aria-current="page"] .nav-count {
+  color: var(--token-color-on-accent);
+}
+
+/* --- tables ------------------------------------------------------------- */
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+caption {
+  text-align: left;
+  color: var(--token-color-text-muted);
+  padding-bottom: var(--token-space-2);
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--token-color-border);
+  padding: var(--token-space-1) var(--token-space-2);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-size: var(--token-text-13);
+  color: var(--token-color-text-muted);
+  font-weight: 500;
+}
+
+.category-table {
+  max-height: 80vh;
+  overflow: auto;
+}
+
+.category-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--token-color-surface);
+}
+
+.cell-secondary {
+  display: block;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.absent td {
+  color: var(--token-color-text-muted);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-3);
+}
+
+.banner {
+  background: var(--token-color-surface);
+  border-left: 3px solid var(--token-color-border-strong);
+  border-radius: var(--token-radius-sm);
+  padding: var(--token-space-2) var(--token-space-3);
+}
+
+.tree-root,
+.tree-root ul {
+  list-style: none;
+  padding-left: var(--token-space-4);
+}
+
+.tree-kind,
+.tree-key {
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+}
+
+/* --- reveal gate -------------------------------------------------------- */
+
+.reveal-gate {
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-lg);
+  background: var(--token-color-surface);
+  padding: var(--token-space-6);
+  max-width: 40rem;
+}
+
+/* --- threads ------------------------------------------------------------ */
+
+.thread-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--token-space-2);
+}
+
+.thread-open {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--token-space-1) var(--token-space-4);
+  width: 100%;
+  padding: var(--token-space-3);
+  text-align: left;
+  background: var(--token-color-surface);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  color: inherit;
+}
+
+.thread-people {
+  font-weight: 500;
+}
+
+.thread-meta,
+.thread-when {
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.thread-when {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  font-family: var(--token-font-mono);
+}
+
+.thread-empty .thread-people {
+  color: var(--token-color-text-muted);
+}
+
+.messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--token-space-4);
+}
+
+.message-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--token-space-3);
+  margin: 0;
+}
+
+.message-sender {
+  font-weight: 500;
+}
+
+.message-time {
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-12);
+}
+
+.message-text {
+  margin: var(--token-space-1) 0 0;
+}
+
+.message-media {
+  list-style: none;
+  margin: var(--token-space-2) 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--token-space-2);
+}
+
+.message-media .tile {
+  width: 8rem;
+}

@@ -4,6 +4,7 @@ import { CategoryIndex } from "../categories/CategoryIndex.js";
 import { CategoryRoute } from "../categories/CategoryView.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { DevIngest } from "./DevIngest.js";
+import { DevTokens } from "./DevTokens.js";
 
 export interface AppRoute {
   readonly path: string;
@@ -30,6 +31,7 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
 
   if (dev) {
     routes.push({ path: "/dev/ingest", element: <DevIngest /> });
+    routes.push({ path: "/dev/tokens", element: <DevTokens /> });
   }
 
   return routes;

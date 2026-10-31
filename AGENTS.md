@@ -222,30 +222,41 @@ These are checked, not hoped for.
 
 ## 8. Visual standards
 
-The existing visual language is ours and it's good — keep it. Nebula (default
-dark) and Starlight (light) as defined in the design notes, Liquid Glass surfaces
-reserved for floating layers, Inter / Lora / JetBrains Mono. Themes are data
-(tokens), never branches in components.
+**Tokens are the single source of truth.** `packages/tokens/src/tokens.css` holds
+every colour, space step, radius, type size, shadow and the one glass recipe, as
+plain custom properties. Tailwind v4 maps its names onto those properties in
+`apps/web/src/styles/app.css` (`@theme`); it defines no value of its own. Any future
+view — DOM, canvas or WebGL — reads the same tokens.
 
-- **All colours, spacing, radii, type sizes come from tokens.** No raw hex, no
-  arbitrary Tailwind values like `mt-[13px]`, no inline styles for anything a
-  token covers.
-- **The Vercel Web Interface Guidelines are a hard gate.** Before any view is
-  marked done, run it through the `web-design-guidelines` skill. Accessibility
-  failures block the commit. Specifically: real focus states, `aria-label` on
-  icon-only buttons, semantic elements over `div onClick`, every async state has
-  a live-region announcement.
-- **Mistral design analysis is a method, not a palette.** Use it for token
-  discipline, a spacing scale that isn't ad hoc, a two-family type hierarchy and
-  defined interaction states. Do not import its colours or fonts.
-- **Motion:** `prefers-reduced-motion` is honoured everywhere, including the 3D
-  view (which degrades to a static grid, not a broken canvas).
-- **Empty, loading and error are three visibly different states.** This is
-  non-negotiable and it's the second half of the original bug.
-- **3D views (cyclone, map):** WebGL is opt-in. Load dynamically with
-  `ssr: false`, ship a non-WebGL fallback, cap the item count, and share the
-  same media URL cache as the DOM views. Build the cyclone only after
-  `useMediaUrl()` exists and the 2D gallery is solid.
+- **Two themes, named Umber (dark) and Paper (light).** Both are data on
+  `[data-theme]`, plus a `prefers-color-scheme` fallback while no explicit choice is
+  stored. Themes are never branches in components. "Nebula" and "Starlight" survive
+  only inside `reference-frontend/` and are not this project's palette.
+- **No raw hex outside the tokens file.** No arbitrary Tailwind values
+  (`bg-[#123]`, `p-[13px]`, `mt-[7px]`). **No gradients anywhere.** `pnpm
+  check:styles` fails the build on all three, printing `file:line`.
+- **Accent is a signal, not a surface.** Links, focus rings, the active nav item and
+  the reveal button. It covers ≤5% of any screen. Everything else is canvas, surface,
+  border and text.
+- **Fonts are self-hosted, latin subset, `font-display: swap`.** Inter (400/500/600),
+  JetBrains Mono (400/500), Lora italic (400) for detail-view captions only. AGENTS
+  §1.1 applies to fonts explicitly: no remote font request, ever. The added gzip bytes
+  are reported in the milestone, not discovered in production.
+- **The Vercel Web Interface Guidelines are a hard gate.** Before any view is marked
+  done, run it through the `web-design-guidelines` skill. Accessibility failures block
+  the commit: real focus states, `aria-label` on icon-only buttons, semantic elements
+  over `div onClick`, every async state announced.
+- **Mistral design analysis is a method, not a palette.** Token discipline, a spacing
+  scale that is not ad hoc, a two-family type hierarchy, defined interaction states.
+  Do not import its colours or fonts.
+- **Motion:** `prefers-reduced-motion` is honoured everywhere — no shimmer, no hover
+  transitions, and the 3D view degrades to a static grid rather than a broken canvas.
+- **Empty, loading, error and unavailable are four visibly different states**, rendered
+  through one component (`apps/web/src/ui/State.tsx`). This is non-negotiable and it is
+  the second half of the original bug.
+- **3D views (cyclone, map):** WebGL is opt-in. Load dynamically with `ssr: false`,
+  ship a non-WebGL fallback, cap the item count, and share the same media URL cache as
+  the DOM views.
 
 ---
 

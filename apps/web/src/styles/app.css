@@ -1,247 +1,113 @@
-:root {
-  color-scheme: light dark;
-  --gap: 0.75rem;
-  --radius: 8px;
-  --surface: #f1f1f1;
-  --border: #ccc;
-  --muted: #555;
-  --danger-bg: #fdecec;
-  --danger-border: #c0392b;
+/*
+ * The app's one stylesheet.
+ *
+ * Tailwind v4 is configured here, CSS-first: every name it exposes maps onto a
+ * token from @instavault/tokens. No value is defined twice and no utility may use
+ * an arbitrary value (enforced by `pnpm check:styles`).
+ */
+@import "tailwindcss";
+@import "@instavault/tokens/tokens.css";
+
+/* Latin subset, self-hosted, swap. No request ever leaves the device. */
+@import "@fontsource/inter/latin-400.css";
+@import "@fontsource/inter/latin-500.css";
+@import "@fontsource/inter/latin-600.css";
+@import "@fontsource/jetbrains-mono/latin-400.css";
+@import "@fontsource/jetbrains-mono/latin-500.css";
+@import "@fontsource/lora/latin-400-italic.css";
+
+@theme {
+  /* Start from an empty palette so Tailwind's defaults cannot be used by accident. */
+  --color-*: initial;
+
+  --color-canvas: var(--token-color-canvas);
+  --color-surface: var(--token-color-surface);
+  --color-raised: var(--token-color-raised);
+  --color-sunken: var(--token-color-sunken);
+  --color-border: var(--token-color-border);
+  --color-border-strong: var(--token-color-border-strong);
+  --color-text: var(--token-color-text);
+  --color-text-muted: var(--token-color-text-muted);
+  --color-accent: var(--token-color-accent);
+  --color-accent-hover: var(--token-color-accent-hover);
+  --color-accent-subtle: var(--token-color-accent-subtle);
+  --color-on-accent: var(--token-color-on-accent);
+  --color-success: var(--token-color-success);
+  --color-warning: var(--token-color-warning);
+  --color-danger: var(--token-color-danger);
+
+  --spacing: var(--token-space-1);
+
+  --radius-sm: var(--token-radius-sm);
+  --radius-md: var(--token-radius-md);
+  --radius-lg: var(--token-radius-lg);
+  --radius-xl: var(--token-radius-xl);
+  --radius-full: var(--token-radius-full);
+
+  --font-sans: var(--token-font-sans);
+  --font-mono: var(--token-font-mono);
+  --font-serif: var(--token-font-serif);
+
+  --text-12: var(--token-text-12);
+  --text-12--line-height: var(--token-leading-12);
+  --text-12--letter-spacing: var(--token-tracking-12);
+  --text-13: var(--token-text-13);
+  --text-13--line-height: var(--token-leading-13);
+  --text-13--letter-spacing: var(--token-tracking-13);
+  --text-14: var(--token-text-14);
+  --text-14--line-height: var(--token-leading-14);
+  --text-14--letter-spacing: var(--token-tracking-14);
+  --text-16: var(--token-text-16);
+  --text-16--line-height: var(--token-leading-16);
+  --text-16--letter-spacing: var(--token-tracking-16);
+  --text-18: var(--token-text-18);
+  --text-18--line-height: var(--token-leading-18);
+  --text-18--letter-spacing: var(--token-tracking-18);
+  --text-24: var(--token-text-24);
+  --text-24--line-height: var(--token-leading-24);
+  --text-24--letter-spacing: var(--token-tracking-24);
+  --text-32: var(--token-text-32);
+  --text-32--line-height: var(--token-leading-32);
+  --text-32--letter-spacing: var(--token-tracking-32);
+  --text-48: var(--token-text-48);
+  --text-48--line-height: var(--token-leading-48);
+  --text-48--letter-spacing: var(--token-tracking-48);
+
+  --shadow-1: var(--token-shadow-1);
+  --shadow-2: var(--token-shadow-2);
 }
 
-body {
-  margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    "Segoe UI",
-    sans-serif;
-  line-height: 1.5;
+@layer base {
+  html {
+    background-color: var(--token-color-canvas);
+    color: var(--token-color-text);
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--token-font-sans);
+    font-size: var(--token-text-16);
+    line-height: var(--token-leading-16);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--token-color-accent);
+    outline-offset: 2px;
+  }
+
+  a {
+    color: var(--token-color-accent);
+  }
+
+  a:hover {
+    color: var(--token-color-accent-hover);
+  }
+
+  ::selection {
+    background: var(--token-color-accent-subtle);
+    color: var(--token-color-text);
+  }
 }
 
-.gallery {
-  max-width: 72rem;
-  margin: 0 auto;
-  padding: 1.5rem;
-}
-
-.summary {
-  color: var(--muted);
-  margin-top: -0.5rem;
-}
-
-.grid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
-  gap: var(--gap);
-}
-
-.tile {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  cursor: pointer;
-  overflow: hidden;
-}
-
-.tile:focus-visible {
-  outline: 3px solid #1a73e8;
-  outline-offset: 2px;
-}
-
-/* Fixed aspect ratio: the layout does not jump when media arrives. */
-.tile-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 1 / 1;
-  width: 100%;
-  overflow: hidden;
-}
-
-.tile-body img,
-.tile-body video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* The three states must be distinguishable at a glance. */
-.tile-pending {
-  background: repeating-linear-gradient(45deg, #e6e6e6, #e6e6e6 8px, #dcdcdc 8px, #dcdcdc 16px);
-}
-
-.tile-failed {
-  flex-direction: column;
-  gap: 0.25rem;
-  background: var(--danger-bg);
-  border: 2px dashed var(--danger-border);
-  color: var(--danger-border);
-  font-size: 0.85rem;
-}
-
-.tile-failed span[aria-hidden="true"] {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.state {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1rem;
-  max-width: 40rem;
-}
-
-.state-error {
-  border-color: var(--danger-border);
-  background: var(--danger-bg);
-}
-
-.state-empty {
-  background: var(--surface);
-}
-
-.muted {
-  color: var(--muted);
-}
-
-.detail {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  color: #fff;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  padding: 1rem;
-  overflow: auto;
-}
-
-.detail-close {
-  justify-self: end;
-}
-
-.detail-media {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 0;
-}
-
-.detail-media img,
-.detail-media video {
-  max-width: 100%;
-  max-height: 70vh;
-  object-fit: contain;
-}
-
-.detail-info {
-  max-width: 60ch;
-  margin: 0 auto;
-}
-
-.nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin: 0 0 1rem;
-}
-
-.nav-link {
-  padding: 0.25rem 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  text-decoration: none;
-  color: inherit;
-}
-
-.nav-link:focus-visible {
-  outline: 3px solid #1a73e8;
-  outline-offset: 2px;
-}
-
-.nav-link[aria-current="page"] {
-  background: #1a73e8;
-  border-color: #1a73e8;
-  color: #fff;
-}
-
-.nav-count {
-  opacity: 0.75;
-  font-variant-numeric: tabular-nums;
-}
-
-.detail-pending {
-  padding: 2rem;
-  color: var(--muted);
-}
-
-/* Category index and generic views (M8): infrastructure, not the visual pass. */
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
-
-caption {
-  text-align: left;
-  color: var(--muted);
-  padding-bottom: 0.5rem;
-}
-
-th,
-td {
-  border-bottom: 1px solid var(--border);
-  padding: 0.4rem 0.5rem;
-  text-align: left;
-  vertical-align: top;
-}
-
-.category-table {
-  max-height: 80vh;
-  overflow: auto;
-}
-
-/* A sticky header only sticks inside a scrolling container. */
-.category-table thead th {
-  position: sticky;
-  top: 0;
-  background: var(--surface);
-}
-
-.cell-secondary {
-  display: block;
-  color: var(--muted);
-  font-size: 0.85em;
-}
-
-.absent td {
-  color: var(--muted);
-}
-
-.pager {
-  display: flex;
-  align-items: center;
-  gap: var(--gap);
-}
-
-.banner {
-  background: var(--surface);
-  border-left: 3px solid var(--border);
-  padding: 0.5rem 0.75rem;
-}
-
-.tree-root,
-.tree-root ul {
-  list-style: none;
-  padding-left: 1rem;
-}
-
-.tree-kind,
-.tree-key {
-  color: var(--muted);
-}
+/* Component classes live in components.css; this file is the Tailwind entry. */
+@import "./components.css";
