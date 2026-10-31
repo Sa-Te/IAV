@@ -23,8 +23,9 @@
     "ingest:report": "tsx scripts/ingest-report.mjs",
     "drift": "tsx scripts/drift.mjs",
     "ci:status": "node scripts/ci-status.mjs",
-    "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm check:boundaries && pnpm check:filesize && pnpm check:styles && pnpm build",
-    "check:styles": "node scripts/check-styles.mjs"
+    "verify": "pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm check:boundaries && pnpm check:filesize && pnpm check:styles && pnpm build && pnpm check:chunks",
+    "check:styles": "node scripts/check-styles.mjs",
+    "check:chunks": "node scripts/check-chunks.mjs"
   },
   "devDependencies": {
     "@eslint/js": "9.39.5",

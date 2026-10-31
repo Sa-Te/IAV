@@ -24,6 +24,9 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    // The chunk check reads this: proving the cyclone is not in the initial load
+    // needs the built graph, not the source.
+    manifest: true,
     target: "es2022",
   },
   // The ingest worker is created with { type: "module" } and uses top-level await

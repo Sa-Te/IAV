@@ -1,10 +1,17 @@
-import type { JSX } from "react";
+import { lazy, Suspense, type JSX } from "react";
 
 import { CategoryIndex } from "../categories/CategoryIndex.js";
+import { State } from "../ui/State.js";
 import { CategoryRoute } from "../categories/CategoryView.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { DevIngest } from "./DevIngest.js";
 import { DevTokens } from "./DevTokens.js";
+
+/** Its own chunk: the GL code must not sit in the initial download. */
+const LazyCyclone = lazy(async () => {
+  const module = await import("../cyclone/CyclonePage.js");
+  return { default: module.CyclonePage };
+});
 
 export interface AppRoute {
   readonly path: string;
@@ -24,6 +31,14 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
     {
       path: "/archived",
       element: <CategoryGallery category="archived_posts" title="Archived posts" />,
+    },
+    {
+      path: "/cyclone",
+      element: (
+        <Suspense fallback={<State kind="loading" message="Loading the 3D view…" />}>
+          <LazyCyclone />
+        </Suspense>
+      ),
     },
     { path: "/categories", element: <CategoryIndex /> },
     { path: "/categories/:id", element: <CategoryRoute /> },

@@ -59,6 +59,9 @@ export function Nav(): JSX.Element {
       <NavLink to="/categories" className="nav-link">
         All categories
       </NavLink>
+      <NavLink to="/cyclone" className="nav-link">
+        Cyclone
+      </NavLink>
     </nav>
   );
 }
