@@ -18,11 +18,7 @@ type State =
   | { readonly status: "loading" }
   | { readonly status: "failed"; readonly message: string }
   | { readonly status: "missing" }
-  | {
-      readonly status: "ready";
-      readonly view: CategoryViewData;
-      readonly entryCount: number;
-    };
+  | { readonly status: "ready"; readonly view: CategoryViewData };
 
 export function CategoryView({ id }: { id: string }): JSX.Element {
   const repository = useArchiveRepository();
@@ -40,9 +36,7 @@ export function CategoryView({ id }: { id: string }): JSX.Element {
         const record = await repository.getCategory(id);
         if (cancelled) return;
         setState(
-          record === null
-            ? { status: "missing" }
-            : { status: "ready", view: toTableView(record), entryCount: record.entryCount },
+          record === null ? { status: "missing" } : { status: "ready", view: toTableView(record) },
         );
       } catch (error) {
         if (!cancelled) {
@@ -86,15 +80,15 @@ export function CategoryView({ id }: { id: string }): JSX.Element {
         </div>
       )}
 
-      {state.status === "ready" && state.entryCount === 0 && (
+      {state.status === "ready" && state.view.kind === "table" && state.view.total === 0 && (
         <p className="state state-empty">This category is in this export but holds no entries.</p>
       )}
 
-      {state.status === "ready" && state.entryCount > 0 && state.view.kind === "table" && (
+      {state.status === "ready" && state.view.kind === "table" && state.view.total > 0 && (
         <CategoryTable view={state.view} caption={label} />
       )}
 
-      {state.status === "ready" && state.entryCount > 0 && state.view.kind === "tree" && (
+      {state.status === "ready" && state.view.kind === "tree" && (
         <CategoryTree view={state.view} caption={label} />
       )}
     </main>

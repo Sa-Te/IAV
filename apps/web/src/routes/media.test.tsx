@@ -211,6 +211,13 @@ describe("dev route gate", () => {
 
     expect(production).not.toContain("/dev/ingest");
     expect(development).toContain("/dev/ingest");
-    expect(production).toEqual(["/", "/posts", "/stories", "/archived", "/categories/:id"]);
+    expect(production).toEqual([
+      "/",
+      "/posts",
+      "/stories",
+      "/archived",
+      "/categories",
+      "/categories/:id",
+    ]);
   });
 });

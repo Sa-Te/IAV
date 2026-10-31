@@ -180,3 +180,68 @@ body {
   padding: 2rem;
   color: var(--muted);
 }
+
+/* Category index and generic views (M8): infrastructure, not the visual pass. */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+caption {
+  text-align: left;
+  color: var(--muted);
+  padding-bottom: 0.5rem;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.category-table {
+  max-height: 80vh;
+  overflow: auto;
+}
+
+/* A sticky header only sticks inside a scrolling container. */
+.category-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+
+.cell-secondary {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+.absent td {
+  color: var(--muted);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.banner {
+  background: var(--surface);
+  border-left: 3px solid var(--border);
+  padding: 0.5rem 0.75rem;
+}
+
+.tree-root,
+.tree-root ul {
+  list-style: none;
+  padding-left: 1rem;
+}
+
+.tree-kind,
+.tree-key {
+  color: var(--muted);
+}

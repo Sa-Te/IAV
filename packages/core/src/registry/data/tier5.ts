@@ -57,7 +57,7 @@ export const TIER_5: readonly Category[] = [
     privacyTier: 5,
     variantRisk: "medium",
     // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
-    // verbatim. T5: NO UI IN V1 — the content is conversation text.
+    // verbatim. T5: rendered only by the generic read-only view (M8), no bespoke UI.
     match: { basenames: [/^ai_conversations(?:_\d+)?\.json$/i] },
     signatures: [
       { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp", "title"] },
@@ -70,7 +70,7 @@ export const TIER_5: readonly Category[] = [
     privacyTier: 5,
     variantRisk: "medium",
     // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
-    // verbatim. T5: NO UI IN V1 — payment records.
+    // verbatim. T5: rendered only by the generic read-only view (M8), no bespoke UI.
     match: { basenames: [/^checkout_payment_information(?:_\d+)?\.json$/i] },
     signatures: [{ kind: "object", requiredKeys: ["fbid", "label_values", "media", "timestamp"] }],
     mediaPath: "none",
@@ -81,7 +81,7 @@ export const TIER_5: readonly Category[] = [
     privacyTier: 5,
     variantRisk: "medium",
     // Promoted in M7b: first seen in archive-2/ (2026-10-31). Parse and store
-    // verbatim. T5: NO UI IN V1 — Threads (the app) activity.
+    // verbatim. T5: rendered only by the generic read-only view (M8), no bespoke UI.
     match: { basenames: [/^threads_viewed(?:_\d+)?\.json$/i] },
     signatures: [{ kind: "object", requiredKeys: ["text_post_app_text_post_app_posts_seen"] }],
     mediaPath: "none",

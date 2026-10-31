@@ -156,3 +156,49 @@ describe("CategoryView", () => {
     expect((await screen.findByRole("alert")).textContent).toContain("disk went away");
   });
 });
+
+describe("CategoryView — one category per privacy tier", () => {
+  const fixtures: readonly { id: string; tier: string; data: unknown }[] = [
+    {
+      id: "ad_preferences",
+      tier: "T1",
+      data: { fbid: "1", media: [], label_values: [{ label: "Ads", value: "personalised" }] },
+    },
+    {
+      id: "saved_posts",
+      tier: "T3",
+      data: [{ fbid: "1", media: [], label_values: [{ label: "Saved on", value: "a date" }] }],
+    },
+    {
+      id: "threads_viewed",
+      tier: "T5",
+      data: {
+        text_post_app_text_post_app_posts_seen: [
+          { string_map_data: { Author: { value: "someone" }, Time: { timestamp: 1 } } },
+        ],
+      },
+    },
+  ];
+
+  for (const fixture of fixtures) {
+    it(`renders ${fixture.id} (${fixture.tier}) from a synthetic fixture`, async () => {
+      const record: CategoryRecord = {
+        id: fixture.id,
+        resolvedTier: 1,
+        entryCount: 1,
+        data: fixture.data,
+        sources: [{ path: `${fixture.id}.json`, entryCount: 1, kind: "array" }],
+        warnings: [],
+      };
+      render(
+        <RepositoryProvider repository={fakeRepository({ [fixture.id]: record })}>
+          <CategoryView id={fixture.id} />
+        </RepositoryProvider>,
+      );
+
+      expect(await screen.findByRole("table")).toBeDefined();
+      expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0);
+      expect(screen.getAllByRole("row").length).toBeGreaterThan(1);
+    });
+  }
+});

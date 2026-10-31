@@ -60,6 +60,7 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `registry/fingerprint.ts` | Turns the set of resolved categories and their first-entry keys into a short stable shape id (ADR 0005). |
 | `strings/fixMojibake.ts` | Repairs Instagram's double-encoded text in a single string (ADR 0003). |
 | `strings/normaliseStrings.ts` | Applies that repair to every string value in a parsed archive, without mutating the input. |
+| `categories/toTableView.ts` | Interprets a category payload: four observed shapes → a table with labels taken verbatim, or a raw tree. Pagination constant lives here. |
 
 The registry is **data, not code**: adding a category is one row. `registry.test.ts`
 fails the moment a row is added without a match rule or signature, or when the
@@ -83,6 +84,10 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/useMediaList.ts` | Pages one category — or every category — out of the repository. |
 | `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. |
 | `apps/web/src/routes/Nav.tsx` | Categories that actually have media, with counts; `aria-current` comes from the router. |
+| `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: reads one category, renders the table or the raw tree, and keeps loading / empty / failed distinct. |
+| `apps/web/src/categories/CategoryTable.tsx` | Semantic table, sticky header, 100 rows per page; long values keep their full text in `title`. |
+| `apps/web/src/categories/CategoryTree.tsx` | Collapsible JSON tree that builds children only on expand, behind the "we have not interpreted it" banner. |
+| `apps/web/src/categories/CategoryIndex.tsx` | `/categories`: every registry row grouped by privacy tier, absent rows greyed rather than hidden. |
 
 **Dependency direction: worker → core → nothing. Storage implements core's ports.**
 

@@ -87,3 +87,10 @@ progress.
 - 2026-10-31 — `known-unknown` — a category can be resolved and stored verbatim while
   nothing about its values is interpreted, so it has no view and no route —
   vault: `learning-notes/2026-10-31_session-07.md`
+- 2026-10-31 — `interpretation-in-core` — the archive's shapes are interpreted once in
+  core where they are testable; the React components only decide which panel to show —
+  vault: `architecture/2026-10-31_generic-renderer.md`
+- 2026-10-31 — `additive-merge-with-provenance` — a category fed by several files keeps
+  every file, sums the entries and records path/count/kind, because any fold of two
+  objects has to drop a key —
+  vault: `debug-log/2026-10-31_last-write-wins.md`

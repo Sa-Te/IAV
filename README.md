@@ -69,7 +69,8 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
    categories and media to IndexedDB on this device. You should see
    `reading → resolving → storing`, then a summary: categories, entries,
    media stored, media missing, unrecognised files, and a shape fingerprint.
-2. Open `/` for everything, or `/posts`, `/stories`, `/archived` for one category. — one tile per post, real
+2. Open `/` for everything, `/categories` for every parsed category, or `/posts`,
+   `/stories`, `/archived` for one gallery. — one tile per post, real
    photos, and a line above saying how many posts and media files are on the
    device. Click a tile for the full-size image, caption and date; Escape closes
    and returns focus to the tile.
@@ -80,6 +81,11 @@ uploaded, there is no server, no analytics, and the page fetches no third-party
 asset. You can turn Wi-Fi off after the page loads and everything still works.
 "Wipe archive" deletes the archive, every category and every media file in one
 transaction.
+
+**Every parsed category has a page.** `/categories` lists all of them by privacy
+tier; a category whose shape carries no labels renders as a collapsible JSON tree
+behind a banner that says so: that category is stored exactly as Instagram
+provided it, and nothing has been interpreted.
 
 **If something is wrong.** A tile that shows a dashed red box is media the archive
 references but does not contain — the archive itself is fine, that file is absent.
