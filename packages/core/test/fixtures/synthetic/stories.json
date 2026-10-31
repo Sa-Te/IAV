@@ -1,0 +1,14 @@
+{
+  "ig_stories": [
+    {
+      "uri": "media/stories/202401/fixture-story-one.jpg",
+      "creation_timestamp": 1703000000,
+      "title": "story one"
+    },
+    {
+      "uri": "media/stories/202401/fixture-story-two.mp4",
+      "creation_timestamp": 1704000000,
+      "title": "story two"
+    }
+  ]
+}

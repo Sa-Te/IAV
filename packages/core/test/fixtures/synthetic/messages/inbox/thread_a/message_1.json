@@ -1,0 +1,15 @@
+{
+  "participants": [{ "name": "fixture-sender" }, { "name": "fixture-other" }],
+  "messages": [
+    {
+      "sender_name": "fixture-sender",
+      "timestamp_ms": 1705000000000,
+      "content": "hello from a fixture",
+      "is_geoblocked_for_viewer": false
+    }
+  ],
+  "title": "fixture-sender",
+  "thread_path": "inbox/thread_a",
+  "is_still_participant": true,
+  "magic_words": []
+}

@@ -8,10 +8,9 @@ ZIP and shows it back to you.
 
 ## Status
 
-**Pre-alpha. It does not work yet.** There is no application code in this
-repository at the moment: the workspace is being rewritten and only the
-documents, the licence and the frozen reference backend exist. Nothing here can
-be installed or run.
+**Pre-alpha. It does not work yet.** The workspace, build pipeline and the
+category resolver exist; there is no archive parsing and no gallery. You can run
+the build and see one placeholder page.
 
 ## What v1 is
 
@@ -33,20 +32,42 @@ the whole archive to a server; it is kept, unmodified and unbuilt, in
 
 ## Stack
 
-Planned, not yet installed:
+Installed:
 
-- Next.js 15 (App Router, static export), React 19, TypeScript in `strict` mode
-- Tailwind CSS v4
-- Zustand for UI state; zod for validating archive JSON
+- Vite + React 19 + react-router-dom, TypeScript in `strict` mode
+  (ADR [0004](docs/adr/0004-vite-not-nextjs.md); Next.js appears only in
+  `reference-frontend/` and is never imported)
+- Zustand for UI state; zod for validating archive JSON (planned, not yet used)
 - IndexedDB for archive records and media blobs; a Web Worker for parsing
-- Three.js / React Three Fiber for the optional 3D view
+  (interfaces only so far)
+- Three.js / React Three Fiber for the optional 3D view (planned)
 - Vitest for tests, pnpm as the only package manager
 
 ## Building it
 
-Not available yet. When the workspace exists the entry points will be
-`pnpm install`, `pnpm dev`, `pnpm build`, `pnpm typecheck`, `pnpm test` and
-`pnpm lint` from the repository root. Until then there is nothing to run.
+Requires Node 22 (see `.nvmrc`) and pnpm.
+
+```bash
+pnpm install        # also installs the pre-push hook
+pnpm dev            # Vite dev server
+pnpm build          # static build in apps/web/dist
+pnpm test           # unit + integration tests
+pnpm verify         # everything CI runs, locally
+```
+
+## Local gates
+
+The repository enforces its own rules; they are not conventions to remember.
+
+- **Pre-push hook** (`.githooks/pre-push`, installed by `pnpm install` through
+  `git config core.hooksPath .githooks`): runs the fast lane — `typecheck`,
+  `lint`, `test` — and blocks the push, naming the step that failed. Bypassing
+  it with `--no-verify` to get past a real failure is the wrong move; if it is
+  too slow, cut scope instead.
+- **`pnpm check:boundaries`** fails if `packages/core` or `packages/storage`
+  import React, reach into `apps/`, touch the network, or escape their package.
+- **`pnpm check:filesize`** warns above 250 lines and fails above 400.
+- **`pnpm verify`** runs the full suite that CI runs.
 
 ## Contributing
 

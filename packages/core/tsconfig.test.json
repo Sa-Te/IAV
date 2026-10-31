@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Tests read files and the repo's markdown, so they need Node types. The
+    // production project above keeps `types: []` so core source stays DOM/Node free.
+    "types": ["node"]
+  },
+  "include": ["src", "test"],
+  "exclude": []
+}

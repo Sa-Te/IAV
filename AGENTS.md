@@ -253,6 +253,28 @@ reserved for floating layers, Inter / Lora / JetBrains Mono. Themes are data
   getter is noise.
 - The first module is `fixMojibake` — pure, no dependencies, tests written first.
 
+### Test quality rules
+
+- No test-only branching in production code. If code checks `NODE_ENV === 'test'` or an
+  injected flag only tests set, the design is wrong. Restructure, do not special-case.
+- Assert values, not calls. `expect(fn).toHaveBeenCalledWith(...)` verifies wiring; only an
+  assertion on the output verifies behaviour. A test that passes when the function returns
+  garbage is not a test.
+- Every module containing a branch, loop or parse gets at least one negative case:
+  malformed input, empty input, wrong type.
+- Never `.skip` without a linked issue number in the reason string.
+- Never `passWithNoTests`. A suite that runs zero tests is a failure.
+- Coverage percentage is not a gate. Mutation testing is not adopted.
+- Integration tests use synthetic fixtures only — never `archive/`, never a redacted slice
+  of it. If a test needs the real archive it is a manual check, not a test.
+
+### Test lanes
+
+- **Fast lane** (pre-push, target under 10 seconds): typecheck + lint + unit tests.
+- **Full suite** (CI): fast lane + integration + boundaries + filesize + build.
+- The fast lane must stay fast enough that `--no-verify` is never tempting. If it exceeds
+  10s, cut scope rather than moving the gate to CI.
+
 ---
 
 ## 10. CI/CD
@@ -270,6 +292,10 @@ Green check on a fresh clone is a feature.
 - Dependency bumps: pin exact versions, bump to the minimum fixed version when
   an advisory lands, never blindly to latest.
 - `reference-backend/` is excluded from CI. It is frozen.
+- Branch protection on `main`: a PR requires the CI check to pass. Until a second person
+  commits, work stays on `main` directly and the pre-push hook is the local gate.
+- Continuous deployment needs a deployment target. There is none until M13. Do not build a
+  deploy job for an endpoint that does not exist.
 
 ---
 
@@ -395,6 +421,7 @@ Delegate reading-heavy and review work; keep design decisions in the main agent.
 | ----------------- | ------------------------------------------------------------------------------ | --------------------------------------------------- |
 | `explore`         | Mapping unfamiliar code, finding every caller, reading a category's JSON shape | Read-only. Never edits.                             |
 | `parser`          | Porting one archive category: schema + parser + tests                          | One category at a time. Touches only its own files. |
+| `resolver`        | Adding or correcting a registry entry: match rules, structural signature, tests | One category per task.                              |
 | `design-review`   | Web Interface Guidelines audit of a view                                       | Reports findings only, never edits.                 |
 | `ponytail-review` | Over-engineering pass on the current diff                                      | Reports deletions only.                             |
 
@@ -467,3 +494,6 @@ parsed + rendered + tested.
 - E2EE sync design — deliberately postponed to v2. Do not build toward it
   speculatively beyond the repository seam.
 - Retention/erase UX for an archive the user wants to remove from the device.
+- MediaSource port is deferred until a second implementation exists (AGENTS.md §4).
+  Media access must still be a function call, never a component reaching for a blob, so
+  the swap is a rename.

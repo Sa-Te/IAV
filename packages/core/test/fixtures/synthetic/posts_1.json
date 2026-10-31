@@ -1,0 +1,29 @@
+[
+  {
+    "media": [
+      {
+        "uri": "media/posts/202401/fixture-one.jpg",
+        "creation_timestamp": 1700000000,
+        "title": "first fixture caption"
+      }
+    ]
+  },
+  {
+    "media": [
+      {
+        "uri": "media/posts/202402/fixture-two.jpg",
+        "creation_timestamp": 1701000000,
+        "title": "second fixture caption"
+      }
+    ]
+  },
+  {
+    "media": [
+      {
+        "uri": "media/posts/202403/fixture-three.mp4",
+        "creation_timestamp": 1702000000,
+        "title": ""
+      }
+    ]
+  }
+]

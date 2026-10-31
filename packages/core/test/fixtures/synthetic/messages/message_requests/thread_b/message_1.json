@@ -1,0 +1,16 @@
+{
+  "participants": [{ "name": "fixture-stranger" }],
+  "messages": [
+    {
+      "sender_name": "fixture-stranger",
+      "timestamp_ms": 1706000000000,
+      "content": "a request from a fixture",
+      "is_geoblocked_for_viewer": false
+    }
+  ],
+  "title": "fixture-stranger",
+  "thread_path": "message_requests/thread_b",
+  "is_still_participant": true,
+  "is_pending": true,
+  "magic_words": []
+}

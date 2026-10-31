@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @instavault/web dev",
+    "prepare": "git config core.hooksPath .githooks || true",
     "build": "pnpm --filter @instavault/web build",
     "typecheck": "pnpm -r --if-present run typecheck",
     "lint": "eslint .",

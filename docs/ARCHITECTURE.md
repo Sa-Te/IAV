@@ -48,6 +48,23 @@ One implementation now (`LocalArchiveRepository` over IndexedDB). This exists so
 an offline/all-platform build later is a wrapper, not a fork — the one rule from
 the old CLAUDE.md worth preserving.
 
+## Core modules
+
+Every module below lives in `packages/core/src` and is pure TypeScript: no React,
+no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
+
+| Module | One-line responsibility |
+| --- | --- |
+| `registry/categories.ts` | The category registry: one data row per archive category, plus the unrecognised bucket (ADR 0002). |
+| `registry/resolve.ts` | Maps one file path and its parsed sample to a category id, by name, then structure, then the unrecognised bucket. |
+| `registry/fingerprint.ts` | Turns the set of resolved categories and their first-entry keys into a short stable shape id (ADR 0005). |
+| `strings/fixMojibake.ts` | Repairs Instagram's double-encoded text in a single string (ADR 0003). |
+| `strings/normaliseStrings.ts` | Applies that repair to every string value in a parsed archive, without mutating the input. |
+
+The registry is **data, not code**: adding a category is one row. `registry.test.ts`
+fails the moment a row is added without a match rule or signature, or when the
+registry and `docs/DATA-MAP.md` drift apart.
+
 ## Frozen reference implementations
 
 `reference-backend/` (Go + PostgreSQL) and `reference-frontend/` (the shipped

@@ -38,3 +38,7 @@ progress.
 - 2026-10-31 — `mojibake` — corruption stored inside string values, not a file
   encoding; repaired by reinterpret-as-bytes → decode UTF-8, once, per string —
   vault: `learning-notes/concepts/mojibake.md`
+- 2026-10-31 — `ports-and-adapters` — core depends on an interface, adapters
+  implement it, so storage can be swapped without touching the core; no port
+  without a second implementation —
+  vault: `learning-notes/concepts/ports-and-adapters.md`
