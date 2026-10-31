@@ -12,7 +12,7 @@ export const TIER_2: readonly Category[] = [
     variantRisk: "high",
     // The filename contains an apostrophe. Matched against the raw basename.
     match: { basenames: [/^posts_you're_not_interested_in(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["impressions_history_posts_not_interested"] },
+    signatures: [{ kind: "object", requiredKeys: ["impressions_history_posts_not_interested"] }],
     mediaPath: "none",
   },
   {
@@ -21,7 +21,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "medium",
     match: { basenames: [/^other_categories_used_to_reach_you(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["fbid", "label_values", "media"] },
+    signatures: [{ kind: "object", requiredKeys: ["fbid", "label_values", "media"] }],
     mediaPath: "none",
   },
   {
@@ -30,7 +30,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^profile_based_in(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["inferred_data_primary_location"] },
+    signatures: [{ kind: "object", requiredKeys: ["inferred_data_primary_location"] }],
     mediaPath: "none",
   },
   {
@@ -39,7 +39,9 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "medium",
     match: { basenames: [/^last_known_location(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["account_history_imprecise_last_known_location"] },
+    signatures: [
+      { kind: "object", requiredKeys: ["account_history_imprecise_last_known_location"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -48,7 +50,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^signup_details(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["account_history_registration_info"] },
+    signatures: [{ kind: "object", requiredKeys: ["account_history_registration_info"] }],
     mediaPath: "none",
   },
   {
@@ -57,7 +59,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "medium",
     match: { basenames: [/^personal_information(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["profile_user"] },
+    signatures: [{ kind: "object", requiredKeys: ["profile_user"] }],
     mediaPath: "root-relative",
   },
   {
@@ -66,7 +68,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "medium",
     match: { basenames: [/^profile_searches(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["searches_user"] },
+    signatures: [{ kind: "object", requiredKeys: ["searches_user"] }],
     mediaPath: "none",
   },
   {
@@ -75,7 +77,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "medium",
     match: { basenames: [/^word_or_phrase_searches(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["searches_keyword"] },
+    signatures: [{ kind: "object", requiredKeys: ["searches_keyword"] }],
     mediaPath: "none",
   },
   {
@@ -84,7 +86,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^profile_privacy_changes(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["account_history_account_privacy_history"] },
+    signatures: [{ kind: "object", requiredKeys: ["account_history_account_privacy_history"] }],
     mediaPath: "none",
   },
   {
@@ -93,7 +95,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^password_change_activity(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["account_history_password_change_history"] },
+    signatures: [{ kind: "object", requiredKeys: ["account_history_password_change_history"] }],
     mediaPath: "none",
   },
   {
@@ -102,10 +104,12 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^interest_categories(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "array",
-      requiredKeys: ["fbid", "label_values", "media", "timestamp"],
-    },
+    signatures: [
+      {
+        kind: "array",
+        requiredKeys: ["fbid", "label_values", "media", "timestamp"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -114,7 +118,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "high",
     match: { basenames: [/^locations_of_interest(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["fbid", "label_values", "media"] },
+    signatures: [{ kind: "object", requiredKeys: ["fbid", "label_values", "media"] }],
     mediaPath: "none",
   },
   {
@@ -123,7 +127,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^logout_activity(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["account_history_logout_history"] },
+    signatures: [{ kind: "object", requiredKeys: ["account_history_logout_history"] }],
     mediaPath: "none",
   },
   {
@@ -132,7 +136,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "high",
     match: { basenames: [/^your_activity_off_meta_technologies(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["apps_and_websites_off_meta_activity"] },
+    signatures: [{ kind: "object", requiredKeys: ["apps_and_websites_off_meta_activity"] }],
     mediaPath: "none",
   },
   {
@@ -141,10 +145,12 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "high",
     match: { basenames: [/^link_history(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "array",
-      requiredKeys: ["fbid", "label_values", "media", "timestamp"],
-    },
+    signatures: [
+      {
+        kind: "array",
+        requiredKeys: ["fbid", "label_values", "media", "timestamp"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -153,7 +159,9 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "medium",
     match: { basenames: [/^profile_status_changes(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["account_history_account_active_status_changes"] },
+    signatures: [
+      { kind: "object", requiredKeys: ["account_history_account_active_status_changes"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -162,7 +170,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "medium",
     match: { basenames: [/^profile_changes(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["profile_profile_change"] },
+    signatures: [{ kind: "object", requiredKeys: ["profile_profile_change"] }],
     mediaPath: "none",
   },
   {
@@ -171,7 +179,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^recommended_topics(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["topics_your_topics"] },
+    signatures: [{ kind: "object", requiredKeys: ["topics_your_topics"] }],
     mediaPath: "none",
   },
   {
@@ -180,7 +188,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^login_activity(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["account_history_login_history"] },
+    signatures: [{ kind: "object", requiredKeys: ["account_history_login_history"] }],
     mediaPath: "none",
   },
   {
@@ -189,7 +197,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^ads_viewed(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["impressions_history_ads_seen"] },
+    signatures: [{ kind: "object", requiredKeys: ["impressions_history_ads_seen"] }],
     mediaPath: "none",
   },
   {
@@ -198,7 +206,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^posts_viewed(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["impressions_history_posts_seen"] },
+    signatures: [{ kind: "object", requiredKeys: ["impressions_history_posts_seen"] }],
     mediaPath: "none",
   },
   {
@@ -207,7 +215,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^suggested_profiles_viewed(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["impressions_history_chaining_seen"] },
+    signatures: [{ kind: "object", requiredKeys: ["impressions_history_chaining_seen"] }],
     mediaPath: "none",
   },
   {
@@ -216,7 +224,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^videos_watched(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["impressions_history_videos_watched"] },
+    signatures: [{ kind: "object", requiredKeys: ["impressions_history_videos_watched"] }],
     mediaPath: "none",
   },
   {
@@ -225,7 +233,7 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^advertisers_using_your_activity_or_information(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["ig_custom_audiences_all_types"] },
+    signatures: [{ kind: "object", requiredKeys: ["ig_custom_audiences_all_types"] }],
     mediaPath: "none",
   },
 ];

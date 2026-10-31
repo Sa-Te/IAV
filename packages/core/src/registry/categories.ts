@@ -23,7 +23,8 @@ import { TIER_5 } from "./data/tier5.js";
  *
  * TODO(signature): a signature is impossible by definition — this bucket is
  * defined by having no signature. That is the missing measurement, and it is
- * permanently missing, not pending.
+ * permanently missing, not pending. `signatures: []` is the type-level form of
+ * that: an empty list is legal and is never matched at tier 2 (ADR 0008).
  */
 export const UNRECOGNISED: Category = {
   id: "unrecognised",
@@ -31,7 +32,7 @@ export const UNRECOGNISED: Category = {
   privacyTier: 5,
   variantRisk: "high",
   match: { basenames: [] },
-  signature: null,
+  signatures: [],
   mediaPath: "none",
 };
 

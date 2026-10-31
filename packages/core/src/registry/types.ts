@@ -26,6 +26,11 @@ export interface Category {
   readonly privacyTier: 1 | 2 | 3 | 4 | 5;
   readonly variantRisk: "low" | "medium" | "high";
   readonly match: CategoryMatch;
-  readonly signature: Signature | null;
+  /**
+   * Every shape this category has been measured in, one per export format
+   * (ADR 0008). Empty means "name-resolvable only" — a row may legitimately have
+   * no measured shape, and then tier 2 never matches it.
+   */
+  readonly signatures: readonly Signature[];
   readonly mediaPath: "root-relative" | "thread-relative" | "none";
 }

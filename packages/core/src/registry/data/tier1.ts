@@ -11,7 +11,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^notification_preferences(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["settings_notification_preferences"] },
+    signatures: [{ kind: "object", requiredKeys: ["settings_notification_preferences"] }],
     mediaPath: "none",
   },
   {
@@ -20,7 +20,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^comments_allowed_from(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["settings_allow_comments_from"] },
+    signatures: [{ kind: "object", requiredKeys: ["settings_allow_comments_from"] }],
     mediaPath: "none",
   },
   {
@@ -29,7 +29,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^show_exclusive_story_promo_setting(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["subscriptions_show_story_teaser_setting"] },
+    signatures: [{ kind: "object", requiredKeys: ["subscriptions_show_story_teaser_setting"] }],
     mediaPath: "none",
   },
   {
@@ -38,7 +38,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "medium",
     match: { basenames: [/^use_cross-app_messaging(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["settings_upgraded_to_cross_app_messaging"] },
+    signatures: [{ kind: "object", requiredKeys: ["settings_upgraded_to_cross_app_messaging"] }],
     mediaPath: "none",
   },
   {
@@ -47,7 +47,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^professional_information(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["profile_business"] },
+    signatures: [{ kind: "object", requiredKeys: ["profile_business"] }],
     mediaPath: "none",
   },
   {
@@ -56,7 +56,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^note_interactions(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["profile_note_interactions"] },
+    signatures: [{ kind: "object", requiredKeys: ["profile_note_interactions"] }],
     mediaPath: "none",
   },
   {
@@ -65,7 +65,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^eligibility(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["monetization_eligibility"] },
+    signatures: [{ kind: "object", requiredKeys: ["monetization_eligibility"] }],
     mediaPath: "none",
   },
   {
@@ -74,7 +74,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^bug_reports(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["reports_bug_reports"] },
+    signatures: [{ kind: "object", requiredKeys: ["reports_bug_reports"] }],
     mediaPath: "none",
   },
   {
@@ -83,7 +83,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^instagram_profile_information(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["profile_account_insights"] },
+    signatures: [{ kind: "object", requiredKeys: ["profile_account_insights"] }],
     mediaPath: "none",
   },
   {
@@ -92,7 +92,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^instagram_friend_map(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["profile_friend_map"] },
+    signatures: [{ kind: "object", requiredKeys: ["profile_friend_map"] }],
     mediaPath: "none",
   },
   {
@@ -101,7 +101,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^camera_information(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["devices_camera"] },
+    signatures: [{ kind: "object", requiredKeys: ["devices_camera"] }],
     mediaPath: "none",
   },
   {
@@ -110,7 +110,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "medium",
     match: { basenames: [/^your_muted_story_teaser_creators(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["subscriptions_muted_story_teaser_creators"] },
+    signatures: [{ kind: "object", requiredKeys: ["subscriptions_muted_story_teaser_creators"] }],
     mediaPath: "none",
   },
   {
@@ -119,10 +119,12 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "medium",
     match: { basenames: [/^your_link_history_settings(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "object",
-      requiredKeys: ["fbid", "label_values", "media", "timestamp"],
-    },
+    signatures: [
+      {
+        kind: "object",
+        requiredKeys: ["fbid", "label_values", "media", "timestamp"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -131,10 +133,12 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^consents(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "object",
-      requiredKeys: ["fbid", "label_values", "media", "timestamp"],
-    },
+    signatures: [
+      {
+        kind: "object",
+        requiredKeys: ["fbid", "label_values", "media", "timestamp"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -143,10 +147,12 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "medium",
     match: { basenames: [/^your_activity_off_meta_technologies_settings(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "object",
-      requiredKeys: ["fbid", "label_values", "media", "timestamp"],
-    },
+    signatures: [
+      {
+        kind: "object",
+        requiredKeys: ["fbid", "label_values", "media", "timestamp"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -155,10 +161,12 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^your_information_download_requests(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "object",
-      requiredKeys: ["fbid", "label_values", "media", "timestamp"],
-    },
+    signatures: [
+      {
+        kind: "object",
+        requiredKeys: ["fbid", "label_values", "media", "timestamp"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -167,7 +175,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "high",
     match: { basenames: [/^avatar_items(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["ig_avatar_marketplace_avatar_items"] },
+    signatures: [{ kind: "object", requiredKeys: ["ig_avatar_marketplace_avatar_items"] }],
     mediaPath: "none",
   },
   {
@@ -176,7 +184,7 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^devices(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["devices_devices"] },
+    signatures: [{ kind: "object", requiredKeys: ["devices_devices"] }],
     mediaPath: "none",
   },
 ];

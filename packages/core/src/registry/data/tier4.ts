@@ -11,7 +11,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "high",
     match: { basenames: [/^secret_conversations(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["ig_secret_conversations"] },
+    signatures: [{ kind: "object", requiredKeys: ["ig_secret_conversations"] }],
     mediaPath: "none",
   },
   {
@@ -20,7 +20,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^removed_suggestions(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_dismissed_suggested_users"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_dismissed_suggested_users"] }],
     mediaPath: "none",
   },
   {
@@ -29,7 +29,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^restricted_profiles(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_restricted_users"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_restricted_users"] }],
     mediaPath: "none",
   },
   {
@@ -38,7 +38,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^hide_story_from(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_hide_stories_from"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_hide_stories_from"] }],
     mediaPath: "none",
   },
   {
@@ -47,7 +47,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^close_friends(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_close_friends"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_close_friends"] }],
     mediaPath: "none",
   },
   {
@@ -56,10 +56,12 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "medium",
     match: { basenames: [/^recent_follow_requests(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "object",
-      requiredKeys: ["relationships_permanent_follow_requests"],
-    },
+    signatures: [
+      {
+        kind: "object",
+        requiredKeys: ["relationships_permanent_follow_requests"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -69,7 +71,7 @@ export const TIER_4: readonly Category[] = [
     variantRisk: "high",
     // The filename contains an apostrophe. Matched against the raw basename.
     match: { basenames: [/^follow_requests_you've_received(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_follow_requests_received"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_follow_requests_received"] }],
     mediaPath: "none",
   },
   {
@@ -78,7 +80,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^recently_unfollowed_profiles(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_unfollowed_users"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_unfollowed_users"] }],
     mediaPath: "none",
   },
   {
@@ -87,7 +89,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^blocked_profiles(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_blocked_users"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_blocked_users"] }],
     mediaPath: "none",
   },
   {
@@ -96,7 +98,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^following_hashtags(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_following_hashtags"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_following_hashtags"] }],
     mediaPath: "none",
   },
   {
@@ -105,7 +107,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "medium",
     match: { basenames: [/^pending_follow_requests(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_follow_requests_sent"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_follow_requests_sent"] }],
     mediaPath: "none",
   },
   {
@@ -114,10 +116,12 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "medium",
     match: { basenames: [/^followers(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "array",
-      requiredKeys: ["title", "string_list_data", "media_list_data"],
-    },
+    signatures: [
+      {
+        kind: "array",
+        requiredKeys: ["title", "string_list_data", "media_list_data"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -126,7 +130,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^synced_contacts(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["contacts_contact_info"] },
+    signatures: [{ kind: "object", requiredKeys: ["contacts_contact_info"] }],
     mediaPath: "none",
   },
   {
@@ -135,7 +139,7 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^following(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["relationships_following"] },
+    signatures: [{ kind: "object", requiredKeys: ["relationships_following"] }],
     mediaPath: "none",
   },
 ];

@@ -71,3 +71,9 @@ progress.
 - 2026-10-31 — `additive-tolerance` — a category needs one measured signature per format it
   has been seen in; a changed shape means *more* signatures, never a looser one —
   vault: `debug-log/2026-10-31_format-envelope-migration.md`
+- 2026-10-31 — `unexercised-fallback` — a tier that never wins is not verified; test it
+  where it is the only thing that can succeed —
+  vault: `debug-log/2026-10-31_tier2-never-ran.md`
+- 2026-10-31 — `signatures-per-format` — a category carries one signature per export format
+  it has been measured in, and the tie-break is scored per signature, not per row —
+  see `docs/adr/0008-multiple-signatures-per-category.md`

@@ -11,7 +11,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "low",
     match: { basenames: [/^profile_photos(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["ig_profile_picture"] },
+    signatures: [{ kind: "object", requiredKeys: ["ig_profile_picture"] }],
     mediaPath: "root-relative",
   },
   {
@@ -20,10 +20,12 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^story_reaction_sticker_reactions(?:_\d+)?\.json$/i] },
-    signature: {
-      kind: "object",
-      requiredKeys: ["story_activities_reaction_sticker_reactions"],
-    },
+    signatures: [
+      {
+        kind: "object",
+        requiredKeys: ["story_activities_reaction_sticker_reactions"],
+      },
+    ],
     mediaPath: "none",
   },
   {
@@ -32,7 +34,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "medium",
     match: { basenames: [/^reels_comments(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["comments_reels_comments"] },
+    signatures: [{ kind: "object", requiredKeys: ["comments_reels_comments"] }],
     mediaPath: "none",
   },
   {
@@ -41,7 +43,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^questions(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["story_activities_questions"] },
+    signatures: [{ kind: "object", requiredKeys: ["story_activities_questions"] }],
     mediaPath: "none",
   },
   {
@@ -50,7 +52,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^emoji_sliders(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["story_activities_emoji_sliders"] },
+    signatures: [{ kind: "object", requiredKeys: ["story_activities_emoji_sliders"] }],
     mediaPath: "none",
   },
   {
@@ -59,7 +61,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "low",
     match: { basenames: [/^archived_posts(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["ig_archived_post_media"] },
+    signatures: [{ kind: "object", requiredKeys: ["ig_archived_post_media"] }],
     mediaPath: "root-relative",
   },
   {
@@ -68,7 +70,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^quizzes(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["story_activities_quizzes"] },
+    signatures: [{ kind: "object", requiredKeys: ["story_activities_quizzes"] }],
     mediaPath: "none",
   },
   {
@@ -77,7 +79,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "medium",
     match: { basenames: [/^posts(?:_\d+)?\.json$/i] },
-    signature: { kind: "array", requiredKeys: ["media"] },
+    signatures: [{ kind: "array", requiredKeys: ["media"] }],
     mediaPath: "root-relative",
   },
   {
@@ -86,7 +88,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "medium",
     match: { basenames: [/^story_likes(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["story_activities_story_likes"] },
+    signatures: [{ kind: "object", requiredKeys: ["story_activities_story_likes"] }],
     mediaPath: "none",
   },
   {
@@ -95,7 +97,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "low",
     match: { basenames: [/^liked_comments(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["likes_comment_likes"] },
+    signatures: [{ kind: "object", requiredKeys: ["likes_comment_likes"] }],
     mediaPath: "none",
   },
   {
@@ -104,7 +106,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^stories(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["ig_stories"] },
+    signatures: [{ kind: "object", requiredKeys: ["ig_stories"] }],
     mediaPath: "root-relative",
   },
   {
@@ -113,7 +115,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^saved_collections(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["saved_saved_collections"] },
+    signatures: [{ kind: "object", requiredKeys: ["saved_saved_collections"] }],
     mediaPath: "none",
   },
   {
@@ -122,7 +124,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^post_comments(?:_\d+)?\.json$/i] },
-    signature: { kind: "array", requiredKeys: ["media_list_data", "string_map_data"] },
+    signatures: [{ kind: "array", requiredKeys: ["media_list_data", "string_map_data"] }],
     mediaPath: "none",
   },
   {
@@ -131,7 +133,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^polls(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["story_activities_polls"] },
+    signatures: [{ kind: "object", requiredKeys: ["story_activities_polls"] }],
     mediaPath: "none",
   },
   {
@@ -140,7 +142,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^saved_posts(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["saved_saved_media"] },
+    signatures: [{ kind: "object", requiredKeys: ["saved_saved_media"] }],
     mediaPath: "none",
   },
   {
@@ -149,7 +151,7 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "medium",
     match: { basenames: [/^liked_posts(?:_\d+)?\.json$/i] },
-    signature: { kind: "object", requiredKeys: ["likes_media_likes"] },
+    signatures: [{ kind: "object", requiredKeys: ["likes_media_likes"] }],
     mediaPath: "none",
   },
 ];
