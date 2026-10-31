@@ -34,6 +34,20 @@ export type {
   ThreadMessage,
   ThreadSummary,
 } from "./messages/threads.js";
+export {
+  BASE_RADIUS,
+  GOLDEN_ANGLE,
+  totalHeightOf,
+  vortexLayout,
+  RADIUS_BREATH,
+  VERTICAL_SPACING,
+} from "./cyclone/layout.js";
+export type { CardTransform } from "./cyclone/layout.js";
+export { projectCards } from "./cyclone/projection.js";
+export type { Camera, ScreenCard } from "./cyclone/projection.js";
+export { pickNearest } from "./cyclone/picking.js";
+export { DEFAULT_WINDOW_SIZE, residentWindow } from "./cyclone/window.js";
+export { advance } from "./cyclone/motion.js";
 export { isT5, revealCopy } from "./categories/privacy.js";
 export type { RevealCopy } from "./categories/privacy.js";
 export { PAGE_SIZE, toTableView } from "./categories/toTableView.js";
