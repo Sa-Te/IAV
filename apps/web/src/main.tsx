@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { App } from "./App.js";
+import { DevIngest } from "./routes/DevIngest.js";
 
 const container = document.getElementById("root");
 
@@ -14,6 +15,7 @@ createRoot(container).render(
   <StrictMode>
     <BrowserRouter>
       <Routes>
+        <Route path="/dev/ingest" element={<DevIngest />} />
         <Route path="*" element={<App />} />
       </Routes>
     </BrowserRouter>

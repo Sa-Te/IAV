@@ -65,6 +65,29 @@ The registry is **data, not code**: adding a category is one row. `registry.test
 fails the moment a row is added without a match rule or signature, or when the
 registry and `docs/DATA-MAP.md` drift apart.
 
+## Ingestion, storage and the worker
+
+| Module | One-line responsibility |
+| --- | --- |
+| `packages/core/src/ingest/job.ts` | The job state machine: no booleans, `parsing` always carries `done`/`total`, a persisted `parsing` record recovers as `interrupted`. |
+| `packages/core/src/ingest/ingest.ts` | Runs one import: validate, resolve, normalise, store, report progress, honour cancellation. |
+| `packages/core/src/ingest/port.ts` | The `IngestSink` port the pipeline writes through, plus its record types. |
+| `packages/storage/src/localArchiveRepository.ts` | IndexedDB implementation of `IngestSink` and `ArchiveRepository`; batched transactions, quota estimate, atomic clear. |
+| `packages/storage/src/db.ts` | The versioned schema and its single upgrader. |
+| `packages/worker/src/index.ts` | Worker host: owns the run, posts progress, depends only on the port. |
+
+**Dependency direction: worker → core → nothing. Storage implements core's ports.**
+
+```
+apps/web ──┬─> packages/worker ──> packages/core
+           └─> packages/storage ──> packages/core
+```
+
+The worker never imports the storage adapter: `apps/web/src/workers/ingest.worker.ts`
+is the composition root that constructs both and hands the repository to the host
+as an `IngestSink`. `packages/core` imports neither React, the DOM, the network,
+nor another workspace package — `pnpm check:boundaries` enforces it.
+
 ## Frozen reference implementations
 
 `reference-backend/` (Go + PostgreSQL) and `reference-frontend/` (the shipped

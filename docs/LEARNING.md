@@ -42,3 +42,10 @@ progress.
   implement it, so storage can be swapped without touching the core; no port
   without a second implementation —
   vault: `learning-notes/concepts/ports-and-adapters.md`
+- 2026-10-31 — `define-errors-out-of-existence` — a job is a four-state union
+  where `parsing` must carry `done`/`total`, and a persisted `parsing` recovers as
+  `interrupted`; the stuck-spinner state cannot be written —
+  vault: `debug-log/2026-10-31_stuck-parsing-state.md`
+- 2026-10-31 — `ingestion-pipeline` — validate, then stream, then store in
+  batches, committing the archive row last —
+  vault: `architecture/2026-10-31_ingestion-pipeline.md`

@@ -8,5 +8,12 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@instavault/core": "workspace:*"
+  },
+  "devDependencies": {
+    "fake-indexeddb": "6.2.7",
+    "vitest": "5.0.5"
   }
 }

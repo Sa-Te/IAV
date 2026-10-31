@@ -43,3 +43,9 @@ export const CATEGORIES: readonly Category[] = [
   ...TIER_5,
   UNRECOGNISED,
 ];
+
+const BY_ID: ReadonlyMap<string, Category> = new Map(CATEGORIES.map((row) => [row.id, row]));
+
+export function findCategory(id: string): Category | undefined {
+  return BY_ID.get(id);
+}

@@ -205,6 +205,8 @@ These are checked, not hoped for.
   growth is a bug.
 - IndexedDB writes are batched in transactions. One transaction per record is a
   bug.
+- Importing a 160MB export must emit progress at least every 2 seconds and must never
+  leave the job in a state it cannot leave.
 
 ---
 
@@ -270,10 +272,12 @@ reserved for floating layers, Inter / Lora / JetBrains Mono. Themes are data
 
 ### Test lanes
 
-- **Fast lane** (pre-push, target under 10 seconds): typecheck + lint + unit tests.
-- **Full suite** (CI): fast lane + integration + boundaries + filesize + build.
-- The fast lane must stay fast enough that `--no-verify` is never tempting. If it exceeds
-  10s, cut scope rather than moving the gate to CI.
+- **One lane** (pre-push and CI, target under 20 seconds): `pnpm verify` — typecheck,
+  lint, format check, unit and integration tests, boundaries, filesize, build. The hook
+  and CI run this identical command; they are never two lists.
+- The lane is the full suite by design. If it exceeds 20s, the fix is to make a step
+  faster, not to split the commands.
+- The lane must stay fast enough that `--no-verify` is never tempting.
 
 ---
 
@@ -505,6 +509,5 @@ unknown.**
 - E2EE sync design — deliberately postponed to v2. Do not build toward it
   speculatively beyond the repository seam.
 - Retention/erase UX for an archive the user wants to remove from the device.
-- MediaSource port is deferred until a second implementation exists (AGENTS.md §4).
-  Media access must still be a function call, never a component reaching for a blob, so
-  the swap is a rename.
+- One archive per device. Importing a new archive replaces the previous one after an
+  explicit confirmation naming what will be deleted (ADR 0006).

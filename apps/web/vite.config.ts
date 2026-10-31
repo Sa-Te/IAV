@@ -25,4 +25,9 @@ export default defineConfig({
     outDir: "dist",
     target: "es2022",
   },
+  // The ingest worker is created with { type: "module" } and uses top-level await
+  // to open IndexedDB before wiring its message handler; IIFE workers cannot.
+  worker: {
+    format: "es",
+  },
 });

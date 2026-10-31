@@ -10,6 +10,9 @@
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },
   "dependencies": {
+    "@instavault/core": "workspace:*",
+    "@instavault/storage": "workspace:*",
+    "@instavault/worker": "workspace:*",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-router-dom": "7.18.5"

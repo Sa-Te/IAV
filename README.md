@@ -55,6 +55,36 @@ pnpm test           # unit + integration tests
 pnpm verify         # everything CI runs, locally
 ```
 
+## Try it
+
+The importer works; the gallery does not exist yet. There is a dev harness route
+that proves the pipeline end to end.
+
+```bash
+pnpm install
+pnpm dev
+# open http://localhost:5173/dev/ingest
+```
+
+Drop in your Instagram export ZIP (request it as **JSON**, not HTML). You should
+see phases `reading → resolving → storing`, then a summary table:
+
+| Field | Meaning |
+| --- | --- |
+| `categories` | how many of the 74 categories were recognised |
+| `entries` | total records across them |
+| `mediaStored` | media files written to IndexedDB on this device |
+| `mediaMissing` | media references that pointed at a file the archive does not contain |
+| `unrecognised` | files no rule matched, listed with their shape (name, kind, keys) and no content |
+| `fingerprint` | the archive's shape id (`fmt-xxxxxx`), used to warn when a later export differs |
+
+**Media stays in the browser.** The ZIP is read in a Web Worker, parsed there, and
+written to IndexedDB on your device. Nothing is uploaded, and the dev harness makes
+no network requests.
+
+Re-importing replaces the archive; the "Wipe archive" button deletes it and tells
+you exactly what it is deleting.
+
 ## Local gates
 
 The repository enforces its own rules; they are not conventions to remember.

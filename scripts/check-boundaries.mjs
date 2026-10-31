@@ -20,12 +20,16 @@ const PACKAGES = [
   {
     name: "core",
     dir: join(ROOT, "packages/core/src"),
+    // The boundary is the *package*, not its src folder: test fakes live in
+    // packages/core/test and are part of the package.
+    rootDir: join(ROOT, "packages/core"),
     // core may not touch the DOM at all, including these globals
     domGlobals: ["indexedDB", "fetch", "XMLHttpRequest", "localStorage"],
   },
   {
     name: "storage",
     dir: join(ROOT, "packages/storage/src"),
+    rootDir: join(ROOT, "packages/storage"),
     // storage is allowed IndexedDB and localStorage; it is not allowed the network
     domGlobals: ["fetch", "XMLHttpRequest"],
   },
@@ -124,7 +128,7 @@ for (const pkg of PACKAGES) {
         }
         if (specifier.startsWith(".") || specifier.startsWith("/")) {
           const target = resolve(file, "..", specifier);
-          if (!target.startsWith(pkg.dir + sep) && target !== pkg.dir) {
+          if (!target.startsWith(pkg.rootDir + sep) && target !== pkg.rootDir) {
             report("relative import escapes the package");
           }
           continue;
