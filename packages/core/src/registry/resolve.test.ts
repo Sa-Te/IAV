@@ -72,14 +72,18 @@ describe("resolveCategory — tier 2 (structure)", () => {
   });
 
   it("reports ambiguity instead of guessing when two rows fit", () => {
-    // `interest_categories` and `link_history` are both root arrays with
-    // {fbid, label_values, media, timestamp}. A name that matches neither must fail.
+    // `interest_categories` and `link_history` were both root arrays with
+    // {fbid, label_values, media, timestamp} in the first export. After M7b the
+    // label/value envelope is the shape of ~15 rows at once, so a renamed envelope
+    // file names many candidates — which is the point: it refuses rather than
+    // guessing (ADR 0002, ADR 0008).
     const sample = [{ fbid: "1", label_values: [], media: [], timestamp: 1 }];
-    expect(resolveCategory({ path: "mystery.json", sample })).toEqual({
-      ok: false,
-      reason: "ambiguous",
-      candidates: ["interest_categories", "link_history"],
-    });
+    const result = resolveCategory({ path: "mystery.json", sample });
+
+    expect(result).toMatchObject({ ok: false, reason: "ambiguous" });
+    const candidates = result.ok ? [] : result.reason === "ambiguous" ? result.candidates : [];
+    expect(candidates).toEqual(expect.arrayContaining(["interest_categories", "link_history"]));
+    expect(candidates.length).toBeGreaterThan(2);
   });
 });
 

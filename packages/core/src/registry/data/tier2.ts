@@ -12,7 +12,11 @@ export const TIER_2: readonly Category[] = [
     variantRisk: "high",
     // The filename contains an apostrophe. Matched against the raw basename.
     match: { basenames: [/^posts_you're_not_interested_in(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["impressions_history_posts_not_interested"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["impressions_history_posts_not_interested"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -30,7 +34,11 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^profile_based_in(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["inferred_data_primary_location"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["inferred_data_primary_location"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -150,6 +158,8 @@ export const TIER_2: readonly Category[] = [
         kind: "array",
         requiredKeys: ["fbid", "label_values", "media", "timestamp"],
       },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
     ],
     mediaPath: "none",
   },
@@ -206,7 +216,11 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^posts_viewed(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["impressions_history_posts_seen"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["impressions_history_posts_seen"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -215,7 +229,11 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^suggested_profiles_viewed(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["impressions_history_chaining_seen"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["impressions_history_chaining_seen"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -224,7 +242,11 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^videos_watched(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["impressions_history_videos_watched"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["impressions_history_videos_watched"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -233,7 +255,11 @@ export const TIER_2: readonly Category[] = [
     privacyTier: 2,
     variantRisk: "low",
     match: { basenames: [/^advertisers_using_your_activity_or_information(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["ig_custom_audiences_all_types"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["ig_custom_audiences_all_types"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media"] },
+    ],
     mediaPath: "none",
   },
 ];

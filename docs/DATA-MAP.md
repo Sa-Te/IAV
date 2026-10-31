@@ -35,23 +35,23 @@ exist yet.** Status is `not started` everywhere: nothing has been parsed.
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
 | `notification_preferences` | `preferences/settings/notification_preferences.json` | `packages/core/schema/notification-preferences.ts` | `packages/core/parsers/notification-preferences.ts` | none | low | not started |
-| `comments_allowed_from` | `preferences/settings/comments_allowed_from.json` | `packages/core/schema/comments-allowed-from.ts` | `packages/core/parsers/comments-allowed-from.ts` | none | low | not started |
-| `show_exclusive_story_promo_setting` | `preferences/settings/show_exclusive_story_promo_setting.json` | `packages/core/schema/show-exclusive-story-promo-setting.ts` | `packages/core/parsers/show-exclusive-story-promo-setting.ts` | none | low | not started |
-| `use_cross-app_messaging` | `preferences/settings/use_cross-app_messaging.json` | `packages/core/schema/use-cross-app-messaging.ts` | `packages/core/parsers/use-cross-app-messaging.ts` | none | medium | not started |
-| `professional_information` | `personal_information/information_about_you/professional_information.json` | `packages/core/schema/professional-information.ts` | `packages/core/parsers/professional-information.ts` | none | low | not started |
-| `note_interactions` | `personal_information/information_about_you/note_interactions.json` | `packages/core/schema/note-interactions.ts` | `packages/core/parsers/note-interactions.ts` | none | low | not started |
+| `comments_allowed_from` | `preferences/settings/comments_allowed_from.json` | `packages/core/schema/comments-allowed-from.ts` | `packages/core/parsers/comments-allowed-from.ts` | none | low | not started — not present in the current baseline |
+| `show_exclusive_story_promo_setting` | `preferences/settings/show_exclusive_story_promo_setting.json` | `packages/core/schema/show-exclusive-story-promo-setting.ts` | `packages/core/parsers/show-exclusive-story-promo-setting.ts` | none | low | not started — not present in the current baseline |
+| `use_cross-app_messaging` | `preferences/settings/use_cross-app_messaging.json` | `packages/core/schema/use-cross-app-messaging.ts` | `packages/core/parsers/use-cross-app-messaging.ts` | none | medium | not started — not present in the current baseline |
+| `professional_information` | `personal_information/information_about_you/professional_information.json` | `packages/core/schema/professional-information.ts` | `packages/core/parsers/professional-information.ts` | none | low | not started — not present in the current baseline |
+| `note_interactions` | `personal_information/information_about_you/note_interactions.json` | `packages/core/schema/note-interactions.ts` | `packages/core/parsers/note-interactions.ts` | none | low | not started — not present in the current baseline |
 | `eligibility` | `your_instagram_activity/monetization/eligibility.json` | `packages/core/schema/eligibility.ts` | `packages/core/parsers/eligibility.ts` | table | low | not started |
 | `bug_reports` | `your_instagram_activity/reports/bug_reports.json` | `packages/core/schema/bug-reports.ts` | `packages/core/parsers/bug-reports.ts` | list | low | not started |
 | `instagram_profile_information` | `personal_information/information_about_you/instagram_profile_information.json` | `packages/core/schema/instagram-profile-information.ts` | `packages/core/parsers/instagram-profile-information.ts` | table | low | not started |
 | `instagram_friend_map` | `personal_information/information_about_you/instagram_friend_map.json` | `packages/core/schema/instagram-friend-map.ts` | `packages/core/parsers/instagram-friend-map.ts` | table | low | not started |
-| `camera_information` | `personal_information/device_information/camera_information.json` | `packages/core/schema/camera-information.ts` | `packages/core/parsers/camera-information.ts` | table | low | not started |
-| `your_muted_story_teaser_creators` | `your_instagram_activity/subscriptions/your_muted_story_teaser_creators.json` | `packages/core/schema/muted-story-teaser-creators.ts` | `packages/core/parsers/muted-story-teaser-creators.ts` | list | medium | not started |
+| `camera_information` | `personal_information/device_information/camera_information.json` | `packages/core/schema/camera-information.ts` | `packages/core/parsers/camera-information.ts` | table | low | not started — not present in the current baseline |
+| `your_muted_story_teaser_creators` | `your_instagram_activity/subscriptions/your_muted_story_teaser_creators.json` | `packages/core/schema/muted-story-teaser-creators.ts` | `packages/core/parsers/muted-story-teaser-creators.ts` | list | medium | not started — not present in the current baseline |
 | `your_link_history_settings` | `logged_information/link_history/your_link_history_settings.json` | `packages/core/schema/link-history-settings.ts` | `packages/core/parsers/link-history-settings.ts` | table | medium | not started |
 | `consents` | `preferences/settings/consents.json` | `packages/core/schema/consents.ts` | `packages/core/parsers/consents.ts` | table | low | not started |
 | `your_activity_off_meta_technologies_settings` | `apps_and_websites_off_of_instagram/apps_and_websites/your_activity_off_meta_technologies_settings.json` | `packages/core/schema/off-meta-settings.ts` | `packages/core/parsers/off-meta-settings.ts` | table | medium | not started |
 | `your_information_download_requests` | `personal_information/information_about_you/your_information_download_requests.json` | `packages/core/schema/download-requests.ts` | `packages/core/parsers/download-requests.ts` | table | low | not started |
 | `avatar_items` | `your_instagram_activity/avatars_store/avatar_items.json` | `packages/core/schema/avatar-items.ts` | `packages/core/parsers/avatar-items.ts` | none | high | not started |
-| `devices` | `personal_information/device_information/devices.json` | `packages/core/schema/devices.ts` | `packages/core/parsers/devices.ts` | table | low | not started |
+| `devices` | `personal_information/device_information/devices.json` | `packages/core/schema/devices.ts` | `packages/core/parsers/devices.ts` | table | low | not started — not present in the current baseline |
 
 ## T2 — your own behaviour and security history
 
@@ -66,17 +66,17 @@ exist yet.** Status is `not started` everywhere: nothing has been parsed.
 | `profile_searches` | `logged_information/recent_searches/profile_searches.json` | `packages/core/schema/profile-searches.ts` | `packages/core/parsers/profile-searches.ts` | list | medium | not started |
 | `word_or_phrase_searches` | `logged_information/recent_searches/word_or_phrase_searches.json` | `packages/core/schema/keyword-searches.ts` | `packages/core/parsers/keyword-searches.ts` | list | medium | not started |
 | `profile_privacy_changes` | `security_and_login_information/login_and_profile_creation/profile_privacy_changes.json` | `packages/core/schema/privacy-changes.ts` | `packages/core/parsers/privacy-changes.ts` | timeline | low | not started |
-| `password_change_activity` | `security_and_login_information/login_and_profile_creation/password_change_activity.json` | `packages/core/schema/password-changes.ts` | `packages/core/parsers/password-changes.ts` | timeline | low | not started |
-| `interest_categories` | `ads_information/ads_and_topics/interest_categories.json` | `packages/core/schema/interest-categories.ts` | `packages/core/parsers/interest-categories.ts` | list | low | not started |
+| `password_change_activity` | `security_and_login_information/login_and_profile_creation/password_change_activity.json` | `packages/core/schema/password-changes.ts` | `packages/core/parsers/password-changes.ts` | timeline | low | not started — not present in the current baseline |
+| `interest_categories` | `ads_information/ads_and_topics/interest_categories.json` | `packages/core/schema/interest-categories.ts` | `packages/core/parsers/interest-categories.ts` | list | low | not started — not present in the current baseline |
 | `locations_of_interest` | `ads_information/ads_and_topics/locations_of_interest.json` | `packages/core/schema/locations-of-interest.ts` | `packages/core/parsers/locations-of-interest.ts` | list | high | not started |
 | `logout_activity` | `security_and_login_information/login_and_profile_creation/logout_activity.json` | `packages/core/schema/logout-activity.ts` | `packages/core/parsers/logout-activity.ts` | table | low | not started |
-| `your_activity_off_meta_technologies` | `apps_and_websites_off_of_instagram/apps_and_websites/your_activity_off_meta_technologies.json` | `packages/core/schema/off-meta-activity.ts` | `packages/core/parsers/off-meta-activity.ts` | table | high | not started |
+| `your_activity_off_meta_technologies` | `apps_and_websites_off_of_instagram/apps_and_websites/your_activity_off_meta_technologies.json` | `packages/core/schema/off-meta-activity.ts` | `packages/core/parsers/off-meta-activity.ts` | table | high | not started — not present in the current baseline |
 | `link_history` | `logged_information/link_history/link_history.json` | `packages/core/schema/link-history.ts` | `packages/core/parsers/link-history.ts` | list | high | not started |
 | `profile_status_changes` | `security_and_login_information/login_and_profile_creation/profile_status_changes.json` | `packages/core/schema/account-status-changes.ts` | `packages/core/parsers/account-status-changes.ts` | timeline | medium | not started |
 | `profile_changes` | `personal_information/personal_information/profile_changes.json` | `packages/core/schema/profile-changes.ts` | `packages/core/parsers/profile-changes.ts` | timeline | medium | not started |
-| `recommended_topics` | `preferences/your_topics/recommended_topics.json` | `packages/core/schema/topics.ts` | `packages/core/parsers/topics.ts` | list | low | not started |
+| `recommended_topics` | `preferences/your_topics/recommended_topics.json` | `packages/core/schema/topics.ts` | `packages/core/parsers/topics.ts` | list | low | not started — not present in the current baseline |
 | `login_activity` | `security_and_login_information/login_and_profile_creation/login_activity.json` | `packages/core/schema/login-activity.ts` | `packages/core/parsers/login-activity.ts` | table | low | not started |
-| `ads_viewed` | `ads_information/ads_and_topics/ads_viewed.json` | `packages/core/schema/ads-viewed.ts` | `packages/core/parsers/ads-viewed.ts` | list | low | not started |
+| `ads_viewed` | `ads_information/ads_and_topics/ads_viewed.json` | `packages/core/schema/ads-viewed.ts` | `packages/core/parsers/ads-viewed.ts` | list | low | not started — not present in the current baseline |
 | `posts_viewed` | `your_instagram_activity/other_activity/posts_viewed.json` | `packages/core/schema/posts-viewed.ts` | `packages/core/parsers/posts-viewed.ts` | list | low | not started |
 | `suggested_profiles_viewed` | `your_instagram_activity/other_activity/suggested_profiles_viewed.json` | `packages/core/schema/suggested-profiles-viewed.ts` | `packages/core/parsers/suggested-profiles-viewed.ts` | list | low | not started |
 | `videos_watched` | `your_instagram_activity/other_activity/videos_watched.json` | `packages/core/schema/videos-watched.ts` | `packages/core/parsers/videos-watched.ts` | list | low | not started |
@@ -107,7 +107,7 @@ exist yet.** Status is `not started` everywhere: nothing has been parsed.
 
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `secret_conversations` | `your_instagram_activity/messages/secret_conversations.json` | `packages/core/schema/secret-conversations.ts` | `packages/core/parsers/secret-conversations.ts` | table | high | not started |
+| `secret_conversations` | `your_instagram_activity/messages/secret_conversations.json` | `packages/core/schema/secret-conversations.ts` | `packages/core/parsers/secret-conversations.ts` | table | high | not started — not present in the current baseline |
 | `removed_suggestions` | `connections/followers_and_following/removed_suggestions.json` | `packages/core/schema/removed-suggestions.ts` | `packages/core/parsers/removed-suggestions.ts` | list | low | not started |
 | `restricted_profiles` | `connections/followers_and_following/restricted_profiles.json` | `packages/core/schema/restricted-profiles.ts` | `packages/core/parsers/restricted-profiles.ts` | list | low | not started |
 | `hide_story_from` | `connections/followers_and_following/hide_story_from.json` | `packages/core/schema/hide-story-from.ts` | `packages/core/parsers/hide-story-from.ts` | list | low | not started |

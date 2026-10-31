@@ -41,16 +41,15 @@ function isShapeChange(change: ChangedCategory): boolean {
 }
 
 function shapeRow(change: ChangedCategory): string {
-  return [
-    "",
+  const cells = [
     `\`${change.id}\``,
     `${change.entryCount.a} → ${change.entryCount.b}`,
     keys(change.keysAdded),
     keys(change.keysRemoved),
     `${flags(change.signaturesStillSatisfied.a)} / ${flags(change.signaturesStillSatisfied.b)}`,
     `${change.mediaPathUsed.a} / ${change.mediaPathUsed.b}`,
-    "",
-  ].join(" |");
+  ];
+  return `| ${cells.join(" | ")} |`;
 }
 
 /**

@@ -25,6 +25,8 @@ export const TIER_3: readonly Category[] = [
         kind: "object",
         requiredKeys: ["story_activities_reaction_sticker_reactions"],
       },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
     ],
     mediaPath: "none",
   },
@@ -43,7 +45,11 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^questions(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["story_activities_questions"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["story_activities_questions"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -52,7 +58,11 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^emoji_sliders(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["story_activities_emoji_sliders"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["story_activities_emoji_sliders"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -70,7 +80,11 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^quizzes(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["story_activities_quizzes"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["story_activities_quizzes"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -88,7 +102,11 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "medium",
     match: { basenames: [/^story_likes(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["story_activities_story_likes"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["story_activities_story_likes"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -115,7 +133,11 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^saved_collections(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["saved_saved_collections"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["saved_saved_collections"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -133,7 +155,11 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^polls(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["story_activities_polls"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["story_activities_polls"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -142,7 +168,11 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "high",
     match: { basenames: [/^saved_posts(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["saved_saved_media"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["saved_saved_media"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -151,7 +181,11 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "medium",
     match: { basenames: [/^liked_posts(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["likes_media_likes"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["likes_media_likes"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
 ];

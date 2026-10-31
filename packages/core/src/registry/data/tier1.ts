@@ -11,7 +11,11 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^notification_preferences(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["settings_notification_preferences"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["settings_notification_preferences"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -74,7 +78,11 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^bug_reports(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["reports_bug_reports"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["reports_bug_reports"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -83,7 +91,11 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^instagram_profile_information(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["profile_account_insights"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["profile_account_insights"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -92,7 +104,11 @@ export const TIER_1: readonly Category[] = [
     privacyTier: 1,
     variantRisk: "low",
     match: { basenames: [/^instagram_friend_map(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["profile_friend_map"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["profile_friend_map"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -166,6 +182,8 @@ export const TIER_1: readonly Category[] = [
         kind: "object",
         requiredKeys: ["fbid", "label_values", "media", "timestamp"],
       },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
     ],
     mediaPath: "none",
   },

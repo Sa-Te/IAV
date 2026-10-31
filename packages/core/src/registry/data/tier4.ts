@@ -20,7 +20,11 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^removed_suggestions(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["relationships_dismissed_suggested_users"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["relationships_dismissed_suggested_users"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "object", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -29,7 +33,11 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^restricted_profiles(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["relationships_restricted_users"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["relationships_restricted_users"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -38,7 +46,11 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^hide_story_from(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["relationships_hide_stories_from"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["relationships_hide_stories_from"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -47,7 +59,11 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^close_friends(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["relationships_close_friends"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["relationships_close_friends"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -61,6 +77,8 @@ export const TIER_4: readonly Category[] = [
         kind: "object",
         requiredKeys: ["relationships_permanent_follow_requests"],
       },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
     ],
     mediaPath: "none",
   },
@@ -71,7 +89,18 @@ export const TIER_4: readonly Category[] = [
     variantRisk: "high",
     // The filename contains an apostrophe. Matched against the raw basename.
     match: { basenames: [/^follow_requests_you've_received(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["relationships_follow_requests_received"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["relationships_follow_requests_received"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990), connections/ file: the
+      // label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+      // Same basename also appears under your_instagram_activity/threads/ in
+      // archive-2/, carrying a one-key object wrapper. Tier 1 assigns both files to
+      // this row, and the merge keeps that object, so the merged sample — what the
+      // drift tool measures — has this shape. Whether two apps' files may share one
+      // row is an open question (M7b report), not something this row may decide.
+      { kind: "object", requiredKeys: ["text_post_app_text_post_app_follow_requests_received"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -80,7 +109,11 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^recently_unfollowed_profiles(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["relationships_unfollowed_users"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["relationships_unfollowed_users"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -89,7 +122,11 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "low",
     match: { basenames: [/^blocked_profiles(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["relationships_blocked_users"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["relationships_blocked_users"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
@@ -107,7 +144,11 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "medium",
     match: { basenames: [/^pending_follow_requests(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "object", requiredKeys: ["relationships_follow_requests_sent"] }],
+    signatures: [
+      { kind: "object", requiredKeys: ["relationships_follow_requests_sent"] },
+      // Measured in archive-2/ (2026-10-31, fmt-e57990): the label/value envelope replaced the wrapper.
+      { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
+    ],
     mediaPath: "none",
   },
   {
