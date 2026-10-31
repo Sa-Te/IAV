@@ -77,7 +77,12 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `packages/worker/src/index.ts` | Worker host: owns the run, posts progress, depends only on the port. |
 | `apps/web/src/repository/RepositoryContext.tsx` | The read path: the one place a view obtains an `ArchiveRepository`; components never touch IndexedDB. |
 | `apps/web/src/media/useMediaUrl.ts` | Three-state media (`pending` / `ready` / `failed`), one shared request per id, object URLs revoked on unmount. |
-| `apps/web/src/routes/Gallery.tsx` | Post grid: three visibly distinct tile states, honest empty and error states, keyboard-openable tiles. |
+| `apps/web/src/media/MediaGrid.tsx` | Responsive grid of `MediaItemView`; takes data and a media source as props. |
+| `apps/web/src/media/MediaTile.tsx` | One tile: pending skeleton, image, video frame, or a failure naming its reason. |
+| `apps/web/src/media/MediaDetail.tsx` | Full-size view, caption, timestamp, category; Escape closes and focus returns. |
+| `apps/web/src/media/useMediaList.ts` | Pages one category — or every category — out of the repository. |
+| `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. |
+| `apps/web/src/routes/Nav.tsx` | Categories that actually have media, with counts; `aria-current` comes from the router. |
 
 **Dependency direction: worker → core → nothing. Storage implements core's ports.**
 

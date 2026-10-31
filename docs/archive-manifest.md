@@ -803,3 +803,41 @@ them — never by inference alone (AGENTS.md §6).
   The UI may label a known value, but the parser never translates it and never
   rejects an unknown one. A second export with a different value is what would
   settle the vocabulary.
+
+### Q4 — is `media_variants` an alternate encoding or additional media?
+
+- **Probe:** for every entry in `stories.json`, count whether the key exists, whether the
+  array is non-empty, how many `uri` values it holds, whether those files exist on disk, and
+  whether any equals the primary `uri`.
+- **Measured:** 211 stories · **72** carry a `media_variants` key · **0** are non-empty ·
+  **0** variant URIs · 0 exist · 0 equal the primary. The same key also appears on some
+  `posts` media records, again always `[]`.
+- **Confidence:** distribution certain for this export; **meaning unresolved** — there is no
+  non-empty sample anywhere to observe.
+- **Decision:** the schema stores `media_variants` **verbatim as an opaque array**, produces
+  no extra media from it, and the parser never rejects an unknown element. A future export
+  with a non-empty array is what would settle it.
+
+### Q5 — what is `dubbing_info`?
+
+- **Probe:** the same pass, over every story.
+- **Measured:** present on the same 72 stories as `media_variants`, always the exact value
+  `[]`. No element shape was ever observed, so no key names are known.
+- **Confidence:** distribution certain; **meaning unknown**.
+- **Decision:** stored verbatim as an opaque array; never interpreted.
+
+### archived_posts vs posts — full shape comparison
+
+- **Probe:** the key set of every group at the top level, and of every `media` record, in
+  both files.
+- **Measured:**
+  - top level: both are exactly `{ media }`;
+  - media record: both are exactly
+    `{ creation_timestamp, cross_post_source, media_metadata, title, uri }`;
+  - the only observed difference is caption length (archived captions reach 174 characters
+    against 56 in posts), and some `posts` records additionally carry `dubbing_info` and
+    `media_variants`.
+- **Confidence:** certain for this export.
+- **Decision:** two schemas, identical today, deliberately not shared — so either file can
+  grow a field without silently loosening the other. `archived_posts` is identified by its
+  `ig_archived_post_media` wrapper, not by shape, because its shape *is* posts'.

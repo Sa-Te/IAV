@@ -69,7 +69,7 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
    categories and media to IndexedDB on this device. You should see
    `reading → resolving → storing`, then a summary: categories, entries,
    media stored, media missing, unrecognised files, and a shape fingerprint.
-2. Open `/`. You should see a grid of your posts — one tile per post, real
+2. Open `/` for everything, or `/posts`, `/stories`, `/archived` for one category. — one tile per post, real
    photos, and a line above saying how many posts and media files are on the
    device. Click a tile for the full-size image, caption and date; Escape closes
    and returns focus to the tile.

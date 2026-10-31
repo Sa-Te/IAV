@@ -1,3 +1,6 @@
+import { parseArchivedPosts } from "../parsers/archivedPosts.js";
+import { parseStories } from "../parsers/stories.js";
+
 /**
  * Category data → the one shape every view renders.
  *
@@ -5,7 +8,6 @@
  * nested message attachment). This module is the single place that knows those
  * differences; views only ever see `MediaItemView`.
  */
-
 export interface MediaItemView {
   /** Archive path; also the repository key. */
   readonly id: string;
@@ -66,6 +68,30 @@ function fromMessages(data: unknown, category: string): MediaItemView[] {
 }
 
 export function toMediaItems(categoryId: string, data: unknown): readonly MediaItemView[] {
+  // Once a category has a parser, the parser is the only reader of its shape.
+  if (categoryId === "stories") {
+    const parsed = parseStories(data);
+    return parsed.ok
+      ? parsed.data.map((story) => ({
+          id: story.id,
+          caption: story.caption,
+          takenAt: story.takenAt,
+          category: "stories",
+        }))
+      : [];
+  }
+  if (categoryId === "archived_posts") {
+    const parsed = parseArchivedPosts(data);
+    return parsed.ok
+      ? parsed.data.map((entry) => ({
+          id: entry.id,
+          caption: entry.caption,
+          takenAt: entry.takenAt,
+          category: "archived_posts",
+        }))
+      : [];
+  }
+
   switch (categoryId) {
     case "posts":
     case "archived_posts":

@@ -91,12 +91,12 @@ exist yet.** Status is `not started` everywhere: nothing has been parsed.
 | `reels_comments` | `your_instagram_activity/comments/reels_comments.json` | `packages/core/schema/reels-comments.ts` | `packages/core/parsers/reels-comments.ts` | list | medium | not started |
 | `questions` | `your_instagram_activity/story_interactions/questions.json` | `packages/core/schema/story-questions.ts` | `packages/core/parsers/story-questions.ts` | list | high | not started |
 | `emoji_sliders` | `your_instagram_activity/story_interactions/emoji_sliders.json` | `packages/core/schema/emoji-sliders.ts` | `packages/core/parsers/emoji-sliders.ts` | list | high | not started |
-| `archived_posts` | `your_instagram_activity/media/archived_posts.json` | `packages/core/schema/archived-posts.ts` | `packages/core/parsers/archived-posts.ts` | gallery | low | not started |
+| `archived_posts` | `your_instagram_activity/media/archived_posts.json` | `packages/core/schema/archived-posts.ts` | `packages/core/parsers/archived-posts.ts` | gallery | low | parsed + rendered + tested |
 | `quizzes` | `your_instagram_activity/story_interactions/quizzes.json` | `packages/core/schema/story-quizzes.ts` | `packages/core/parsers/story-quizzes.ts` | list | high | not started |
 | `posts` | `your_instagram_activity/media/posts_1.json` | `packages/core/schema/posts.ts` | `packages/core/parsers/posts.ts` | gallery | medium | not started |
 | `story_likes` | `your_instagram_activity/likes/story_likes.json` | `packages/core/schema/story-likes.ts` | `packages/core/parsers/story-likes.ts` | list | medium | not started |
 | `liked_comments` | `your_instagram_activity/likes/liked_comments.json` | `packages/core/schema/liked-comments.ts` | `packages/core/parsers/liked-comments.ts` | list | low | not started |
-| `stories` | `your_instagram_activity/media/stories.json` | `packages/core/schema/stories.ts` | `packages/core/parsers/stories.ts` | gallery | high | not started |
+| `stories` | `your_instagram_activity/media/stories.json` | `packages/core/schema/stories.ts` | `packages/core/parsers/stories.ts` | gallery | high | parsed + rendered + tested |
 | `saved_collections` | `your_instagram_activity/saved/saved_collections.json` | `packages/core/schema/saved-collections.ts` | `packages/core/parsers/saved-collections.ts` | list | high | not started |
 | `post_comments` | `your_instagram_activity/comments/post_comments_1.json` | `packages/core/schema/post-comments.ts` | `packages/core/parsers/post-comments.ts` | list | high | not started |
 | `polls` | `your_instagram_activity/story_interactions/polls.json` | `packages/core/schema/story-polls.ts` | `packages/core/parsers/story-polls.ts` | list | high | not started |

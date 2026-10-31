@@ -47,7 +47,8 @@ function dataMapIds(): readonly string[] {
   const markdown = readFileSync(DATA_MAP_URL, "utf8");
   const ids: string[] = [];
   for (const line of markdown.split("\n")) {
-    const match = /^\|\s*`([^`]+)`\s*\|.*\|\s*not started\s*\|\s*$/.exec(line);
+    // Any status counts: a finished category must not look deleted to this test.
+    const match = /^\|\s*`([^`]+)`\s*\|(?:[^|]*\|){5}[^|]*\|\s*$/.exec(line);
     const raw = match?.[1];
     if (raw === undefined) {
       continue;

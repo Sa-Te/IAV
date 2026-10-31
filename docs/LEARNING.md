@@ -57,3 +57,10 @@ progress.
   `failed` with a reason; there is no null-as-loading, and a missing blob can
   never render as a spinner —
   vault: `architecture/2026-10-31_read-path.md`
+- 2026-10-31 — `extract-on-the-third-caller` — the media tile/grid/detail layer
+  moved out of the posts route only once stories and archived needed the same
+  thing; two callers would have been a guess —
+  vault: `architecture/2026-10-31_shared-media-layer.md`
+- 2026-10-31 — `render-what-you-measured` — `/` shows 376 items because the archive
+  measures 376 media references, not because posts were the only thing built —
+  vault: `learning-notes/2026-10-31_session-05.md`

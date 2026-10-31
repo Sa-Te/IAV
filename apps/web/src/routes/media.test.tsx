@@ -42,13 +42,15 @@ const CATEGORIES: CategoryRecord[] = [
     id: "archived_posts",
     resolvedTier: 1,
     entryCount: 1,
-    data: [
-      {
-        media: [
-          { uri: "media/archived/z.jpg", title: "archived one", creation_timestamp: 1700000300 },
-        ],
-      },
-    ],
+    data: {
+      ig_archived_post_media: [
+        {
+          media: [
+            { uri: "media/archived/z.jpg", title: "archived one", creation_timestamp: 1700000300 },
+          ],
+        },
+      ],
+    },
     warnings: [],
   },
   {
