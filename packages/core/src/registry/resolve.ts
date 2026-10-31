@@ -57,7 +57,8 @@ function keysOf(signature: Signature, sample: unknown): readonly string[] | null
   return Object.keys(sample);
 }
 
-function matchesSignature(signature: Signature, sample: unknown): boolean {
+/** Exported because drift reports satisfaction per signature, not per row (ADR 0008). */
+export function signatureMatches(signature: Signature, sample: unknown): boolean {
   const keys = keysOf(signature, sample);
   if (keys === null) {
     return false;
@@ -86,7 +87,7 @@ function matchesSignature(signature: Signature, sample: unknown): boolean {
 function shapeMatches(categories: readonly Category[], sample: unknown): readonly string[] {
   const fits = categories.flatMap((category) => {
     const specificities = category.signatures
-      .filter((signature) => matchesSignature(signature, sample))
+      .filter((signature) => signatureMatches(signature, sample))
       .map((signature) => signature.requiredKeys.length);
     return specificities.length === 0
       ? []
