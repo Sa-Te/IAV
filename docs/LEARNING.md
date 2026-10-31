@@ -21,5 +21,17 @@ progress.
 
 ## Registry
 
-- YYYY-MM-DD — example-concept-name — *TEMPLATE, NOT A REAL NOTE* — this line
-  demonstrates the format; delete it when the first real entry is added.
+- 2026-10-31 — `archive-data-model` — an export is seven entities (MediaFile,
+  Post, Story, Person, Thread, Message, Event) joined by strings, not ids —
+  vault: `architecture/2026-10-31_archive-data-model.md`
+- 2026-10-31 — `mojibake-repair` — the export files are pure ASCII; the
+  corruption is `\u`-escaped inside string values and is repaired by
+  latin-1 → utf-8 on each string, in every category —
+  vault: `mind-maps/2026-10-31_archive-relationships.md`
+- 2026-10-31 — `normalised-by-omission` — the export records *who* an action
+  involved but rarely *what* it was performed on (no post id, no story id, no
+  collection membership —
+  vault: `architecture/2026-10-31_archive-data-model.md`
+- 2026-10-31 — `privacy-tiered-build-order` — categories are ordered by whose
+  data they contain, so third-party messages and identities are built last —
+  see `docs/DATA-MAP.md`
