@@ -40,6 +40,16 @@ th {
   background: var(--token-color-surface);
 }
 
+/* One vertical rhythm: the header is compact, the page title owns the room, and
+   the grid starts after it. Left edges align; the spacing deliberately does not. */
+.gallery > h1 {
+  margin: 0 0 var(--token-space-1);
+}
+
+.gallery > .summary {
+  margin: 0 0 var(--token-space-6);
+}
+
 .cell-secondary {
   display: block;
   color: var(--token-color-text-muted);

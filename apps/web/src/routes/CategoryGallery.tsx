@@ -47,7 +47,7 @@ export function CategoryGallery({
       {state.status === "ready" && state.items.length > 0 && (
         <>
           <p className="summary">
-            {state.items.length} items · {title}
+            {state.items.length} {state.items.length === 1 ? "item" : "items"}
           </p>
           <MediaGrid
             items={state.items}
