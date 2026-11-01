@@ -70,6 +70,7 @@ function repository(records: readonly CategoryRecord[]): ArchiveRepository {
     summary: async () => null,
     getThumbnail: async () => null,
     putThumbnail: async () => undefined,
+    auditCounts: async () => ({ archive: 0, categories: 0, media: 0, thumbs: 0 }),
   };
 }
 

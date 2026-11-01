@@ -50,10 +50,15 @@ describe("tables", () => {
 
 describe("reduced motion", () => {
   it("turns the loading shimmer off", () => {
-    const start = components.indexOf("@media (prefers-reduced-motion: reduce)");
-    const block = components.slice(start, components.indexOf("}\n}", start));
+    // Scan every reduced-motion block: the file has more than one, and asserting
+    // only the first would pass while the skeleton still shimmered.
+    const blocks = [
+      ...components.matchAll(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n\}/g),
+    ]
+      .map((match) => match[1] ?? "")
+      .join("\n");
 
-    expect(block).toContain(".state-skeleton-bar");
-    expect(block).toContain("animation: none");
+    expect(blocks).toContain(".state-skeleton-bar");
+    expect(blocks).toContain("animation: none");
   });
 });

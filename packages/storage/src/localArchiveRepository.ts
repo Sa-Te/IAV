@@ -61,6 +61,13 @@ export interface ArchiveRepository {
   summary(): Promise<ArchiveRow | null>;
   getThumbnail(path: string): Promise<StoredThumbnail | null>;
   putThumbnail(thumbnail: StoredThumbnail): Promise<void>;
+  /** Row counts per store, for the dev media audit. Read-only, four counts. */
+  auditCounts(): Promise<{
+    archive: number;
+    categories: number;
+    media: number;
+    thumbs: number;
+  }>;
 }
 
 interface StoredMedia {
@@ -198,6 +205,25 @@ export class LocalArchiveRepository implements IngestSink, ArchiveRepository {
       this.db.transaction(STORE_CATEGORIES, "readonly").objectStore(STORE_CATEGORIES).getAll(),
     )) as CategoryRecord[];
     return rows;
+  }
+
+  async auditCounts(): Promise<{
+    archive: number;
+    categories: number;
+    media: number;
+    thumbs: number;
+  }> {
+    const count = async (store: string): Promise<number> =>
+      (await requestToPromise(
+        this.db.transaction(store, "readonly").objectStore(store).count(),
+      )) as number;
+
+    return {
+      archive: await count(STORE_ARCHIVE),
+      categories: await count(STORE_CATEGORIES),
+      media: await count(STORE_MEDIA),
+      thumbs: await count(STORE_THUMBS),
+    };
   }
 
   async getThumbnail(path: string): Promise<StoredThumbnail | null> {

@@ -68,20 +68,71 @@
   object-fit: cover;
 }
 
+/* Pending: a skeleton with a slow pulse, never a blank square. */
 .tile-pending {
-  display: block;
+  display: flex;
+  align-items: flex-end;
   width: 100%;
   height: 100%;
   background: var(--token-color-sunken);
 }
 
+.tile-pending-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--token-color-raised);
+  animation: tile-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes tile-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+/* Failed: a dashed danger outline plus words. Distinguishable at arm's length from
+   both a skeleton and a photograph — nothing about it is "empty". */
 .tile-failed {
+  display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: var(--token-space-1);
+  width: 100%;
+  height: 100%;
   background: var(--token-color-surface);
   border: 1px dashed var(--token-color-danger);
   color: var(--token-color-danger);
   font-size: var(--token-text-13);
+  text-align: center;
+  padding: var(--token-space-2);
+}
+
+.tile-failed-mark {
+  display: grid;
+  place-items: center;
+  width: var(--token-space-6);
+  height: var(--token-space-6);
+  border: 1px solid var(--token-color-danger);
+  border-radius: var(--token-radius-full);
+  font-weight: 600;
+}
+
+.tile-has-failure {
+  border-style: dashed;
+  border-color: var(--token-color-danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile-pending-bar {
+    animation: none;
+    opacity: 0.6;
+  }
 }
 
 /* --- the four states, styled once --------------------------------------- */

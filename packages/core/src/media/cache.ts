@@ -31,6 +31,8 @@ export interface MediaCacheRuntime<T extends MediaBytes> {
 
 interface Entry {
   readonly path: string;
+  /** Mounted consumers. An entry with refs > 0 must not be revoked under them. */
+  refs: number;
   url: string | null;
   bitmap: DecodedBitmap | null;
   mime: string;
@@ -41,6 +43,16 @@ interface Entry {
 
 export interface MediaCache {
   getUrl(path: string): Promise<MediaState>;
+  /**
+   * Like `getUrl`, but pins the entry until the matching `release(path)`.
+   *
+   * A mounted tile holds its URL; evicting it would revoke a URL still on screen,
+   * which the browser renders as nothing at all — the blank-tile bug of M12. A
+   * pinned entry is skipped by eviction, so the cap can be exceeded by the number
+   * of live tiles (tens) and never by the archive (hundreds).
+   */
+  retain(path: string): Promise<MediaState>;
+  release(path: string): void;
   getBitmap(path: string): Promise<DecodedBitmap | null>;
   /** Entries currently held, failures included. */
   size(): number;
@@ -61,11 +73,15 @@ export function createMediaCache<T extends MediaBytes>(
       let oldestPath: string | null = null;
       let oldest = Infinity;
       for (const [path, entry] of entries) {
-        if (path !== keep && entry.lastUsed < oldest) {
+        // A pinned entry is on screen right now; revoking it would blank a tile.
+        if (path === keep || entry.refs > 0) continue;
+        if (entry.lastUsed < oldest) {
           oldest = entry.lastUsed;
           oldestPath = path;
         }
       }
+      // Everything left is pinned: stay over the cap rather than blank a tile.
+      // Live tiles are tens, the archive is hundreds, so the ceiling is still real.
       if (oldestPath === null) return;
       const doomed = entries.get(oldestPath);
       entries.delete(oldestPath);
@@ -97,6 +113,7 @@ export function createMediaCache<T extends MediaBytes>(
       if (blob === null) {
         return {
           path,
+          refs: 0,
           url: null,
           bitmap: null,
           mime: "",
@@ -110,6 +127,7 @@ export function createMediaCache<T extends MediaBytes>(
       if (!decoded.ok) {
         return {
           path,
+          refs: 0,
           url: null,
           bitmap: null,
           mime: blob.type,
@@ -121,6 +139,7 @@ export function createMediaCache<T extends MediaBytes>(
 
       return {
         path,
+        refs: 0,
         url: runtime.createUrl(blob),
         bitmap: decoded.bitmap,
         mime: blob.type,
@@ -146,6 +165,19 @@ export function createMediaCache<T extends MediaBytes>(
       if (entry.failure !== null) return { status: "failed", reason: entry.failure };
       if (entry.url === null) return { status: "failed", reason: "decode" };
       return { status: "ready", url: entry.url, mime: entry.mime, bitmap: entry.bitmap };
+    },
+
+    async retain(path) {
+      const entry = await ensure(path);
+      entry.refs += 1;
+      if (entry.failure !== null) return { status: "failed", reason: entry.failure };
+      if (entry.url === null) return { status: "failed", reason: "decode" };
+      return { status: "ready", url: entry.url, mime: entry.mime, bitmap: entry.bitmap };
+    },
+
+    release(path) {
+      const entry = entries.get(path);
+      if (entry !== undefined && entry.refs > 0) entry.refs -= 1;
     },
 
     async getBitmap(path) {

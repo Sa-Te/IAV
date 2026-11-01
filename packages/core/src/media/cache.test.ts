@@ -145,3 +145,46 @@ describe("media cache", () => {
     expect((await videoCache.getUrl("v.mp4")).status).toBe("ready");
   });
 });
+
+describe("pinning (M12 blank-tile bug)", () => {
+  it("never revokes an entry a mounted tile still holds", async () => {
+    const load = vi.fn(async () => blob());
+    const { runtime, calls } = fakeRuntime();
+    const cache = createMediaCache(load, runtime, 1);
+
+    await cache.retain("on-screen.jpg");
+    await cache.getUrl("other.jpg");
+
+    // The pinned entry survived even though the cap is one. Two entries remain:
+    // the pinned one and the one just inserted, which eviction could not drop.
+    expect(cache.size()).toBe(2);
+    expect(calls.filter((call) => call.startsWith("revoke:"))).toHaveLength(0);
+    expect((await cache.getUrl("on-screen.jpg")).status).toBe("ready");
+    expect(load).toHaveBeenCalledTimes(2);
+  });
+
+  it("evicts a pinned entry once the tile releases it", async () => {
+    const { runtime } = fakeRuntime();
+    const cache = createMediaCache(async () => blob(), runtime, 1);
+
+    await cache.retain("a.jpg");
+    cache.release("a.jpg");
+    await cache.getUrl("b.jpg");
+    await cache.getUrl("c.jpg");
+
+    expect(cache.size()).toBe(1);
+  });
+
+  it("keeps every live tile when the viewport itself exceeds the cap", async () => {
+    const { runtime, calls } = fakeRuntime();
+    const cache = createMediaCache(async () => blob(), runtime, 2);
+
+    await cache.retain("a");
+    await cache.retain("b");
+    await cache.retain("c");
+
+    // Three live tiles, cap two: overshoot rather than blank one of them.
+    expect(cache.size()).toBe(3);
+    expect(calls.filter((call) => call.startsWith("revoke:"))).toHaveLength(0);
+  });
+});

@@ -105,13 +105,15 @@ export function useMediaUrl(
 
     const cache = caches === null ? undefined : caches[variant];
     if (cache !== undefined) {
-      // The cache owns the object URL: it revokes on evict and on releaseAll, not
-      // on this component's unmount, or a scroll back would re-decode.
-      void cache.getUrl(id).then((next) => {
+      // Pin the entry for as long as this tile is mounted. Without the pin the LRU
+      // can revoke the URL under a visible tile, which the browser paints as
+      // nothing — the M12 blank-tile bug.
+      void cache.retain(id).then((next) => {
         if (!cancelled) setState(next);
       });
       return () => {
         cancelled = true;
+        cache.release(id);
       };
     }
 

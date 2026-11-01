@@ -89,6 +89,7 @@ function repository(overrides: Partial<ArchiveRepository> = {}): ArchiveReposito
     summary: async () => SUMMARY,
     getThumbnail: async () => null,
     putThumbnail: async () => undefined,
+    auditCounts: async () => ({ archive: 0, categories: 0, media: 0, thumbs: 0 }),
     ...overrides,
   };
 }
@@ -155,7 +156,7 @@ describe("MediaTile states", () => {
       }),
     );
 
-    expect(await screen.findByText("File missing")).toBeTruthy();
+    expect(await screen.findByText("Not stored")).toBeTruthy();
     await waitFor(() => expect(screen.getByAltText("post one")).toBeTruthy());
     // Still loading: no image, no failure text, only the skeleton.
     expect(document.querySelectorAll(".tile-pending").length).toBeGreaterThan(0);

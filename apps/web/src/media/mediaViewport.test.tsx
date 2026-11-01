@@ -53,6 +53,7 @@ function repositoryWith(spies: { blobs: string[]; thumbs: string[] }): ArchiveRe
       return null;
     },
     putThumbnail: async () => undefined,
+    auditCounts: async () => ({ archive: 0, categories: 0, media: 0, thumbs: 0 }),
   };
 }
 

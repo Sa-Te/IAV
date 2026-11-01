@@ -5,6 +5,7 @@ import { State } from "../ui/State.js";
 import { CategoryRoute } from "../categories/CategoryView.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { DevIngest } from "./DevIngest.js";
+import { DevMediaAudit } from "./DevMediaAudit.js";
 import { DevTokens } from "./DevTokens.js";
 
 /** Its own chunk: the GL code must not sit in the initial download. */
@@ -53,6 +54,7 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
   if (dev) {
     routes.push({ path: "/dev/ingest", element: <DevIngest /> });
     routes.push({ path: "/dev/tokens", element: <DevTokens /> });
+    routes.push({ path: "/dev/media-audit", element: <DevMediaAudit /> });
     routes.push({
       path: "/dev/cyclone-stats",
       element: (
