@@ -31,6 +31,7 @@ export function CycloneStage({
   const pausedRef = useRef(false);
 
   const [highlight, setHighlight] = useState(0);
+  const [regionFocused, setRegionFocused] = useState(false);
   const [paused, setPaused] = useState(false);
   const [motionOptIn, setMotionOptIn] = useState(false);
   const [available, setAvailable] = useState(true);
@@ -97,6 +98,15 @@ export function CycloneStage({
   return (
     <div
       className="cyclone"
+      // Only keys that originate inside this region are consumed. A global
+      // listener would steal arrows from the rest of the page and scroll the
+      // document under the canvas, which is exactly the reported bug.
+      onFocus={() => setRegionFocused(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setRegionFocused(false);
+        }
+      }}
       onKeyDown={(event) => {
         if (event.key === "ArrowDown" || event.key === "ArrowRight") {
           event.preventDefault();
@@ -113,10 +123,16 @@ export function CycloneStage({
         }
       }}
     >
-      <p className="summary">
+      <p className="summary" id="cyclone-help">
         Arrow keys move through the archive, Enter opens the highlighted item, Space pauses the
         rotation.
       </p>
+
+      {!regionFocused && (
+        <p className="summary" id="cyclone-hint">
+          Press Tab to enter the 3D view controls. The page scrolls normally until you do.
+        </p>
+      )}
 
       <canvas
         ref={canvasRef}

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { CategoryRecord } from "@instavault/core";
 import type { ArchiveRepository } from "@instavault/storage";
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -163,5 +163,46 @@ describe("cyclone keyboard", () => {
 
     const dialog = await screen.findByRole("dialog");
     expect(dialog.textContent).toContain("post 2");
+  });
+});
+
+describe("cyclone keys stay inside the region", () => {
+  it("prevents the default (page scroll) and moves the highlight by one", async () => {
+    const user = userEvent.setup();
+    renderPage(12);
+    const list = await screen.findByRole("list", { name: "All media, in cyclone order" });
+    const buttons = within(list).getAllByRole("button");
+    const region = list.closest(".cyclone");
+    expect(region).not.toBeNull();
+
+    buttons[0]?.focus();
+    // fireEvent returns false when the handler called preventDefault.
+    const dispatched = fireEvent.keyDown(region as Element, { key: "ArrowDown" });
+
+    expect(dispatched).toBe(false);
+    expect(buttons[1]?.getAttribute("aria-current")).toBe("true");
+    expect(buttons[0]?.getAttribute("aria-current")).toBe("false");
+    expect(user).toBeDefined();
+  });
+
+  it("does not consume keys typed outside the region", async () => {
+    renderPage(12);
+    await screen.findByRole("list", { name: "All media, in cyclone order" });
+
+    const dispatched = fireEvent.keyDown(document.body, { key: "ArrowDown" });
+
+    expect(dispatched).toBe(true);
+  });
+
+  it("consumes Space so the page cannot scroll, and leaves Escape alone", async () => {
+    renderPage(12);
+    const list = await screen.findByRole("list", { name: "All media, in cyclone order" });
+    const region = list.closest(".cyclone");
+
+    expect(fireEvent.keyDown(region as Element, { key: " " })).toBe(false);
+    const escape = fireEvent.keyDown(region as Element, { key: "Escape" });
+    // Escape is not ours to consume: consuming it would block the browser's own
+    // "stop" behaviour and, in a router, can read as a navigation.
+    expect(escape).toBe(true);
   });
 });

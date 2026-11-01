@@ -102,7 +102,7 @@ export function CyclonePage(): JSX.Element {
   }
 
   return (
-    <div className="gallery">
+    <div className="gallery cyclone-page">
       <h1>Cyclone</h1>
       <CycloneStage
         items={items}
