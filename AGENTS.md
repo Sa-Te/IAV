@@ -295,6 +295,9 @@ view — DOM, canvas or WebGL — reads the same tokens.
 - Coverage percentage is not a gate. Mutation testing is not adopted.
 - Integration tests use synthetic fixtures only — never `archive/`, never a redacted slice
   of it. If a test needs the real archive it is a manual check, not a test.
+- Synthetic fixtures prove parsing. They do not prove rendering. Every media view carries
+  one test where the blob is genuinely absent and one where thumbnail generation rejects —
+  because that is the only path a fake repository can lie about by omission.
 
 ### Test lanes
 
