@@ -7,6 +7,11 @@ import { State } from "../ui/State.js";
 /**
  * `/categories` — every registry row, grouped by privacy tier.
  *
+ * The row set comes from the **registry**, joined to the repository for counts and
+ * view kind. A repository alone can render an empty page when it returns nothing
+ * (or a record it cannot read); the registry always knows all 86 categories, so an
+ * absent category is a greyed row, never a missing one.
+ *
  * This is infrastructure, not the visual pass: semantic tables, no framework.
  * A category that is not in the current export is shown greyed with "not in this
  * export" and no link, because ADR 0002 says absence is a normal state; hiding the
@@ -81,8 +86,18 @@ export function CategoryIndex(): JSX.Element {
             // ponytail: the index builds each view only to learn its kind. 72
             // categories, largest 42k rows, once per page — if a profile ever
             // shows this, add a kind probe beside toTableView instead.
-            const view = toTableView(record);
-            const media = toMediaItems(category.id, record.data).length;
+            //
+            // One unreadable record must not take the page with it: a stale or
+            // malformed row degrades to "present, no counts" rather than a throw
+            // that leaves the whole index blank.
+            let view: ReturnType<typeof toTableView>;
+            let media = 0;
+            try {
+              view = toTableView(record);
+              media = toMediaItems(category.id, record.data).length;
+            } catch {
+              view = { kind: "tree", value: null };
+            }
             return {
               id: category.id,
               label: category.label,
