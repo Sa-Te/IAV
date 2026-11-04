@@ -26,17 +26,22 @@ export function useInViewport(
       return;
     }
 
-    const observer = new IntersectionObserver(
+    // `observer` is assigned after construction, but a target that is already
+    // intersecting is reported on the first callback — and an implementation is
+    // allowed to invoke that callback synchronously. Guard the reference so the
+    // first report cannot touch an uninitialised binding.
+    let observer: IntersectionObserver | null = null;
+    observer = new IntersectionObserver(
       (entries) => {
         if (entries.some((entry) => entry.isIntersecting)) {
           setSeen(true);
-          observer.disconnect();
+          observer?.disconnect();
         }
       },
       { rootMargin },
     );
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => observer?.disconnect();
   }, [ref, rootMargin, seen]);
 
   return seen;

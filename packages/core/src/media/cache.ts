@@ -23,10 +23,24 @@ import type { DecodedBitmap, DecodedMedia, MediaBytes, MediaState } from "./stat
 
 export const MEDIA_CACHE_CAP = 150;
 
+/**
+ * How many decodes may run at once. 405 tiles becoming visible together used to
+ * open 405 reads and decodes at the same instant; eight is enough to keep the
+ * main thread responsive, and the queue is FIFO so the order is the request order.
+ */
+export const MAX_CONCURRENT_LOADS = 8;
+
 export interface MediaCacheRuntime<T extends MediaBytes> {
   createUrl(blob: T): string;
   revokeUrl(url: string): void;
   decode(blob: T): Promise<DecodedMedia>;
+}
+
+interface Trace {
+  requestedAt: number | null;
+  resolvedAt: number | null;
+  evictedAt: number | null;
+  timesRequested: number;
 }
 
 interface Entry {
@@ -41,8 +55,19 @@ interface Entry {
   failure: "missing" | "decode" | null;
 }
 
+export interface PathTimeline {
+  readonly path: string;
+  readonly requestedAt: number | null;
+  readonly resolvedAt: number | null;
+  readonly evictedAt: number | null;
+  readonly timesRequested: number;
+  readonly resident: boolean;
+}
+
 export interface MediaCache {
   getUrl(path: string): Promise<MediaState>;
+  /** Per-path history, for /dev/media-audit. Survives eviction. */
+  audit(): readonly PathTimeline[];
   /**
    * Like `getUrl`, but pins the entry until the matching `release(path)`.
    *
@@ -66,15 +91,53 @@ export function createMediaCache<T extends MediaBytes>(
 ): MediaCache {
   const entries = new Map<string, Entry>();
   const inflight = new Map<string, Promise<Entry>>();
+  // Consumers that have asked for a path but not yet received an entry. An eviction
+  // during this window would hand back a URL that is already revoked, which the
+  // browser paints as nothing — the top-of-grid tiles that never loaded.
+  const reservations = new Map<string, number>();
+  const traces = new Map<string, Trace>();
   let clock = 0;
+
+  let active = 0;
+  const queue: (() => void)[] = [];
+
+  /** FIFO admission with a hard concurrency cap (MAX_CONCURRENT_LOADS). */
+  const admitted = <R>(work: () => Promise<R>): Promise<R> =>
+    new Promise<R>((resolve, reject) => {
+      const start = () => {
+        active += 1;
+        void work()
+          .then(resolve, reject)
+          .finally(() => {
+            active -= 1;
+            queue.shift()?.();
+          });
+      };
+      if (active < MAX_CONCURRENT_LOADS) start();
+      else queue.push(start);
+    });
+
+  const traceOf = (path: string): Trace => {
+    const existing = traces.get(path);
+    if (existing !== undefined) return existing;
+    const fresh: Trace = {
+      requestedAt: null,
+      resolvedAt: null,
+      evictedAt: null,
+      timesRequested: 0,
+    };
+    traces.set(path, fresh);
+    return fresh;
+  };
 
   const evictIfNeeded = (keep: string): void => {
     while (entries.size > capacity) {
       let oldestPath: string | null = null;
       let oldest = Infinity;
       for (const [path, entry] of entries) {
-        // A pinned entry is on screen right now; revoking it would blank a tile.
-        if (path === keep || entry.refs > 0) continue;
+        // A pinned entry is on screen right now, and a reserved one has a consumer
+        // waiting for it: revoking either would blank or hang a tile.
+        if (path === keep || entry.refs > 0 || (reservations.get(path) ?? 0) > 0) continue;
         if (entry.lastUsed < oldest) {
           oldest = entry.lastUsed;
           oldestPath = path;
@@ -86,6 +149,7 @@ export function createMediaCache<T extends MediaBytes>(
       const doomed = entries.get(oldestPath);
       entries.delete(oldestPath);
       if (doomed !== undefined) release(doomed);
+      traceOf(oldestPath).evictedAt = Date.now();
     }
   };
 
@@ -108,8 +172,11 @@ export function createMediaCache<T extends MediaBytes>(
     const pending = inflight.get(path);
     if (pending !== undefined) return pending;
 
+    traceOf(path).timesRequested += 1;
+    traceOf(path).requestedAt = Date.now();
+
     const promise = (async (): Promise<Entry> => {
-      const blob = await load(path);
+      const blob = await admitted(() => load(path));
       if (blob === null) {
         return {
           path,
@@ -161,14 +228,30 @@ export function createMediaCache<T extends MediaBytes>(
 
   return {
     async getUrl(path) {
-      const entry = await ensure(path);
+      reservations.set(path, (reservations.get(path) ?? 0) + 1);
+      let entry: Entry;
+      try {
+        entry = await ensure(path);
+      } finally {
+        const left = (reservations.get(path) ?? 1) - 1;
+        if (left <= 0) reservations.delete(path);
+        else reservations.set(path, left);
+      }
       if (entry.failure !== null) return { status: "failed", reason: entry.failure };
       if (entry.url === null) return { status: "failed", reason: "decode" };
       return { status: "ready", url: entry.url, mime: entry.mime, bitmap: entry.bitmap };
     },
 
     async retain(path) {
-      const entry = await ensure(path);
+      reservations.set(path, (reservations.get(path) ?? 0) + 1);
+      let entry: Entry;
+      try {
+        entry = await ensure(path);
+      } finally {
+        const left = (reservations.get(path) ?? 1) - 1;
+        if (left <= 0) reservations.delete(path);
+        else reservations.set(path, left);
+      }
       entry.refs += 1;
       if (entry.failure !== null) return { status: "failed", reason: entry.failure };
       if (entry.url === null) return { status: "failed", reason: "decode" };
@@ -183,6 +266,19 @@ export function createMediaCache<T extends MediaBytes>(
     async getBitmap(path) {
       const entry = await ensure(path);
       return entry.bitmap;
+    },
+
+    audit() {
+      return [...traces.entries()]
+        .map(([path, trace]) => ({
+          path,
+          requestedAt: trace.requestedAt,
+          resolvedAt: trace.resolvedAt,
+          evictedAt: trace.evictedAt,
+          timesRequested: trace.timesRequested,
+          resident: entries.has(path),
+        }))
+        .sort((a, b) => (a.requestedAt ?? 0) - (b.requestedAt ?? 0));
     },
 
     size() {

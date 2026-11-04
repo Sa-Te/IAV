@@ -135,6 +135,8 @@ export function MediaTile({
     <button
       ref={ref}
       type="button"
+      data-media-state={media.status}
+      data-media-reason={failure === null ? undefined : failure.toLowerCase()}
       className={failure === null ? "tile" : "tile tile-has-failure"}
       aria-label={failure === null ? label : `${label} — ${failure.toLowerCase()}`}
       onClick={onOpen}

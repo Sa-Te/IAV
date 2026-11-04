@@ -1,4 +1,9 @@
-import { createMediaCache, toMediaItems, type MediaState } from "@instavault/core";
+import {
+  createMediaCache,
+  toMediaItems,
+  type MediaState,
+  type PathTimeline,
+} from "@instavault/core";
 import { useEffect, useState, type JSX } from "react";
 
 import { browserRuntime } from "../media/browserRuntime.js";
@@ -25,6 +30,8 @@ interface Audit {
   readonly rows: readonly Row[];
   readonly categories: readonly { id: string; claimed: number }[];
   readonly worker: string;
+  readonly timelines: readonly PathTimeline[];
+  readonly evictedWhileUnresolved: number;
 }
 
 export function DevMediaAudit(): JSX.Element {
@@ -83,7 +90,26 @@ export function DevMediaAudit(): JSX.Element {
                 ),
               ]);
 
-        if (!cancelled) setAudit({ counts, rows, categories, worker });
+        // The timelines for the first 20 items of "/" — the exact question the
+        // top-of-grid tiles raised: requested, resolved, evicted, how often.
+        const allIds = records
+          .flatMap((record) => toMediaItems(record.id, record.data).map((item) => item.id))
+          .slice(0, 20);
+        const timelineCache = createMediaCache(
+          (path) => repository.getMediaBlob(path),
+          browserRuntime,
+        );
+        await Promise.all(allIds.map((id) => timelineCache.getUrl(id)));
+        const timelines = timelineCache.audit().filter((entry) => allIds.includes(entry.path));
+        const evictedWhileUnresolved = timelines.filter(
+          (entry) =>
+            entry.evictedAt !== null &&
+            (entry.resolvedAt === null || entry.evictedAt < entry.resolvedAt),
+        ).length;
+        timelineCache.releaseAll();
+
+        if (!cancelled)
+          setAudit({ counts, rows, categories, worker, timelines, evictedWhileUnresolved });
       } catch (caught) {
         if (!cancelled) setError(caught instanceof Error ? caught.message : String(caught));
       }
@@ -156,6 +182,47 @@ export function DevMediaAudit(): JSX.Element {
                 <tr key={entry.id}>
                   <th scope="row">{entry.id}</th>
                   <td>{entry.claimed}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <h2>Timeline — first 20 items of /</h2>
+          <table>
+            <caption>
+              Evicted while unresolved: {audit.evictedWhileUnresolved} of {audit.timelines.length}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">path</th>
+                <th scope="col">requested</th>
+                <th scope="col">resolved</th>
+                <th scope="col">evicted</th>
+                <th scope="col">requests</th>
+                <th scope="col">resident</th>
+              </tr>
+            </thead>
+            <tbody>
+              {audit.timelines.map((entry) => (
+                <tr key={entry.path}>
+                  <td>{entry.path}</td>
+                  <td>
+                    {entry.requestedAt === null
+                      ? "–"
+                      : new Date(entry.requestedAt).toLocaleTimeString()}
+                  </td>
+                  <td>
+                    {entry.resolvedAt === null
+                      ? "–"
+                      : new Date(entry.resolvedAt).toLocaleTimeString()}
+                  </td>
+                  <td>
+                    {entry.evictedAt === null
+                      ? "–"
+                      : new Date(entry.evictedAt).toLocaleTimeString()}
+                  </td>
+                  <td>{entry.timesRequested}</td>
+                  <td>{entry.resident ? "yes" : "no"}</td>
                 </tr>
               ))}
             </tbody>

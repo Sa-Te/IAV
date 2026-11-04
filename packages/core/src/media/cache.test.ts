@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { createMediaCache, MEDIA_CACHE_CAP } from "./cache.js";
+import { createMediaCache, MAX_CONCURRENT_LOADS, MEDIA_CACHE_CAP } from "./cache.js";
 import type { DecodedBitmap, DecodedMedia, MediaBytes } from "./state.js";
 
 /**
@@ -186,5 +186,73 @@ describe("pinning (M12 blank-tile bug)", () => {
     // Three live tiles, cap two: overshoot rather than blank one of them.
     expect(cache.size()).toBe(3);
     expect(calls.filter((call) => call.startsWith("revoke:"))).toHaveLength(0);
+  });
+});
+
+describe("in-flight entries and the load queue (M14)", () => {
+  it("re-requests an evicted path and still settles the consumer", async () => {
+    let calls = 0;
+    const load = vi.fn(async () => {
+      calls += 1;
+      return blob();
+    });
+    const cache = createMediaCache(load, fakeRuntime().runtime, 1);
+
+    const first = await cache.getUrl("a.jpg");
+    expect(first.status).toBe("ready");
+
+    // B evicts the unpinned A.
+    await cache.getUrl("b.jpg");
+    const again = await cache.getUrl("a.jpg");
+
+    expect(again.status).toBe("ready");
+    expect(calls).toBe(3); // a, b, a — the re-request really happened
+    const trace = cache.audit().find((entry) => entry.path === "a.jpg");
+    expect(trace?.timesRequested).toBe(2);
+    expect(trace?.evictedAt).not.toBeNull();
+  });
+
+  it("settles 300 concurrent requests while never loading more than 8 at once", async () => {
+    let inFlight = 0;
+    let peak = 0;
+    const cache = createMediaCache(
+      async () => {
+        inFlight += 1;
+        peak = Math.max(peak, inFlight);
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        inFlight -= 1;
+        return blob();
+      },
+      fakeRuntime().runtime,
+      150,
+    );
+
+    const results = await Promise.all(
+      Array.from({ length: 300 }, (_, index) => cache.getUrl(`p/${index}.jpg`)),
+    );
+
+    expect(results.every((state) => state !== undefined)).toBe(true);
+    expect(peak).toBeLessThanOrEqual(MAX_CONCURRENT_LOADS);
+    expect(peak).toBeGreaterThan(1); // the queue did run things in parallel
+  });
+
+  it("never evicts a path a consumer is waiting for", async () => {
+    let release: ((value: MediaBytes) => void) | undefined;
+    const cache = createMediaCache(
+      (path) =>
+        path === "slow.jpg"
+          ? new Promise<MediaBytes>((resolve) => {
+              release = resolve;
+            })
+          : Promise.resolve(blob()),
+      fakeRuntime().runtime,
+      1,
+    );
+
+    const slow = cache.retain("slow.jpg");
+    await cache.getUrl("fast.jpg");
+    release?.(blob());
+
+    expect((await slow).status).toBe("ready");
   });
 });
