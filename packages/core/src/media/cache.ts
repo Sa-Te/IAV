@@ -263,6 +263,7 @@ export function createMediaCache<T extends MediaBytes>(
       .finally(() => inflight.delete(path))
       .then((entry) => {
         entries.set(path, entry);
+        traceOf(path).resolvedAt = Date.now();
         evictIfNeeded(path);
         return entry;
       });

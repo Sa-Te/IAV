@@ -12,8 +12,17 @@ const scope = self as unknown as {
 };
 
 const repository = await createLocalArchiveRepository();
-const host = new IngestWorkerHost(repository, (response) => scope.postMessage(response));
+// The repository is also the worker's media store: without it every thumbnail
+// request is answered "unsupported" and the grid silently falls back to decoding
+// full-size originals on the main thread.
+const host = new IngestWorkerHost(
+  repository,
+  (response) => scope.postMessage(response),
+  repository,
+);
 
 scope.addEventListener("message", (event) => {
   void host.handle(event.data as IngestRequest);
 });
+
+host.announceReady();

@@ -26,10 +26,13 @@ export type ThumbnailResult =
   | { readonly status: "unavailable" };
 
 let worker: Worker | null = null;
+let ready = false;
 let unavailable = false;
 let announced = false;
 const pending = new Map<string, { resolve: (result: ThumbnailResult) => void; timer: number }>();
 const listeners = new Set<() => void>();
+/** Requests made before the worker announced itself; posted once it is ready. */
+const waitingForReady = new Map<string, IngestRequest>();
 
 function markUnavailable(): void {
   unavailable = true;
@@ -64,6 +67,12 @@ function ensureWorker(): Worker | null {
 
   worker.addEventListener("message", (event: MessageEvent<IngestResponse>) => {
     const response = event.data;
+    if (response.type === "ready") {
+      ready = true;
+      for (const request of waitingForReady.values()) worker?.postMessage(request);
+      waitingForReady.clear();
+      return;
+    }
     if (response.type !== "thumbnail") return;
     const entry = pending.get(response.path);
     if (entry === undefined) return;
@@ -97,7 +106,10 @@ export function requestThumbnail(path: string): Promise<ThumbnailResult> {
 
     pending.set(path, { resolve, timer });
     const request: IngestRequest = { type: "thumbnail", path };
-    target.postMessage(request);
+    // The worker opens IndexedDB before it listens; a message posted in that
+    // window is lost, and the caller would wait out the whole deadline.
+    if (ready) target.postMessage(request);
+    else waitingForReady.set(path, request);
   });
 }
 
@@ -117,6 +129,8 @@ export function resetThumbnailWorker(): void {
   pending.clear();
   worker?.terminate();
   worker = null;
+  ready = false;
   unavailable = false;
   announced = false;
+  waitingForReady.clear();
 }

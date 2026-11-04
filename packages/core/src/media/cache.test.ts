@@ -256,3 +256,17 @@ describe("in-flight entries and the load queue (M14)", () => {
     expect((await slow).status).toBe("ready");
   });
 });
+
+describe("audit timeline (M15)", () => {
+  it("records when a path resolved, not just that it is resident", async () => {
+    const cache = createMediaCache(async () => blob(), fakeRuntime().runtime);
+
+    await cache.getUrl("a.jpg");
+
+    const [trace] = cache.audit();
+    expect(trace?.resident).toBe(true);
+    expect(trace?.requestedAt).not.toBeNull();
+    expect(trace?.resolvedAt).not.toBeNull();
+    expect(trace?.evictedAt).toBeNull();
+  });
+});

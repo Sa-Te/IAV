@@ -32,6 +32,10 @@ class SilentWorker {
     this.posted.push(message);
   }
 
+  emit(type: string, data: unknown): void {
+    for (const listener of this.listeners.get(type) ?? []) listener({ data });
+  }
+
   terminate(): void {}
 }
 
@@ -55,6 +59,11 @@ describe("worker deadline", () => {
       settled = result.status;
     });
 
+    // The worker opens IndexedDB before listening: the request waits for its
+    // "ready" announcement instead of being posted into the void.
+    expect(SilentWorker.instances[0]?.posted).toEqual([]);
+
+    SilentWorker.instances[0]?.emit("message", { type: "ready" });
     expect(SilentWorker.instances[0]?.posted).toEqual([
       { type: "thumbnail", path: "media/posts/a.jpg" },
     ]);

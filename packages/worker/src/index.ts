@@ -41,6 +41,7 @@ export interface ThumbnailMediaStore {
 }
 
 export type IngestResponse =
+  | { readonly type: "ready" }
   | { readonly type: "job"; readonly job: IngestJob }
   | { readonly type: "error"; readonly message: string }
   | {
@@ -59,6 +60,15 @@ export class IngestWorkerHost {
     private readonly media: ThumbnailMediaStore | null = null,
     private readonly encode: ThumbnailEncoder<Blob> = browserThumbnailEncoder,
   ) {}
+
+  /**
+   * Announced by the composition root once the repository is open and this host
+   * has installed its listener. Messages posted before that point can be lost —
+   * which is why a thumbnail request used to wait out its whole deadline.
+   */
+  announceReady(): void {
+    this.post({ type: "ready" });
+  }
 
   get isRunning(): boolean {
     return this.controller !== null;
