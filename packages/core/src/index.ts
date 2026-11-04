@@ -11,7 +11,13 @@ export { toMediaItems } from "./domain/media.js";
 export type { MediaItemView } from "./domain/media.js";
 export { toPostEntries } from "./domain/posts.js";
 export type { PostEntry } from "./domain/posts.js";
-export { createMediaCache, MAX_CONCURRENT_LOADS, MEDIA_CACHE_CAP } from "./media/cache.js";
+export {
+  createMediaCache,
+  MAX_CONCURRENT_LOADS,
+  MEDIA_CACHE_CAP,
+  MEDIA_REQUEST_DEADLINE_MS,
+  MediaTimeoutError,
+} from "./media/cache.js";
 export type { MediaCache, MediaCacheRuntime, PathTimeline } from "./media/cache.js";
 export type { DecodedBitmap, DecodedMedia, MediaBytes, MediaState } from "./media/state.js";
 export {

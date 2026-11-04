@@ -26,8 +26,9 @@ function assertNever(value: never): never {
   throw new Error(`unhandled media state: ${JSON.stringify(value)}`);
 }
 
-function reasonText(reason: "missing" | "decode" | "unloadable"): string {
+function reasonText(reason: "missing" | "decode" | "timeout" | "unloadable"): string {
   if (reason === "missing") return "Not stored";
+  if (reason === "timeout") return "Timed out";
   return "Cannot display";
 }
 

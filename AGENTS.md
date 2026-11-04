@@ -208,6 +208,8 @@ These are checked, not hoped for.
 - Tables paginate at 100 rows. Virtualise only above 2,000 rendered tiles.
 - 3D views hold at most 96 textures at 256px (≈25 MB). The window advances; it never
   grows. Report resident bytes in the dev overlay.
+- No request may be pending without a deadline. A promise that cannot settle is a permanent
+  loading state, which is the original bug.
 - Thumbnails generated off the main thread (`createImageBitmap` +
   `OffscreenCanvas` in the worker). Never decode full-res media for a grid tile.
 - Blob URLs live in one LRU cache with an explicit revoke policy. Unbounded blob

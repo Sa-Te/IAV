@@ -80,10 +80,10 @@ export function DevMediaAudit(): JSX.Element {
           first === undefined
             ? "no media rows to ask about"
             : await Promise.race([
-                requestThumbnail(first).then((blob) =>
-                  blob === null
-                    ? "no reply (no Worker, or generation refused)"
-                    : `replied with ${blob.size} bytes`,
+                requestThumbnail(first).then((result) =>
+                  result.status === "blob"
+                    ? `replied with ${result.blob.size} bytes`
+                    : `no blob — ${result.status}`,
                 ),
                 new Promise<string>((resolve) =>
                   window.setTimeout(() => resolve("no reply within 3s"), 3000),

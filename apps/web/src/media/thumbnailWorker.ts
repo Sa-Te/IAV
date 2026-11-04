@@ -3,43 +3,120 @@ import type { IngestRequest, IngestResponse } from "@instavault/worker";
 /**
  * Main-thread client for the worker's `thumbnail` request.
  *
- * Deliberately tiny: one worker, one pending map, and a hard "not available"
- * answer when there is no `Worker` (Node/jsdom, or a browser that refused it).
- * A null means "no thumbnail, use the original" — never a failed tile.
+ * The M14 defect: a request that never got a reply stayed pending forever, and a
+ * pending cache entry is a permanent skeleton. Every request now carries a
+ * deadline and every answer is typed, so "no reply" is a result rather than a
+ * hang. The worker is started lazily; a construction failure is remembered once
+ * and every tile falls back to original blobs afterwards.
  */
 
+/**
+ * Ten seconds: enough for a cold worker boot plus a 12MP decode on a slow laptop,
+ * short enough that a tile that will never show an image says so.
+ */
+export const THUMBNAIL_DEADLINE_MS = 10_000;
+
+export type ThumbnailResult =
+  | { readonly status: "blob"; readonly blob: Blob }
+  /** The worker answered "no thumbnail for this path" (video, decode refused). */
+  | { readonly status: "empty" }
+  /** The worker did not answer within the deadline. */
+  | { readonly status: "timeout" }
+  /** No worker exists, or it failed to start. Thumbnails are off for this session. */
+  | { readonly status: "unavailable" };
+
 let worker: Worker | null = null;
-const pending = new Map<string, (blob: Blob | null) => void>();
+let unavailable = false;
+let announced = false;
+const pending = new Map<string, { resolve: (result: ThumbnailResult) => void; timer: number }>();
+const listeners = new Set<() => void>();
+
+function markUnavailable(): void {
+  unavailable = true;
+  for (const [path, entry] of pending) {
+    clearTimeout(entry.timer);
+    pending.delete(path);
+    entry.resolve({ status: "unavailable" });
+  }
+  if (!announced) {
+    announced = true;
+    // Once per page session, not once per tile.
+    for (const listener of listeners) listener();
+  }
+}
 
 function ensureWorker(): Worker | null {
-  if (typeof Worker === "undefined") return null;
+  if (unavailable) return null;
+  if (typeof Worker === "undefined") {
+    markUnavailable();
+    return null;
+  }
   if (worker !== null) return worker;
 
-  worker = new Worker(new URL("../workers/ingest.worker.ts", import.meta.url), { type: "module" });
+  try {
+    worker = new Worker(new URL("../workers/ingest.worker.ts", import.meta.url), {
+      type: "module",
+    });
+  } catch {
+    markUnavailable();
+    return null;
+  }
+
   worker.addEventListener("message", (event: MessageEvent<IngestResponse>) => {
     const response = event.data;
     if (response.type !== "thumbnail") return;
-    const resolve = pending.get(response.path);
+    const entry = pending.get(response.path);
+    if (entry === undefined) return;
+    clearTimeout(entry.timer);
     pending.delete(response.path);
-    resolve?.(response.thumbnail?.blob ?? null);
+    entry.resolve(
+      response.thumbnail === null
+        ? { status: "empty" }
+        : { status: "blob", blob: response.thumbnail.blob },
+    );
   });
+
+  worker.addEventListener("error", () => {
+    markUnavailable();
+    worker?.terminate();
+    worker = null;
+  });
+
   return worker;
 }
 
-export function requestThumbnail(path: string): Promise<Blob | null> {
+export function requestThumbnail(path: string): Promise<ThumbnailResult> {
   const target = ensureWorker();
-  if (target === null) return Promise.resolve(null);
+  if (target === null) return Promise.resolve({ status: "unavailable" });
 
   return new Promise((resolve) => {
-    pending.set(path, resolve);
+    const timer = window.setTimeout(() => {
+      pending.delete(path);
+      resolve({ status: "timeout" });
+    }, THUMBNAIL_DEADLINE_MS);
+
+    pending.set(path, { resolve, timer });
     const request: IngestRequest = { type: "thumbnail", path };
     target.postMessage(request);
   });
 }
 
+export function thumbnailsUnavailable(): boolean {
+  return unavailable;
+}
+
+/** Fires at most once per page session. Returns an unsubscribe. */
+export function onThumbnailsUnavailable(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 /** Test hook: forget the worker between tests. */
 export function resetThumbnailWorker(): void {
+  for (const entry of pending.values()) clearTimeout(entry.timer);
   pending.clear();
   worker?.terminate();
   worker = null;
+  unavailable = false;
+  announced = false;
 }

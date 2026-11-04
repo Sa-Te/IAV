@@ -30,6 +30,20 @@ export const MEDIA_CACHE_CAP = 150;
  */
 export const MAX_CONCURRENT_LOADS = 8;
 
+/**
+ * No request may be pending without a deadline (AGENTS §7). This is the backstop
+ * for a loader that never settles at all, so it is deliberately longer than the
+ * worker's own 10-second deadline: the thumbnail times out first, the original
+ * blob answers, and a working tile is never failed by the backstop. On expiry the
+ * entry becomes `failed: "timeout"` — a terminal state, never a fourth state.
+ */
+export const MEDIA_REQUEST_DEADLINE_MS = 12_000;
+
+/** A loader may throw this to say "nobody answered", distinct from "no blob". */
+export class MediaTimeoutError extends Error {
+  override readonly name = "MediaTimeoutError";
+}
+
 export interface MediaCacheRuntime<T extends MediaBytes> {
   createUrl(blob: T): string;
   revokeUrl(url: string): void;
@@ -52,7 +66,7 @@ interface Entry {
   mime: string;
   bytes: number;
   lastUsed: number;
-  failure: "missing" | "decode" | null;
+  failure: "missing" | "decode" | "timeout" | null;
 }
 
 export interface PathTimeline {
@@ -88,6 +102,7 @@ export function createMediaCache<T extends MediaBytes>(
   load: (path: string) => Promise<T | null>,
   runtime: MediaCacheRuntime<T>,
   capacity: number = MEDIA_CACHE_CAP,
+  deadlineMs: number = MEDIA_REQUEST_DEADLINE_MS,
 ): MediaCache {
   const entries = new Map<string, Entry>();
   const inflight = new Map<string, Promise<Entry>>();
@@ -176,7 +191,34 @@ export function createMediaCache<T extends MediaBytes>(
     traceOf(path).requestedAt = Date.now();
 
     const promise = (async (): Promise<Entry> => {
-      const blob = await admitted(() => load(path));
+      // One attempt, one deadline, one terminal state. A loader that hangs — the
+      // worker never replying — must not become a permanent skeleton.
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const deadline = new Promise<"timeout">((resolve) => {
+        timer = setTimeout(() => resolve("timeout"), deadlineMs);
+      });
+      let blob: T | null | "timeout";
+      try {
+        blob = await Promise.race([admitted(() => load(path)), deadline]);
+      } catch (error) {
+        if (error instanceof MediaTimeoutError) blob = "timeout";
+        else throw error;
+      } finally {
+        if (timer !== undefined) clearTimeout(timer);
+      }
+
+      if (blob === "timeout") {
+        return {
+          path,
+          refs: 0,
+          url: null,
+          bitmap: null,
+          mime: "",
+          bytes: 0,
+          lastUsed: (clock += 1),
+          failure: "timeout",
+        };
+      }
       if (blob === null) {
         return {
           path,

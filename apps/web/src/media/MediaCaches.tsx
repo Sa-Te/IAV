@@ -1,4 +1,9 @@
-import { createMediaCache, type MediaCache, type MediaCacheRuntime } from "@instavault/core";
+import {
+  createMediaCache,
+  MediaTimeoutError,
+  type MediaCache,
+  type MediaCacheRuntime,
+} from "@instavault/core";
 import { createContext, useContext, useEffect, useMemo, type JSX, type ReactNode } from "react";
 
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
@@ -32,12 +37,20 @@ export function createMediaCaches(
 ): MediaCaches {
   const original = createMediaCache((path) => repository.getMediaBlob(path), runtime);
 
+  // A thumbnail is an optimisation, never a dependency: when generation fails or
+  // times out, the original blob answers instead. `timeout` is kept only for the
+  // case where nothing answered at all, so the tile can say so.
   const thumb = createMediaCache(async (path) => {
     const stored = await repository.getThumbnail(path);
     if (stored !== null) return stored.blob;
+
     const generated = await requestThumbnail(path);
-    if (generated !== null) return generated;
-    return repository.getMediaBlob(path);
+    if (generated.status === "blob") return generated.blob;
+
+    const original = await repository.getMediaBlob(path);
+    if (original !== null) return original;
+    if (generated.status === "timeout") throw new MediaTimeoutError(`thumbnail timed out: ${path}`);
+    return null;
   }, runtime);
 
   return { original, thumb };

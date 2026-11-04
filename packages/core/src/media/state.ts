@@ -28,7 +28,7 @@ export type MediaState =
       /** Decoded pixels when a bitmap was requested; null for video and audio. */
       readonly bitmap: DecodedBitmap | null;
     }
-  | { readonly status: "failed"; readonly reason: "missing" | "decode" };
+  | { readonly status: "failed"; readonly reason: "missing" | "decode" | "timeout" };
 
 /** What a runtime must provide to decode a blob into pixels, or explain why not. */
 export type DecodedMedia =

@@ -7,3 +7,11 @@ declare class TextDecoder {
   constructor(label?: string, options?: { fatal?: boolean });
   decode(input?: Uint8Array): string;
 }
+
+/**
+ * Timer globals, declared for the same reason as TextDecoder: the media cache
+ * needs a deadline and `lib.dom` is not available here. Both exist in Node and in
+ * every browser.
+ */
+declare function setTimeout(handler: () => void, timeout?: number): number;
+declare function clearTimeout(handle: number | undefined): void;
