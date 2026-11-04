@@ -481,6 +481,8 @@ INFERENCE until the main agent confirms it by reading.
   guess). Never blur them.
 - Quote code you're describing. Never paraphrase a file from memory.
 - If you couldn't read something, say which and why.
+- Every browser-only failure report must be paired with /dev/logs output. A description of a
+  symptom is not evidence; a copied log line is.
 - No "everything is now fixed" without the command and its output that proves it.
 
 ### Housekeeping latitude

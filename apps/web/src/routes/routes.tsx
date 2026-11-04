@@ -5,6 +5,7 @@ import { State } from "../ui/State.js";
 import { CategoryRoute } from "../categories/CategoryView.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { DevIngest } from "./DevIngest.js";
+import { DevLogs } from "./DevLogs.js";
 import { DevMediaAudit } from "./DevMediaAudit.js";
 import { DevTokens } from "./DevTokens.js";
 
@@ -55,6 +56,7 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
     routes.push({ path: "/dev/ingest", element: <DevIngest /> });
     routes.push({ path: "/dev/tokens", element: <DevTokens /> });
     routes.push({ path: "/dev/media-audit", element: <DevMediaAudit /> });
+    routes.push({ path: "/dev/logs", element: <DevLogs /> });
     routes.push({
       path: "/dev/cyclone-stats",
       element: (
