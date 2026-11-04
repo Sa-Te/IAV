@@ -114,3 +114,9 @@ progress.
   `vec3(uv, layer)` needs no padding, packing or re-packing; an atlas is the same memory
   with more arithmetic —
   vault: `architecture/2026-10-31_instanced-rendering.md`
+- 2026-11-04 — `worker-ready-handshake` — messages posted to a worker before it
+  installs its listener are lost, so a worker protocol needs an explicit ready ping —
+  vault: `debug-log/2026-11-04_worker-ready-handshake.md`
+- 2026-11-04 — `browser-before-green` — a green suite proves what its fakes model; the
+  product is proven by driving a real browser against a real archive —
+  vault: `learning-notes/2026-11-04_session-12.md`
