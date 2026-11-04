@@ -206,3 +206,29 @@ describe("cyclone keys stay inside the region", () => {
     expect(escape).toBe(true);
   });
 });
+
+describe("the texture budget is a refusal, not a crash", () => {
+  it("falls back to the grid with a sentence when the budget is exceeded", async () => {
+    const { TextureBudgetError } = await import("./gl/textures.js");
+    startMock.mockImplementation(() => {
+      throw new TextureBudgetError(97, 96);
+    });
+    renderPage();
+
+    expect(await screen.findByText(/needs more cards than this device can hold/)).toBeDefined();
+  });
+
+  it("catches any other startup error, logs it, and still degrades to the grid", async () => {
+    const { clearLogs, logEntries } = await import("../ui/logBuffer.js");
+    clearLogs();
+    startMock.mockImplementation(() => {
+      throw new Error("shader failed to compile");
+    });
+    renderPage();
+
+    expect(await screen.findByText(/cannot start the 3D view/)).toBeDefined();
+    expect(logEntries().some((entry) => entry.message.includes("shader failed to compile"))).toBe(
+      true,
+    );
+  });
+});

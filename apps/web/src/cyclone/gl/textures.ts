@@ -13,6 +13,20 @@ import { DEFAULT_WINDOW_SIZE } from "@instavault/core";
  * card left the window while the request was in flight).
  */
 
+/**
+ * The window refused to grow. Typed so the route can tell "this device cannot hold
+ * the 3D view" apart from a genuine bug and degrade instead of crashing.
+ */
+export class TextureBudgetError extends Error {
+  override readonly name = "TextureBudgetError";
+  constructor(
+    readonly requested: number,
+    readonly cap: number,
+  ) {
+    super(`texture window exceeded its ${cap}-layer budget (requested ${requested})`);
+  }
+}
+
 export const THUMBNAIL_SIZE = 256;
 export const BYTES_PER_PIXEL = 4;
 
@@ -69,7 +83,7 @@ export function createTextureWindow(
     if (layer === undefined) {
       // 96 in, 96 out: reaching here means the caller asked for more than the
       // budget without leaving a layer behind.
-      throw new Error(`texture window exceeded its ${windowSize}-layer budget`);
+      throw new TextureBudgetError(resident.size + 1, sink.layerCount);
     }
     return layer;
   };

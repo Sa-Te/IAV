@@ -8,7 +8,9 @@ import { useArchiveRepository } from "../repository/RepositoryContext.js";
 import { State } from "../ui/State.js";
 import { usePrefersReducedMotion } from "../ui/usePrefersReducedMotion.js";
 import { CycloneStage } from "./CycloneStage.js";
+import { TextureBudgetError } from "./gl/textures.js";
 import { startCyclone } from "./startCyclone.js";
+import { log } from "../ui/logBuffer.js";
 
 /**
  * `/cyclone` — the 3D view, behind a lazy import so its GL code is its own chunk.
@@ -26,6 +28,7 @@ export function CyclonePage(): JSX.Element {
   const reducedMotion = usePrefersReducedMotion();
   const [opened, setOpened] = useState<MediaItemView | null>(null);
   const [unavailable, setUnavailable] = useState(false);
+  const [budgetRefused, setBudgetRefused] = useState(false);
 
   useEffect(() => {
     const onOpen = (event: Event) => {
@@ -89,6 +92,12 @@ export function CyclonePage(): JSX.Element {
     );
   }
 
+  if (budgetRefused) {
+    return gridFallback(
+      "The 3D view needs more cards than this device can hold, so the grid is shown instead.",
+    );
+  }
+
   if (unavailable) {
     return gridFallback(
       "This browser cannot start the 3D view: it needs WebGL2 with at least 96 texture-array layers.",
@@ -109,29 +118,47 @@ export function CyclonePage(): JSX.Element {
         reducedMotion={reducedMotion}
         onUnavailable={() => setUnavailable(true)}
         start={(canvas, media) => {
-          const started = startCyclone({
-            canvas,
-            items: media.map((item, index) => ({
-              index,
-              bitmap: async () => {
-                // 256px, not the grid's 512px (D3): the cards are small, and the
-                // window is what bounds memory.
-                const blob = await repository.getMediaBlob(item.id);
-                if (blob === null) return null;
-                try {
-                  return await createImageBitmap(blob, {
-                    resizeWidth: 256,
-                    resizeHeight: 256,
-                    resizeQuality: "medium",
-                  });
-                } catch {
-                  return null;
-                }
-              },
-            })),
-            reducedMotion,
-          });
-          return started;
+          try {
+            return startCyclone({
+              canvas,
+              items: media.map((item, index) => ({
+                index,
+                bitmap: async () => {
+                  // 256px, not the grid's 512px (D3): the cards are small, and the
+                  // window is what bounds memory.
+                  const blob = await repository.getMediaBlob(item.id);
+                  if (blob === null) return null;
+                  try {
+                    return await createImageBitmap(blob, {
+                      resizeWidth: 256,
+                      resizeHeight: 256,
+                      resizeQuality: "medium",
+                    });
+                  } catch {
+                    return null;
+                  }
+                },
+              })),
+              reducedMotion,
+            });
+          } catch (error) {
+            // A budget refusal is a supported outcome, not a crash: say so and show
+            // the grid. Anything else is a bug — record it before degrading.
+            if (error instanceof TextureBudgetError) {
+              setBudgetRefused(true);
+            } else {
+              log({
+                level: "error",
+                source: "window",
+                message: error instanceof Error ? error.message : String(error),
+                ...(error instanceof Error && error.stack !== undefined
+                  ? { stack: error.stack }
+                  : {}),
+              });
+              setUnavailable(true);
+            }
+            return null;
+          }
         }}
       />
 

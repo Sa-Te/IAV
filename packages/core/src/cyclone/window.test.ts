@@ -37,3 +37,19 @@ describe("residentWindow", () => {
     expect(residentWindow(0, 0)).toEqual([]);
   });
 });
+
+describe("the window never exceeds the cap (M14)", () => {
+  const counts = [0, 1, 95, 96, 97, 405] as const;
+
+  it.each(counts)("count %i", (count) => {
+    for (let focus = 0; focus <= count; focus += Math.max(1, Math.floor(count / 7))) {
+      const window = residentWindow(count, focus);
+      expect(window.length).toBeLessThanOrEqual(Math.min(96, count));
+      expect(new Set(window).size).toBe(window.length);
+      for (const index of window) {
+        expect(index).toBeGreaterThanOrEqual(0);
+        expect(index).toBeLessThan(count);
+      }
+    }
+  });
+});

@@ -1,7 +1,12 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
 
-import { createTextureWindow, THUMBNAIL_SIZE, type LayerSink } from "./textures.js";
+import {
+  createTextureWindow,
+  TextureBudgetError,
+  THUMBNAIL_SIZE,
+  type LayerSink,
+} from "./textures.js";
 
 /** jsdom has no WebGL, so the seam is tested: what is uploaded, freed and closed. */
 function sink(layers = 96): LayerSink & { uploads: number[]; cleared: number[] } {
@@ -129,5 +134,19 @@ describe("texture window", () => {
 
     expect(window.stats().resident).toBe(0);
     expect(target.cleared).toHaveLength(3);
+  });
+});
+
+describe("budget refusal is typed (M14)", () => {
+  it("throws TextureBudgetError carrying the requested count and the cap", async () => {
+    const window = createTextureWindow(sink(96), { request: async () => bitmap() });
+
+    await expect(
+      window.setWindow(Array.from({ length: 97 }, (_, index) => index)),
+    ).rejects.toMatchObject({ name: "TextureBudgetError", cap: 96 });
+
+    await expect(
+      window.setWindow(Array.from({ length: 97 }, (_, index) => index)),
+    ).rejects.toBeInstanceOf(TextureBudgetError);
   });
 });
