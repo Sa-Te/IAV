@@ -1,6 +1,8 @@
 import { describeFailure, type IngestJob } from "@instavault/core";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { useListCache } from "../data/ListCacheContext.js";
+
 /**
  * Dev harness, not the product UI (AGENTS.md: the harness is deleted or hidden
  * behind a flag at M6). Its job is to prove, in the browser, that a ZIP goes in
@@ -14,6 +16,7 @@ const WIPE_WARNING =
   "This deletes the archive on this device: every category and every media file. It cannot be undone.";
 
 export function DevIngest() {
+  const listCache = useListCache();
   const workerRef = useRef<Worker | null>(null);
   const lastFileRef = useRef<File | null>(null);
   const startedAtRef = useRef<number | null>(null);
@@ -44,6 +47,12 @@ export function DevIngest() {
     return () => worker.terminate();
   }, []);
 
+  // An import replaces the archive: every cached list is now wrong.
+  useEffect(() => {
+    if (job.status !== "ready") return;
+    listCache?.clear();
+  }, [job.status, listCache]);
+
   useEffect(() => {
     if (job.status !== "parsing") return;
     const timer = setInterval(() => {
@@ -71,6 +80,8 @@ export function DevIngest() {
   const wipe = useCallback(() => {
     if (!window.confirm(WIPE_WARNING)) return;
     workerRef.current?.postMessage({ type: "clear" });
+    // The archive is about to change underneath every cached list.
+    listCache?.clear();
     setProtocolError(null);
   }, []);
 

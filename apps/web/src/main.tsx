@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import "./styles/app.css";
+import { ListCacheProvider } from "./data/ListCacheContext.js";
 import { MediaCachesProvider } from "./media/MediaCaches.js";
 import { AppShell } from "./ui/AppShell.js";
 import { ErrorBoundary } from "./ui/ErrorBoundary.js";
@@ -26,23 +27,26 @@ void stopLogCapture;
 createRoot(container).render(
   <StrictMode>
     <ErrorBoundary>
-      <BrowserRouter>
-        <Routes>
-          {routes.map((route) => (
-            <Route
-              key={route.path}
-              path={route.path}
-              element={
-                <RepositoryProvider>
-                  <MediaCachesProvider>
-                    <AppShell>{route.element}</AppShell>
-                  </MediaCachesProvider>
-                </RepositoryProvider>
-              }
-            />
-          ))}
-        </Routes>
-      </BrowserRouter>
+      {/* Providers sit above <Routes>: inside a route they are re-created on every
+          navigation, which is why switching tabs reopened the archive, emptied the
+          media cache and re-read every list. */}
+      <RepositoryProvider>
+        <MediaCachesProvider>
+          <ListCacheProvider>
+            <BrowserRouter>
+              <Routes>
+                {routes.map((route) => (
+                  <Route
+                    key={route.path}
+                    path={route.path}
+                    element={<AppShell>{route.element}</AppShell>}
+                  />
+                ))}
+              </Routes>
+            </BrowserRouter>
+          </ListCacheProvider>
+        </MediaCachesProvider>
+      </RepositoryProvider>
     </ErrorBoundary>
   </StrictMode>,
 );

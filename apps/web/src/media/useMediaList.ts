@@ -1,6 +1,8 @@
 import { toMediaItems, type MediaItemView } from "@instavault/core";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { useListCache } from "../data/ListCacheContext.js";
+import { createListCache, type ListCache } from "../data/listCache.js";
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
 
 export type MediaListState =
@@ -20,13 +22,39 @@ export function useMediaList(category: string): {
   readonly counts: Readonly<Record<string, number>>;
 } {
   const repository = useArchiveRepository();
-  const [state, setState] = useState<MediaListState>({ status: "loading" });
-  const [counts, setCounts] = useState<Readonly<Record<string, number>>>({});
+  const provided = useListCache();
+  // Outside a provider (tests, storybook-ish harnesses) the hook keeps its own
+  // cache for its lifetime rather than reaching for a module singleton.
+  const fallback = useRef<ListCache | null>(null);
+  const cache = useMemo(() => {
+    fallback.current ??= createListCache();
+    return provided ?? fallback.current;
+  }, [provided]);
+
+  const hit = cache.get(category);
+  const [state, setState] = useState<MediaListState>(
+    hit === undefined ? { status: "loading" } : { status: "ready", items: hit.items },
+  );
+  const [counts, setCounts] = useState<Readonly<Record<string, number>>>(hit?.counts ?? {});
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
-    setState({ status: "loading" });
+
+    // A cache hit renders immediately — no loading state, ever — and a later
+    // refresh updates in place through the subscription.
+    const cached = cache.get(category);
+    if (cached === undefined) setState({ status: "loading" });
+
+    const unsubscribe = cache.subscribe(category, (entry) => {
+      setState({ status: "ready", items: entry.items });
+      setCounts(entry.counts);
+    });
+
+    if (cached !== undefined) {
+      // A later mount inside the same page session: nothing to fetch.
+      return unsubscribe;
+    }
 
     void (async () => {
       try {
@@ -43,6 +71,8 @@ export function useMediaList(category: string): {
         }
 
         if (cancelled) return;
+
+        cache.set(category, { items, counts: perCategory });
         setCounts(perCategory);
         setState({ status: "ready", items });
       } catch {
@@ -52,8 +82,9 @@ export function useMediaList(category: string): {
 
     return () => {
       cancelled = true;
+      unsubscribe();
     };
-  }, [repository, category, attempt]);
+  }, [repository, category, attempt, cache]);
 
   const retry = useCallback(() => setAttempt((value) => value + 1), []);
   return { state, retry, counts };
