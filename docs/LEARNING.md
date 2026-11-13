@@ -184,3 +184,7 @@ progress.
   record does not match its measured shape, so a changed export degrades to the
   table or tree instead of showing a confident lie —
   vault: `mind-maps/2026-11-13_t1-screen-groups.md`
+- 2026-11-13 — `signed-urls-expire` — a CDN URL in an export is a signed
+  capability with an `oe` expiry, not a file; an expired signature cannot be
+  recomputed locally, so the honest UI shows the URL as text with its expiry —
+  vault: `debug-log/2026-11-13_expired-avatar-urls.md`

@@ -18,6 +18,12 @@ export interface AvatarItem {
   readonly acquiredAt: number | null;
   /** Localised acquisition time; null when absent or the export's 0 sentinel. */
   readonly acquiredDate: string | null;
+  /**
+   * Unix seconds from the URL's `oe` parameter, when it is a signed CDN URL.
+   * Facebook signs the link with a secret we do not have; an expired value
+   * cannot be refreshed locally. Null means the URL is unsigned.
+   */
+  readonly expiresAt: number | null;
 }
 
 export interface AvatarItemsView {
@@ -27,6 +33,18 @@ export interface AvatarItemsView {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+/** `oe` is a hex Unix timestamp on Facebook's signed CDN URLs. */
+function expiresAtOf(url: string): number | null {
+  const query = url.split("?")[1];
+  if (query === undefined) return null;
+  for (const part of query.split("&")) {
+    const [key, value] = part.split("=");
+    if (key !== "oe" || value === undefined) continue;
+    return /^[0-9a-f]+$/i.test(value) ? Number.parseInt(value, 16) : null;
+  }
+  return null;
 }
 
 export function toAvatarItemsView(record: {
@@ -47,6 +65,7 @@ export function toAvatarItemsView(record: {
         type: typeof raw.type === "string" ? raw.type : "",
         acquiredAt,
         acquiredDate: acquiredAt === null || acquiredAt === 0 ? null : localisedDate(acquiredAt),
+        expiresAt: expiresAtOf(raw.item),
       });
     }
   }

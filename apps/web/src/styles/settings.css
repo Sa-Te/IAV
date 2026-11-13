@@ -178,6 +178,13 @@
   font-size: var(--token-text-12);
 }
 
+.avatar-summary {
+  max-width: 72ch;
+  margin: 0 0 var(--token-space-4);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
 .avatar-card .settings-fields {
   gap: var(--token-space-2);
 }

@@ -34,6 +34,19 @@ describe("toAvatarItemsView", () => {
     expect(view?.items[0]?.acquiredDate).toBeNull();
   });
 
+  it("reads a signed URL's expiry and refuses to invent one", () => {
+    const view = toAvatarItemsView({
+      data: [
+        { item: "https://x.invalid/a.png?oe=6AE7C213" },
+        { item: "https://x.invalid/b.png?oe=not-hex" },
+        { item: "not a url" },
+      ],
+    });
+    expect(view?.items[0]?.expiresAt).toBe(Number.parseInt("6AE7C213", 16));
+    expect(view?.items[1]?.expiresAt).toBeNull();
+    expect(view?.items[2]?.expiresAt).toBeNull();
+  });
+
   it("treats an empty array as a present category with no items", () => {
     expect(toAvatarItemsView({ data: [] })).toEqual({ kind: "avatar-items", items: [] });
   });

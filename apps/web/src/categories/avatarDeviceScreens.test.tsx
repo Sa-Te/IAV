@@ -41,6 +41,13 @@ function renderAvatars(count: number): void {
   render(<AvatarItemsView view={view} raw={data} />);
 }
 
+function renderAvatarData(data: readonly unknown[]): void {
+  const view = toAvatarItemsView({ data });
+  expect(view).not.toBeNull();
+  if (view === null) return;
+  render(<AvatarItemsView view={view} raw={data} />);
+}
+
 function renderDevices(count: number): void {
   const data = Array.from({ length: count }, (_, index) => device(index));
   const view = toDeviceEffectsView({ data });
@@ -67,6 +74,29 @@ describe("avatar items screen", () => {
     expect(link.getAttribute("rel")).toBe("noreferrer noopener");
     expect(link.getAttribute("target")).toBe("_blank");
     expect(screen.getByText("item").tagName).toBe("DT");
+  });
+
+  it("shows an expired signed link as text, not a dead link", () => {
+    const expired = {
+      item: `https://x.invalid/a.png?oe=${(Math.floor(Date.now() / 1000) - 3600).toString(16)}`,
+      type: "FREE",
+      acquisition_time: 1_700_000_000,
+    };
+    renderAvatarData([expired]);
+
+    expect(screen.queryByRole("link", { name: expired.item })).toBeNull();
+    expect(screen.getByText(expired.item)).toBeDefined();
+    expect(screen.getByText(/This signed link expired/)).toBeDefined();
+  });
+
+  it("keeps the link while its signature is still valid", () => {
+    const live = {
+      item: `https://x.invalid/a.png?oe=${(Math.floor(Date.now() / 1000) + 3600).toString(16)}`,
+      type: "FREE",
+      acquisition_time: 1_700_000_000,
+    };
+    renderAvatarData([live]);
+    expect(screen.getByRole("link", { name: live.item })).toBeDefined();
   });
 
   it("renders a present-but-empty category as empty", () => {
