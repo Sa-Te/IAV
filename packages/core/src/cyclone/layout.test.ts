@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   camera,
   CAMERA_DISTANCE,
-  CARD_SIZE_SHARE,
   FOV_Y,
   focusedIndex,
   GOLDEN_ANGLE,
@@ -147,39 +146,28 @@ describe("the ribbon fits the viewport", () => {
     }
   });
 
-  it("never overlaps two cards by more than a tenth of a card's area", () => {
+  it("keeps every card individually pickable, overlap allowed", () => {
+    // M18's owner decided cards may overlap as long as the one under the pointer
+    // can still be opened. What that needs is separation between *centres*: the
+    // picker takes the nearest centre within its radius, so no two centres may
+    // sit closer than a radius apart.
     const viewport = { width: 1440, height: 810 };
-    const cards = vortexLayout(405, 0, { cardAspect: 0.75, viewport });
-    const screen = screenOf(viewport);
-    // Card rectangles exactly as the renderer sizes them: a share of the canvas
-    // width, height from the card's own aspect.
-    const rects = screen.map((card) => {
-      const scaleX = (cards[card.index]?.scale ?? 1) * CARD_SIZE_SHARE;
-      const halfWidth = scaleX * viewport.width;
-      // On screen: scaleY (normalised) × height equals halfWidth / aspect.
-      const halfHeight = halfWidth / 0.75;
-      return {
-        left: card.x - halfWidth,
-        right: card.x + halfWidth,
-        top: card.y - halfHeight,
-        bottom: card.y + halfHeight,
-        area: 4 * halfWidth * halfHeight,
-      };
-    });
+    const screen = screenOf(viewport).filter(
+      (card) =>
+        card.x > -100 &&
+        card.x < viewport.width + 100 &&
+        card.y > -100 &&
+        card.y < viewport.height + 100,
+    );
+    const pickRadius = Math.max(72, viewport.width * 0.12);
 
-    // Only cards that can be seen: far off-screen cards compress towards the
-    // vanishing point and may sit anywhere without being drawn over anything.
-    const visible = rects.filter((rect) => rect.bottom > 0 && rect.top < viewport.height);
-    for (let a = 0; a < visible.length; a += 1) {
-      for (let b = a + 1; b < visible.length; b += 1) {
-        const one = visible[a];
-        const other = visible[b];
+    for (let a = 0; a < screen.length; a += 1) {
+      for (let b = a + 1; b < screen.length; b += 1) {
+        const one = screen[a];
+        const other = screen[b];
         if (one === undefined || other === undefined) continue;
-        const overlapX = Math.min(one.right, other.right) - Math.max(one.left, other.left);
-        const overlapY = Math.min(one.bottom, other.bottom) - Math.max(one.top, other.top);
-        if (overlapX <= 0 || overlapY <= 0) continue;
-        const share = (overlapX * overlapY) / Math.min(one.area, other.area);
-        expect(share).toBeLessThanOrEqual(0.1);
+        const distance = Math.hypot(one.x - other.x, one.y - other.y);
+        expect(distance).toBeGreaterThan(pickRadius);
       }
     }
   });

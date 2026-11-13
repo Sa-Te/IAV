@@ -12,6 +12,9 @@
    canvas) takes the whole width. */
 .app-shell[data-sidebar="closed"] {
   --shell-sidebar: 0px;
+  /* One column, not "0 + the content": with the sidebar out of flow, auto-placement
+     put the content in the zero-width first column and squashed every page. */
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .app-shell[data-sidebar="closed"] > .sidebar {
