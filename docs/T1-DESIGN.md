@@ -84,13 +84,15 @@ All thirty entries share one shape:
 - The 1-row list holds one long text value (323 characters).
 - The 8-row list holds feature-support values: short text, a 3-character text,
   a 7-character text and boolean strings.
-- Thirty distinct `fbid`s and thirty distinct timestamps: these are thirty devices,
-  not thirty copies of one device.
+- All thirty entries carry the **same** 32-character identifier, and the two
+  nested lists are byte-identical in all thirty. Only `timestamp` and `fbid`
+  differ. This is one device profile recorded thirty times, not thirty devices.
 - No media, no URL, no nested list beyond the two `dict`s.
 
-**Consequence:** this is a repeated device record whose meaning lives in its two
-nested lists. It is not a single settings page, and the settings screen would have
-to hide the device identity in a section heading to fit.
+**Consequence:** the content is one identity, one support profile and thirty
+timestamps. Repeating the profile thirty times would invent thirty devices. The
+honest screen shows the identity and profile once and the records as the varying
+part.
 
 ## 3. What each category actually is
 
@@ -116,10 +118,10 @@ media, none has a usable URL, and the largest has sixteen fields.
 
 - `avatar_items` — thirteen records of a remote URL, a type and an acquisition time.
 
-**Group C — repeated device records (1 category).**
+**Group C — repeated records of one device (1 category).**
 
-- `device_camera_effects_support` — thirty devices, each with an opaque ID and two
-  nested feature lists.
+- `device_camera_effects_support` — thirty records of one device: one repeated
+  identifier, one repeated support profile, thirty timestamps.
 
 The split is 10 / 1 / 1. The ten in Group A share one screen because they share one
 content shape: a labelled field list. Group B and Group C do not share it: one has
@@ -221,24 +223,31 @@ network request in the app that the app itself did not make.
 
 ```
 ┌ Device camera effects support ──────────────────────────────┐
-│ 30 devices                                                  │
+│ 30 records · 1 device profile                               │
 │                                                             │
-│  Device 1 · 00dcd21f…            ← truncated opaque ID       │
-│    Acquired        30 October 2026 · 1793358112             │
-│    Metadata                                                 │
-│      Supported SDK versions      323-character value…       │
-│    Device metadata                                          │
-│      Feature A                   True                       │
-│      Feature B                   False                      │
-│      … eight rows                                           │
+│  Device ID                                                  │
+│  00dcd21f…                    ← truncated opaque ID          │
 │                                                             │
-│  Device 2 · …                                               │
+│  Metadata                                                   │
+│    Supported SDK versions      323-character value…         │
+│  Device metadata                                            │
+│    Feature A                   True                         │
+│    Feature B                   False                        │
+│    … eight rows                                             │
+│                                                             │
+│  Records (30)                                               │
+│    Record 1                    12 Nov 2026 · 1792…          │
+│    Record 2                    13 Nov 2026 · 1793…          │
+│    …                                                        │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-Each device is a section. Its heading is the ordinal plus the truncated opaque ID
-(full ID on focus). The two nested lists are definition lists under their own
-headings. There is no media and no thumbnail: a device is text.
+The identity and the profile are shown once; the thirty records are the only
+varying part. If a future export carries several identities, core groups them and
+the screen repeats the block per identity. If one identity carries different
+profiles, core refuses to deduplicate and the settings screen takes over rather
+than picking one profile and hiding the others. There is no media and no
+thumbnail: a device is text.
 
 ## 5. Which need a genuinely different screen
 
@@ -247,9 +256,9 @@ headings. There is no media and no thumbnail: a device is text.
   That is a data difference the settings screen already handles, not a design
   difference.
 - **Need their own screen:** `avatar_items` (no label layer; remote URL only) and
-  `device_camera_effects_support` (thirty device records with nested feature
-  lists). Building either as a settings page would either invent thumbnails or
-  bury the device identity.
+  `device_camera_effects_support` (thirty records of one device; repeating the
+  profile would invent thirty devices). Building either as a settings page would
+  either invent thumbnails or repeat one profile thirty times.
 
 This is the "bespoke per content" rule: two categories share a screen when their
 measured content is the same, and get their own when it is not. The grouping above

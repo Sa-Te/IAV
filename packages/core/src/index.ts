@@ -85,6 +85,14 @@ export type {
   SettingsView,
   SettingValue,
 } from "./categories/settingsView.js";
+export { toAvatarItemsView } from "./categories/avatarItemsView.js";
+export type { AvatarItem, AvatarItemsView } from "./categories/avatarItemsView.js";
+export { toDeviceEffectsView } from "./categories/deviceEffectsView.js";
+export type {
+  DeviceEffectsView,
+  DeviceProfile,
+  DeviceRecord,
+} from "./categories/deviceEffectsView.js";
 export { fixMojibake } from "./strings/fixMojibake.js";
 export { normaliseStrings } from "./strings/normaliseStrings.js";
 export {

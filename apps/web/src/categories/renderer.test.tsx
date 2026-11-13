@@ -224,3 +224,59 @@ describe("CategoryView — one category per privacy tier", () => {
     });
   }
 });
+
+describe("CategoryView — the two measured T1 outliers", () => {
+  function record(id: string, data: unknown): CategoryRecord {
+    return {
+      id,
+      resolvedTier: 1,
+      entryCount: 1,
+      data,
+      sources: [{ path: `${id}.json`, entryCount: 1, kind: "array" }],
+      warnings: [],
+    };
+  }
+
+  it("renders avatar_items as labelled placeholders, not a raw tree", async () => {
+    const data = [
+      { item: "https://scontent.invalid/a.png", type: "FREE", acquisition_time: 1_700_000_000 },
+    ];
+    render(
+      <RepositoryProvider
+        repository={fakeRepository({ avatar_items: record("avatar_items", data) })}
+      >
+        <CategoryView id="avatar_items" />
+      </RepositoryProvider>,
+    );
+
+    expect(await screen.findByText("No image")).toBeDefined();
+    expect(screen.getByRole("heading", { level: 2, name: "Item 1" })).toBeDefined();
+    expect(screen.queryByText("Raw tree")).toBeNull();
+  });
+
+  it("renders device_camera_effects_support as devices, not as settings entries", async () => {
+    const data = [
+      {
+        timestamp: 1_700_000_000,
+        media: [],
+        label_values: [
+          { label: "Device ID", value: "0".repeat(32) },
+          { label: "Metadata", dict: [{ label: "Supported SDK versions", value: "149.0" }] },
+        ],
+      },
+    ];
+    render(
+      <RepositoryProvider
+        repository={fakeRepository({
+          device_camera_effects_support: record("device_camera_effects_support", data),
+        })}
+      >
+        <CategoryView id="device_camera_effects_support" />
+      </RepositoryProvider>,
+    );
+
+    expect(await screen.findByRole("heading", { level: 2, name: "Device ID" })).toBeDefined();
+    expect(screen.getByText("1 record · 1 device profile")).toBeDefined();
+    expect(screen.queryByText("Entry 1")).toBeNull();
+  });
+});

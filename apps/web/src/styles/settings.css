@@ -128,3 +128,85 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+
+/* --- avatar items -------------------------------------------------------- */
+
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--token-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.avatar-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-2);
+  padding: var(--token-space-3);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  background: var(--token-color-surface);
+}
+
+/* A placeholder, not a broken image: there is no local bitmap to draw. */
+.avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border: 1px dashed var(--token-color-border);
+  border-radius: var(--token-radius-sm);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.avatar-heading {
+  margin: 0;
+  font-size: var(--token-text-14);
+  font-weight: 600;
+}
+
+/* --- device effects ------------------------------------------------------ */
+
+.device-profiles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-8);
+}
+
+.device-heading {
+  margin: 0;
+  font-size: var(--token-text-18);
+  font-weight: 600;
+}
+
+.device-identity {
+  margin: var(--token-space-1) 0 var(--token-space-5);
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-13);
+}
+
+.device-records-heading {
+  margin: var(--token-space-6) 0 var(--token-space-2);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+  font-weight: 500;
+}
+
+.device-records {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.device-record {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
