@@ -159,9 +159,26 @@
 }
 
 .sidebar-count {
+  flex: none;
   font-family: var(--token-font-mono);
   font-size: var(--token-text-12);
   color: var(--token-color-text-muted);
+  white-space: nowrap;
+}
+
+/*
+ * A gallery that is registered but absent from this export (reels). It has the
+ * same geometry as a link so the list stays aligned, but it is not focusable and
+ * not clickable: there is nowhere to go.
+ */
+.sidebar-muted {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--token-space-2);
+  padding: var(--token-space-1) var(--token-space-2);
+  color: var(--token-color-text-muted);
+  opacity: 0.55;
 }
 
 .sidebar-sublist {

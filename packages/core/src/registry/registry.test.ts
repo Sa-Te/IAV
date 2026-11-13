@@ -117,8 +117,8 @@ describe("registry — every row resolves to itself", () => {
   }
 
   it("treats a row with no measured signature as name-resolvable only", () => {
-    // No measured row is signature-less except the unrecognised bucket, so this
-    // proves the rule on invented rows rather than on measured data.
+    // Only the unrecognised bucket and reels are signature-less: reels is
+    // registered by name before any export has been measured for it (D2).
     const nameless: readonly Category[] = [
       {
         id: "only_by_name",

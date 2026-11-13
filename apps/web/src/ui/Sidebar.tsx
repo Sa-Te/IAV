@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type JSX } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 
+import { primaryCount } from "../categories/counts.js";
 import { splitPresent, TIERS, useCategoryRows, type Tier } from "../categories/useCategoryRows.js";
 import { useMediaQuery } from "./useMediaQuery.js";
 
@@ -44,10 +45,12 @@ export function Sidebar({
 
   const catalogue = rows.status === "ready" ? rows.rows : [];
   const counts: Record<string, number> = {};
+  const byId = new Map(catalogue.map((row) => [row.id, row]));
   for (const row of catalogue) counts[row.id] = row.media;
   const everything = catalogue.reduce((sum, row) => sum + row.media, 0);
   const countOf = (category: string): number =>
     category === "everything" ? everything : (counts[category] ?? 0);
+  const reels = byId.get("reels");
 
   // The tier that owns the current route opens by itself: `/categories/:id` finds
   // its category's tier, `/tiers/tN` is that tier.
@@ -166,6 +169,25 @@ export function Sidebar({
                 Cyclone
               </NavLink>
             </li>
+            {/*
+              Reels is registered but absent from this export (D2, ADR 0008). It is
+              never hidden and never invented: an empty gallery is a normal state,
+              and a person who does post reels gets the link when the file exists.
+            */}
+            <li>
+              {reels?.present === true ? (
+                <NavLink to={reels.href ?? "/categories/reels"} className="sidebar-link">
+                  Reels <span className="sidebar-count">{primaryCount(reels) ?? ""}</span>
+                </NavLink>
+              ) : (
+                <span className="sidebar-muted">
+                  <span>Reels</span>{" "}
+                  {rows.status === "ready" && (
+                    <span className="sidebar-count">no reels in this export</span>
+                  )}
+                </span>
+              )}
+            </li>
           </ul>
         </nav>
 
@@ -193,16 +215,25 @@ export function Sidebar({
                   </button>
                   <div id={`tier-panel-${group.tier}`} hidden={!open}>
                     <ul className="sidebar-list sidebar-sublist">
-                      {present.map((row) => (
-                        <li key={row.id}>
-                          <NavLink
-                            to={row.href ?? `/categories/${row.id}`}
-                            className="sidebar-link"
-                          >
-                            {row.label} <span className="sidebar-count">{row.media}</span>
-                          </NavLink>
-                        </li>
-                      ))}
+                      {present.map((row) => {
+                        const count = primaryCount(row);
+                        return (
+                          <li key={row.id}>
+                            <NavLink
+                              to={row.href ?? `/categories/${row.id}`}
+                              className="sidebar-link"
+                            >
+                              {row.label}
+                              {count !== null && (
+                                <>
+                                  {" "}
+                                  <span className="sidebar-count">{count}</span>
+                                </>
+                              )}
+                            </NavLink>
+                          </li>
+                        );
+                      })}
                       {rows.status === "ready" && present.length === 0 && (
                         <li className="sidebar-note">Nothing from this tier here.</li>
                       )}

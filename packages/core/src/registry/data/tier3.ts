@@ -97,6 +97,22 @@ export const TIER_3: readonly Category[] = [
     mediaPath: "root-relative",
   },
   {
+    id: "reels",
+    label: "Reels",
+    privacyTier: 3,
+    variantRisk: "medium",
+    // Registered before it was ever measured: this export has no reels, and a
+    // person who does post them must not see their file land in the unrecognised
+    // bucket (D2). Name-resolvable only until a real reels.json is measured
+    // (ADR 0008 allows an empty signature list).
+    match: { basenames: [/^reels(?:_\d+)?\.json$/i] },
+    signatures: [],
+    // Unmeasured declaration. No reels file exists in archive-2/, so the media
+    // layout has not been observed; this is the value other media categories use
+    // and it must be re-checked the first time a reels.json is available.
+    mediaPath: "root-relative",
+  },
+  {
     id: "story_likes",
     label: "Story likes",
     privacyTier: 3,

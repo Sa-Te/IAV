@@ -51,6 +51,17 @@ describe("resolveCategory — tier 1 (basename)", () => {
     const result = resolveCategory({ path: "messages/elsewhere/message_1.json", sample: {} });
     expect(result.ok).toBe(false);
   });
+
+  it("resolves a reels file by name even though its shape is unmeasured", () => {
+    // Reels is registered before it was measured (D2). The point is that a real
+    // reels.json is claimed by its own category instead of the unrecognised bucket.
+    const sample = [{ media: [{ uri: "media/reels/202401/reel.mp4" }] }];
+    expect(resolveCategory({ path: "your_instagram_activity/media/reels.json", sample })).toEqual({
+      ok: true,
+      id: "reels",
+      tier: 1,
+    });
+  });
 });
 
 describe("resolveCategory — tier 2 (structure)", () => {

@@ -9,6 +9,7 @@ import {
   type CategoryRow,
   type Tier,
 } from "../categories/useCategoryRows.js";
+import { describeCounts } from "../categories/counts.js";
 import { State } from "../ui/State.js";
 
 /**
@@ -26,15 +27,13 @@ function tierOf(value: string | undefined): Tier | null {
 }
 
 function Card({ row }: { row: CategoryRow }): JSX.Element {
+  const meta = row.present ? describeCounts(row) : "not in this export";
   const body = (
     <>
       <span className="category-card-tile" aria-hidden="true" />
       <span className="category-card-body">
         <span className="category-card-name">{row.label}</span>
-        <span className="category-card-meta">
-          {row.present ? `${row.entries.toLocaleString("en-US")} entries` : "not in this export"}
-          {row.media > 0 ? ` · ${row.media} media` : ""}
-        </span>
+        {meta !== null && <span className="category-card-meta">{meta}</span>}
       </span>
     </>
   );

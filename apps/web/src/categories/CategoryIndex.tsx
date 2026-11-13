@@ -2,6 +2,7 @@ import type { JSX } from "react";
 import { Link } from "react-router-dom";
 
 import { TIERS, useCategoryRows } from "./useCategoryRows.js";
+import { describeCounts } from "./counts.js";
 import { State } from "../ui/State.js";
 
 /**
@@ -30,7 +31,12 @@ export function CategoryIndex(): JSX.Element {
         <ul className="tier-overview">
           {TIERS.map((group) => {
             const tierRows = catalogue.filter((row) => row.tier === group.tier);
-            const present = tierRows.filter((row) => row.present).length;
+            const presentRows = tierRows.filter((row) => row.present);
+            const present = presentRows.length;
+            const counts = describeCounts({
+              entries: presentRows.reduce((sum, row) => sum + row.entries, 0),
+              media: presentRows.reduce((sum, row) => sum + row.media, 0),
+            });
             return (
               <li key={group.tier}>
                 <Link to={`/tiers/t${group.tier}`} className="tier-overview-link">
@@ -39,6 +45,7 @@ export function CategoryIndex(): JSX.Element {
                   </span>
                   <span className="tier-overview-meta">
                     {present} of {tierRows.length} in this export
+                    {counts !== null ? ` · ${counts}` : ""}
                   </span>
                   <span className="tier-overview-description">{group.description}</span>
                 </Link>

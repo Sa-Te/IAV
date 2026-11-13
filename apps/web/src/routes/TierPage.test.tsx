@@ -22,7 +22,7 @@ function record(id: string, count: number): CategoryRecord {
 function repository(): ArchiveRepository {
   return {
     listMedia: async () => ({ items: [], nextCursor: null }),
-    listCategories: async () => [record("notification_preferences", 2)],
+    listCategories: async () => [record("notification_preferences", 2), record("consents", 1)],
     getMediaBlob: async () => null,
     getCategory: async () => null,
     summary: async () => null,
@@ -48,6 +48,8 @@ describe("tier page", () => {
 
     expect(await screen.findByRole("heading", { level: 2, name: /In this export/ })).toBeDefined();
     expect(screen.getByRole("link", { name: /Notification preferences/ })).toBeDefined();
+    expect(screen.getByText("2 entries")).toBeDefined();
+    expect(screen.getByText("1 entry")).toBeDefined();
 
     const absentGroup = screen.getByRole("heading", { level: 2, name: /Not in this export/ });
     expect(absentGroup).toBeDefined();

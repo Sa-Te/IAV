@@ -3,15 +3,20 @@
 Completion tracker for "every archive category implemented". A category is done
 only when its row says parsed + rendered + tested (AGENTS.md §16).
 
-**86 categories inventoried, 72 rendered, 14 not in the current baseline, 2
+**87 categories inventoried, 72 rendered, 15 not in the current baseline, 2
 tested.** Plus one unrecognised bucket (ADR 0002, tier 3) that is always present by
 design.
 
 Of the 72 present in `archive-2/`, **58 render as a table**, **12 render only as a
 raw tree** — stored exactly as Instagram provided it, because their shape carries no
 labels to name a column — and **2 message categories render as a thread list** (M9)
-behind the T5 reveal gate. The fourteen absent rows stay registered: absence is a
+behind the T5 reveal gate. The fifteen absent rows stay registered: absence is a
 normal state (ADR 0002), and an ordinary export must not look broken.
+
+`reels` is registered by name only: no reels file exists in this baseline, so it has
+no measured shape (ADR 0008 permits an empty signature list) and no observed media
+layout. The sidebar shows it as a muted row rather than hiding it, and a real
+`reels.json` resolves to it instead of falling into the unrecognised bucket.
 
 Rows are ordered by privacy weight **ascending**, so the categories that carry
 other people's identities and words (connections, messages) sit at the bottom
@@ -109,6 +114,7 @@ are parsed, rendered and tested, and twelve are parsed but not rendered.
 | `archived_posts` | `your_instagram_activity/media/archived_posts.json` | `packages/core/schema/archived-posts.ts` | `packages/core/parsers/archived-posts.ts` | gallery | low | parsed + rendered + tested |
 | `quizzes` | `your_instagram_activity/story_interactions/quizzes.json` | `packages/core/schema/story-quizzes.ts` | `packages/core/parsers/story-quizzes.ts` | list | high | parsed + rendered |
 | `posts` | `your_instagram_activity/media/posts_1.json` | `packages/core/schema/posts.ts` | `packages/core/parsers/posts.ts` | gallery | medium | parsed + raw view |
+| `reels` | `your_instagram_activity/media/reels.json` | `packages/core/schema/opaque.ts` | `packages/core/parsers/opaque.ts` | none | medium | registered, unmeasured — absent from the current baseline |
 | `story_likes` | `your_instagram_activity/likes/story_likes.json` | `packages/core/schema/story-likes.ts` | `packages/core/parsers/story-likes.ts` | list | medium | parsed + rendered |
 | `liked_comments` | `your_instagram_activity/likes/liked_comments.json` | `packages/core/schema/liked-comments.ts` | `packages/core/parsers/liked-comments.ts` | list | low | parsed + raw view |
 | `stories` | `your_instagram_activity/media/stories.json` | `packages/core/schema/stories.ts` | `packages/core/parsers/stories.ts` | gallery | high | parsed + rendered + tested |
@@ -161,7 +167,8 @@ no rule matches is parsed generically and surfaced here.
 ## Status values
 
 `not started` · `schema` · `parsed` · `parsed + rendered` · `parsed + raw view` ·
-`parsed + rendered + tested` · `not present in the current baseline`
+`parsed + rendered + tested` · `registered, unmeasured — absent from the current baseline` ·
+`not present in the current baseline`
 
 A row is only marked `parsed` once its parser has a fixture, a malformed-input
 test and an empty-file test (AGENTS.md §9). `parsed + rendered` means the generic

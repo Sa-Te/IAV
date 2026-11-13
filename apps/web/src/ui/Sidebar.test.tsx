@@ -24,10 +24,18 @@ function record(id: string, count: number): CategoryRecord {
   };
 }
 
-function repository(): ArchiveRepository {
+const defaultRecords: readonly CategoryRecord[] = [
+  record("posts", 3),
+  record("profile_photos", 2),
+  record("notification_preferences", 1),
+  record("consents", 2),
+  record("bug_reports", 0),
+];
+
+function repository(records: readonly CategoryRecord[] = defaultRecords): ArchiveRepository {
   return {
     listMedia: async () => ({ items: [], nextCursor: null }),
-    listCategories: async () => [record("posts", 3), record("profile_photos", 2)],
+    listCategories: async () => records,
     getMediaBlob: async () => null,
     getCategory: async () => null,
     summary: async () => null,
@@ -37,10 +45,10 @@ function repository(): ArchiveRepository {
   };
 }
 
-function renderShell(path = "/posts"): void {
+function renderShell(path = "/posts", records: readonly CategoryRecord[] = defaultRecords): void {
   render(
     <MemoryRouter initialEntries={[path]}>
-      <RepositoryProvider repository={repository()}>
+      <RepositoryProvider repository={repository(records)}>
         <AppShell>
           <h1>Page</h1>
         </AppShell>
@@ -118,6 +126,43 @@ describe("sidebar", () => {
         .getByRole("link", { name: /Everything/ })
         .getAttribute("aria-current"),
     ).toBeNull();
+  });
+
+  it("labels every present T1 sub-row by its unit, and prints no bare zero", async () => {
+    const user = userEvent.setup();
+    renderShell();
+    const categories = screen.getByRole("navigation", { name: "Categories" });
+    await user.click(within(categories).getByRole("button", { name: /T1/ }));
+
+    const panel = document.querySelector<HTMLElement>("#tier-panel-1");
+    expect(panel).not.toBeNull();
+    if (panel === null) return;
+
+    const one = await within(panel).findByRole("link", { name: /Notification preferences/ });
+    expect(one.textContent).toBe("Notification preferences 1 entry");
+
+    const two = within(panel).getByRole("link", { name: /Consents/ });
+    expect(two.textContent).toBe("Consents 2 entries");
+
+    // Present but empty: no count span at all, not "0".
+    const empty = within(panel).getByRole("link", { name: /Bug reports/ });
+    expect(empty.textContent).toBe("Bug reports");
+    expect(empty.querySelector(".sidebar-count")).toBeNull();
+  });
+
+  it("shows reels as a muted, non-clickable row when the export has none", async () => {
+    renderShell();
+    const galleries = await screen.findByRole("navigation", { name: "Galleries" });
+    expect(await within(galleries).findByText("no reels in this export")).toBeDefined();
+    expect(within(galleries).queryByRole("link", { name: /Reels/ })).toBeNull();
+  });
+
+  it("links reels when the export actually contains it", async () => {
+    renderShell("/posts", [...defaultRecords, record("reels", 2)]);
+    const galleries = await screen.findByRole("navigation", { name: "Galleries" });
+    const link = await within(galleries).findByRole("link", { name: /Reels/ });
+    expect(link.getAttribute("href")).toBe("/categories/reels");
+    expect(within(galleries).queryByText("no reels in this export")).toBeNull();
   });
 });
 
