@@ -76,7 +76,7 @@ export {
   tiltTarget,
 } from "./cyclone/motion.js";
 export type { PhaseEvent, PhaseState, Tilt } from "./cyclone/motion.js";
-export { isT5, revealCopy } from "./categories/privacy.js";
+export { isGated, revealCopy } from "./categories/privacy.js";
 export type { RevealCopy } from "./categories/privacy.js";
 export { PAGE_SIZE, toTableView } from "./categories/toTableView.js";
 export type { CategoryViewData, Cell, TableView, TreeView } from "./categories/toTableView.js";

@@ -1,6 +1,6 @@
 import {
   findCategory,
-  isT5,
+  isGated,
   toAvatarItemsView,
   toDeviceEffectsView,
   toEventListView,
@@ -283,7 +283,7 @@ export function CategoryView({ id }: { id: string }): JSX.Element {
       </p>
       <h1>{label}</h1>
 
-      {isT5(id) ? <RevealGate categoryId={id}>{content}</RevealGate> : content}
+      {isGated(id) ? <RevealGate categoryId={id}>{content}</RevealGate> : content}
     </div>
   );
 }

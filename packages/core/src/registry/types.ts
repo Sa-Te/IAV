@@ -24,6 +24,16 @@ export interface Category {
   readonly id: string;
   readonly label: string;
   readonly privacyTier: 1 | 2 | 3 | 4 | 5;
+  /**
+   * A second, independent reason to ask before rendering (ADR 0014).
+   *
+   * The tier answers "whose data is this?" and is a label, not a lock (ADR 0009).
+   * The gate answers "was this written by someone else?" — a comment, a message —
+   * and is shown behind an explicit reveal even when the category is the reader's
+   * own content (T3). It is deliberately separate from `privacyTier`: comments stay
+   * on the T3 page while still gating.
+   */
+  readonly gated?: boolean;
   readonly variantRisk: "low" | "medium" | "high";
   readonly match: CategoryMatch;
   /**

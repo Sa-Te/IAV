@@ -32,6 +32,23 @@ function repository(): ArchiveRepository {
   };
 }
 
+/** A repository whose only present categories are the ones named. */
+function repositoryOf(ids: readonly string[]): ArchiveRepository {
+  return { ...repository(), listCategories: async () => ids.map((id) => record(id, 1)) };
+}
+
+function renderTier(tier: string, source: ArchiveRepository): void {
+  render(
+    <MemoryRouter initialEntries={[`/tiers/${tier}`]}>
+      <RepositoryProvider repository={source}>
+        <Routes>
+          <Route path="/tiers/:tier" element={<TierPage />} />
+        </Routes>
+      </RepositoryProvider>
+    </MemoryRouter>,
+  );
+}
+
 afterEach(cleanup);
 
 describe("tier page", () => {
@@ -57,5 +74,20 @@ describe("tier page", () => {
     const groups = screen.getAllByRole("heading", { level: 2 });
     expect(groups[0]?.textContent).toMatch(/In this export/);
     expect(groups[1]?.textContent).toMatch(/Not in this export/);
+  });
+});
+
+describe("tier page — a gated category keeps its tier", () => {
+  it("lists a gated T3 comment category on t3, not on t5", async () => {
+    const source = repositoryOf(["post_comments"]);
+
+    renderTier("t3", source);
+    const link = await screen.findByRole("link", { name: /Comments/ });
+    expect(link.getAttribute("href")).toBe("/categories/post_comments");
+    cleanup();
+
+    renderTier("t5", source);
+    await screen.findByRole("heading", { level: 2, name: /In this export/ });
+    expect(screen.queryByRole("link", { name: /Comments/ })).toBeNull();
   });
 });

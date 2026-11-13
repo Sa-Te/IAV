@@ -114,8 +114,41 @@ describe("T5 reveal gate", () => {
     expect(screen.getByRole("button", { name: "Show this category" })).toBeDefined();
   });
 
-  it("leaves T1–T4 categories ungated", () => {
-    for (const id of ["posts", "saved_posts"]) {
+  it("leaves T1–T4 categories without third-party text ungated", () => {
+    for (const id of ["posts", "saved_posts", "liked_posts"]) {
+      renderView(repositoryWith([id]), id);
+      expect(screen.queryByRole("button", { name: "Show this category" })).toBeNull();
+      cleanup();
+    }
+  });
+
+  it("gates a T3 comment category without moving it out of T3", async () => {
+    const user = userEvent.setup();
+    const repository = repositoryWith(["post_comments"]);
+    renderView(repository, "post_comments");
+
+    // A T3 category: the gate does not become a tier change.
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Comments");
+    expect(screen.getByRole("button", { name: "Show this category" })).toBeDefined();
+    expect(repository.getCategory).toHaveBeenCalledTimes(0);
+    expect(document.body.textContent).toContain("words other people wrote");
+
+    await user.click(screen.getByRole("button", { name: "Show this category" }));
+
+    expect(repository.getCategory).toHaveBeenCalledTimes(1);
+    expect(repository.getCategory).toHaveBeenCalledWith("post_comments");
+  });
+
+  it("renders exactly one gate for a comment category and one for a T5 category", () => {
+    for (const id of ["post_comments", "messages_inbox"]) {
+      renderView(repositoryWith([id]), id);
+      expect(screen.getAllByRole("button", { name: "Show this category" })).toHaveLength(1);
+      cleanup();
+    }
+  });
+
+  it("does not gate the other T3 lists", () => {
+    for (const id of ["saved_collections", "story_likes", "other_content"]) {
       renderView(repositoryWith([id]), id);
       expect(screen.queryByRole("button", { name: "Show this category" })).toBeNull();
       cleanup();

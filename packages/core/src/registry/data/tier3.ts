@@ -34,6 +34,9 @@ export const TIER_3: readonly Category[] = [
     id: "reels_comments",
     label: "Reels comments",
     privacyTier: 3,
+    // Gated, not T5: the words inside are other people's, but the category is
+    // where the reader looks for their own content (ADR 0014).
+    gated: true,
     variantRisk: "medium",
     match: { basenames: [/^reels_comments(?:_\d+)?\.json$/i] },
     signatures: [{ kind: "object", requiredKeys: ["comments_reels_comments"] }],
@@ -136,6 +139,9 @@ export const TIER_3: readonly Category[] = [
     id: "liked_comments",
     label: "Liked comments",
     privacyTier: 3,
+    // Gated, not T5: the words inside are other people's, but the category is
+    // where the reader looks for their own content (ADR 0014).
+    gated: true,
     variantRisk: "low",
     match: { basenames: [/^liked_comments(?:_\d+)?\.json$/i] },
     signatures: [{ kind: "object", requiredKeys: ["likes_comment_likes"] }],
@@ -167,6 +173,9 @@ export const TIER_3: readonly Category[] = [
     id: "post_comments",
     label: "Comments",
     privacyTier: 3,
+    // Gated, not T5: the words inside are other people's, but the category is
+    // where the reader looks for their own content (ADR 0014).
+    gated: true,
     variantRisk: "high",
     match: { basenames: [/^post_comments(?:_\d+)?\.json$/i] },
     signatures: [{ kind: "array", requiredKeys: ["media_list_data", "string_map_data"] }],
