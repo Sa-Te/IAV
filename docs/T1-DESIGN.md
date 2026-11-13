@@ -263,3 +263,28 @@ thumbnail: a device is text.
 This is the "bespoke per content" rule: two categories share a screen when their
 measured content is the same, and get their own when it is not. The grouping above
 is a measurement result, not a naming decision.
+
+## 6. Applying this to T2–T5
+
+The same probe over the other 60 present categories says T1 was unusually
+settings-heavy. Only **three** of the remaining categories look like the T1
+settings group: a small label/value record with no media reference, no URL and no
+coordinate.
+
+| Group | Remaining present | What it needs |
+| --- | ---: | --- |
+| Settings (small label/value, no media/URL) | 3 | the settings screen: `signup_details`, `subscription_for_no_ads`, `checkout_payment_information` (T5, behind the gate) |
+| Event and activity lists (label/value, many entries, timestamps) | ~33 | a list or timeline screen; the settings screen would repeat hundreds of sections |
+| Person lists (`Name`/`Username`/`URL`, or `string_list_data`) | ~14 | a person list/card screen |
+| Media galleries | ~7 | the existing gallery, or a per-category gallery |
+| Maps | 2 | `last_known_location`, `profile_based_in` |
+| Threads | 2 | the existing thread list (`messages_inbox`, `messages_requests`) |
+| Conversation metadata | 1 | `ai_conversations` |
+| Registered, unmeasured | 1 | `reels`, absent from this baseline |
+
+The counts are approximate at the edges: `post_comments` carries both media and
+text, `personal_information` carries a profile photo, and a person list is also a
+list. The important number is the first row: **3 of 60**, not 30. Copying the T1
+settings screen across T2–T5 would be the wrong kind of reuse. The rest need
+their own measured design, and the generic table/tree remains the honest fallback
+until they get one.

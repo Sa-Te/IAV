@@ -161,3 +161,25 @@ progress.
 - 2026-11-13 — `controls-above-canvas` — a control that floats over a full-bleed canvas needs
   its own stacking context, or the route swallows it —
   vault: `learning-notes/2026-11-13_session-15.md`
+- 2026-11-13 — `bespoke-per-content` — two categories share a screen only when
+  their measured content is the same shape; the screen is chosen by what the record
+  contains, not by its name — see `docs/adr/0012-bespoke-per-content.md`
+- 2026-11-13 — `settings-view-model` — the label/value envelope is interpreted once
+  in core into labelled fields, nested sections, timestamps and absent values, so
+  the view is a definition list and never touches archive keys —
+  vault: `architecture/2026-11-13_bespoke-per-content.md`
+- 2026-11-13 — `records-not-devices` — thirty entries with one repeated identifier
+  and one repeated profile are thirty records of one device; counting rows would
+  invent thirty devices —
+  vault: `debug-log/2026-11-13_records-not-devices.md`
+- 2026-11-13 — `counts-need-units` — a count without its unit is ambiguous; one
+  formatter gives 1 entry / 2 entries / 1 media item / 2 media items, and a
+  present-but-empty category shows no count rather than a bare zero —
+  vault: `learning-notes/2026-11-13_session-16.md`
+- 2026-11-13 — `absent-is-not-zero` — a zero timestamp is the export's "not set",
+  not 1 January 1970; the raw number stays visible and the invented date does not —
+  vault: `learning-notes/2026-11-13_session-16.md`
+- 2026-11-13 — `fallback-is-the-proof` — a bespoke screen returns `null` when the
+  record does not match its measured shape, so a changed export degrades to the
+  table or tree instead of showing a confident lie —
+  vault: `mind-maps/2026-11-13_t1-screen-groups.md`

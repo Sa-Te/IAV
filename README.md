@@ -8,9 +8,11 @@ ZIP and shows it back to you.
 
 ## Status
 
-**Pre-alpha. It does not work yet.** The workspace, build pipeline and the
-category resolver exist; there is no archive parsing and no gallery. You can run
-the build and see one placeholder page.
+**Pre-alpha, browser-only.** The import path works end to end: a ZIP is parsed in
+a worker, stored in IndexedDB, and rendered through galleries, a 3D cyclone and
+per-category screens. T1's settings, avatar and device categories have bespoke
+screens (M20); the other tiers render through the generic table or raw tree until
+their content is measured. There is no server, no account and no network egress.
 
 ## What v1 is
 
@@ -37,10 +39,8 @@ Installed:
 - Vite + React 19 + react-router-dom, TypeScript in `strict` mode
   (ADR [0004](docs/adr/0004-vite-not-nextjs.md); Next.js appears only in
   `reference-frontend/` and is never imported)
-- Zustand for UI state; zod for validating archive JSON (planned, not yet used)
 - IndexedDB for archive records and media blobs; a Web Worker for parsing
-  (interfaces only so far)
-- Three.js / React Three Fiber for the optional 3D view (planned)
+- Hand-written WebGL2 for the optional 3D view — no Three.js dependency
 - Vitest for tests, pnpm as the only package manager
 
 ## Building it
@@ -95,10 +95,10 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
 2. Open `/` for everything, `/posts`, `/stories`, `/archived` for one gallery,
    `/cyclone` for the 3D view, and `/categories` or `/tiers/t1` … `/tiers/t5` for
    the archive's categories, grouped by the privacy tier they belong to. The
-   sidebar is the way around all of it. — one tile per post, real
-   photos, and a line above saying how many posts and media files are on the
-   device. Click a tile for the full-size image, caption and date; Escape closes
-   and returns focus to the tile.
+   sidebar is the way around all of it. T1's settings categories open as labelled
+   fields rather than a table; avatar items open as a grid of placeholders because
+   their images are remote URLs the app never fetches; device camera effects open
+   as one profile with its records.
 
 **What privacy means in practice.** The ZIP is read with the browser's own file
 API, parsed in a worker in the same tab, and stored in IndexedDB. Nothing is

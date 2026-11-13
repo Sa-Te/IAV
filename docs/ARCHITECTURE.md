@@ -1,18 +1,12 @@
 # Architecture
 
-> **TODO: expand at M1.** This is a stub. It records only the layer shape and
-> the dependency-direction rules, copied from [AGENTS.md](../AGENTS.md) §2. The
-> full document (module boundaries per feature, the `ArchiveRepository`
-> implementation, worker message protocol, IndexedDB schema) is written in M1,
-> after the workspace exists.
-
 ## Layers
 
 Dependency direction points inward. Nothing may import outward.
 
 ```
-apps/web/            Next.js, static export. UI, routes, React state.
-  └─ features/       one folder per view (gallery, stories, messages, ...)
+apps/web/            Vite + React Router, static build. UI, routes, React state.
+  └─ categories/     category screens, tables, trees, the reveal gate
 packages/core/       Pure TypeScript. Parsers, schemas, domain model.
   └─ parsers/        one file per archive category
   └─ schema/         zod schemas + inferred types
@@ -61,6 +55,12 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `strings/fixMojibake.ts` | Repairs Instagram's double-encoded text in a single string (ADR 0003). |
 | `strings/normaliseStrings.ts` | Applies that repair to every string value in a parsed archive, without mutating the input. |
 | `categories/toTableView.ts` | Interprets a category payload: four observed shapes → a table with labels taken verbatim, or a raw tree. Pagination constant lives here. |
+| `categories/labelValues.ts` | The label/value envelope read once: label, value, timestamp, nested dict/vec, description and href, shared by the table and the bespoke screens. |
+| `categories/entries.ts` | The two container shapes every reader shares: entries inside one payload, and payloads of a category fed by several files. |
+| `categories/format.ts` | Text and timestamp presentation shared by the table and the screens; timestamps are Unix seconds. |
+| `categories/settingsView.ts` | A label/value record → labelled fields, nested sections, timestamps and absent values; `null` when the record is not that shape. |
+| `categories/avatarItemsView.ts` | `avatar_items` → URL records with an ordinal and a localised acquisition time; `null` when the shape does not match. |
+| `categories/deviceEffectsView.ts` | Repeated device records grouped by identity and deduplicated only when the profile is identical; `null` when it cannot be honest. |
 | `categories/privacy.ts` | Which categories are T5, and the copy shown before one is revealed; reads the registry, never a hardcoded id list. |
 | `media/cache.ts` | Bounded media cache: one entry and one in-flight decode per path, LRU by count at 150, evict = revoke URL then close bitmap, `releaseAll` for teardown. |
 | `media/thumbnail.ts` | Thumbnail geometry and the encode contract: max edge 512, aspect preserved, never upscaled, type taken from what the encoder produced. |
@@ -88,10 +88,16 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/useMediaList.ts` | Pages one category — or every category — out of the repository. |
 | `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. |
 | `apps/web/src/routes/Nav.tsx` | Categories that actually have media, with counts; `aria-current` comes from the router. |
-| `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: reads one category, renders the table or the raw tree, and keeps loading / empty / failed distinct. |
+| `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: chooses the screen by measured content (settings/avatar/device within T1, table/tree otherwise) and keeps loading / empty / failed distinct. |
+| `apps/web/src/categories/settingsFields.tsx` | The field renderer: definition lists, nested sections, opaque values that expand on focus, real links and timestamps. |
+| `apps/web/src/categories/SettingsView.tsx` | The T1 label/value screen: one entry as a page, many as sections, raw JSON behind a closed disclosure. |
+| `apps/web/src/categories/AvatarItemsView.tsx` | The avatar grid: labelled placeholders, no invented thumbnails, the URL as a user-initiated link. |
+| `apps/web/src/categories/DeviceEffectsView.tsx` | The device profile: identity and support lists once, the varying records as a list. |
+| `apps/web/src/categories/RawDisclosure.tsx` | The one closed raw-JSON disclosure every bespoke screen ends with. |
+| `apps/web/src/categories/counts.ts` | One count vocabulary: 1 entry / 2 entries / 1 media item / 2 media items, and no bare zero. |
+| `apps/web/src/styles/settings.css` | The settings, avatar and device screens; tokens only. |
 | `apps/web/src/categories/CategoryTable.tsx` | Semantic table, sticky header, 100 rows per page; long values keep their full text in `title`. |
 | `apps/web/src/categories/CategoryTree.tsx` | Collapsible JSON tree that builds children only on expand, behind the "we have not interpreted it" banner. |
-| `apps/web/src/categories/CategoryIndex.tsx` | `/categories`: every registry row grouped by privacy tier, absent rows greyed rather than hidden. |
 | `apps/web/src/categories/RevealGate.tsx` | T5 gate: renders copy + one button, mounts the reader only after the click, never persists the reveal. |
 | `apps/web/src/media/MediaCaches.tsx` | Creates the per-root original and thumbnail caches from the repository; releases both on teardown. |
 | `apps/web/src/media/useInViewport.ts` | IntersectionObserver with a 200px margin; once seen, stays seen, so scrolling back does not re-request. |

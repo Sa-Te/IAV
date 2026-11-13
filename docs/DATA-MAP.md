@@ -3,15 +3,17 @@
 Completion tracker for "every archive category implemented". A category is done
 only when its row says parsed + rendered + tested (AGENTS.md §16).
 
-**87 categories inventoried, 72 rendered, 15 not in the current baseline, 2
-tested.** Plus one unrecognised bucket (ADR 0002, tier 3) that is always present by
-design.
+**87 categories inventoried, 72 present, 15 not in the current baseline, 2 with
+the full per-category fixture set.** Plus one unrecognised bucket (ADR 0002, tier
+3) that is always present by design.
 
-Of the 72 present in `archive-2/`, **58 render as a table**, **12 render only as a
-raw tree** — stored exactly as Instagram provided it, because their shape carries no
-labels to name a column — and **2 message categories render as a thread list** (M9)
-behind the T5 reveal gate. The fifteen absent rows stay registered: absence is a
-normal state (ADR 0002), and an ordinary export must not look broken.
+Of the 72 present in `archive-2/`, **12 T1 categories now have a bespoke screen**
+— ten settings pages, one avatar grid, one device profile (M20) — **3 media
+categories have their own gallery routes**, and **2 message categories render as
+a thread list** behind the T5 reveal gate. The rest render through the generic
+table, or the raw tree when the shape carries no labels. The fifteen absent rows
+stay registered: absence is a normal state (ADR 0002), and an ordinary export
+must not look broken.
 
 `reels` is registered by name only: no reels file exists in this baseline, so it has
 no measured shape (ADR 0008 permits an empty signature list) and no observed media
@@ -40,33 +42,33 @@ resolution, per `docs/ARCHIVE-VARIANTS.md`.
 | `low` | A single stable filename with a distinct shape, no open questions. |
 
 Paths are real module paths under `packages/core/src/` per AGENTS.md §2. A path is
-a plan until its Status says otherwise; two categories (stories, archived posts)
-are parsed, rendered and tested, and twelve are parsed but not rendered.
+a plan until its Status says otherwise; the rows below say what each category
+actually has, and the View column says which screen renders it.
 
 ## T1 — settings and mechanics
 
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `notification_preferences` | `preferences/settings/notification_preferences.json` | `packages/core/schema/notification-preferences.ts` | `packages/core/parsers/notification-preferences.ts` | none | low | parsed + rendered |
+| `notification_preferences` | `preferences/settings/notification_preferences.json` | `packages/core/schema/notification-preferences.ts` | `packages/core/parsers/notification-preferences.ts` | settings | low | parsed + rendered |
 | `comments_allowed_from` | `preferences/settings/comments_allowed_from.json` | `packages/core/schema/comments-allowed-from.ts` | `packages/core/parsers/comments-allowed-from.ts` | none | low | not started — not present in the current baseline |
 | `show_exclusive_story_promo_setting` | `preferences/settings/show_exclusive_story_promo_setting.json` | `packages/core/schema/show-exclusive-story-promo-setting.ts` | `packages/core/parsers/show-exclusive-story-promo-setting.ts` | none | low | not started — not present in the current baseline |
 | `use_cross-app_messaging` | `preferences/settings/use_cross-app_messaging.json` | `packages/core/schema/use-cross-app-messaging.ts` | `packages/core/parsers/use-cross-app-messaging.ts` | none | medium | not started — not present in the current baseline |
 | `professional_information` | `personal_information/information_about_you/professional_information.json` | `packages/core/schema/professional-information.ts` | `packages/core/parsers/professional-information.ts` | none | low | not started — not present in the current baseline |
 | `note_interactions` | `personal_information/information_about_you/note_interactions.json` | `packages/core/schema/note-interactions.ts` | `packages/core/parsers/note-interactions.ts` | none | low | not started — not present in the current baseline |
-| `eligibility` | `your_instagram_activity/monetization/eligibility.json` | `packages/core/schema/eligibility.ts` | `packages/core/parsers/eligibility.ts` | table | low | parsed + rendered |
-| `bug_reports` | `your_instagram_activity/reports/bug_reports.json` | `packages/core/schema/bug-reports.ts` | `packages/core/parsers/bug-reports.ts` | list | low | parsed + rendered |
-| `instagram_profile_information` | `personal_information/information_about_you/instagram_profile_information.json` | `packages/core/schema/instagram-profile-information.ts` | `packages/core/parsers/instagram-profile-information.ts` | table | low | parsed + rendered |
-| `instagram_friend_map` | `personal_information/information_about_you/instagram_friend_map.json` | `packages/core/schema/instagram-friend-map.ts` | `packages/core/parsers/instagram-friend-map.ts` | table | low | parsed + rendered |
+| `eligibility` | `your_instagram_activity/monetization/eligibility.json` | `packages/core/schema/eligibility.ts` | `packages/core/parsers/eligibility.ts` | settings | low | parsed + rendered |
+| `bug_reports` | `your_instagram_activity/reports/bug_reports.json` | `packages/core/schema/bug-reports.ts` | `packages/core/parsers/bug-reports.ts` | settings | low | parsed + rendered |
+| `instagram_profile_information` | `personal_information/information_about_you/instagram_profile_information.json` | `packages/core/schema/instagram-profile-information.ts` | `packages/core/parsers/instagram-profile-information.ts` | settings | low | parsed + rendered |
+| `instagram_friend_map` | `personal_information/information_about_you/instagram_friend_map.json` | `packages/core/schema/instagram-friend-map.ts` | `packages/core/parsers/instagram-friend-map.ts` | settings | low | parsed + rendered |
 | `camera_information` | `personal_information/device_information/camera_information.json` | `packages/core/schema/camera-information.ts` | `packages/core/parsers/camera-information.ts` | table | low | not started — not present in the current baseline |
 | `your_muted_story_teaser_creators` | `your_instagram_activity/subscriptions/your_muted_story_teaser_creators.json` | `packages/core/schema/muted-story-teaser-creators.ts` | `packages/core/parsers/muted-story-teaser-creators.ts` | list | medium | not started — not present in the current baseline |
-| `your_link_history_settings` | `logged_information/link_history/your_link_history_settings.json` | `packages/core/schema/link-history-settings.ts` | `packages/core/parsers/link-history-settings.ts` | table | medium | parsed + rendered |
-| `consents` | `preferences/settings/consents.json` | `packages/core/schema/consents.ts` | `packages/core/parsers/consents.ts` | table | low | parsed + rendered |
-| `your_activity_off_meta_technologies_settings` | `apps_and_websites_off_of_instagram/apps_and_websites/your_activity_off_meta_technologies_settings.json` | `packages/core/schema/off-meta-settings.ts` | `packages/core/parsers/off-meta-settings.ts` | table | medium | parsed + rendered |
-| `your_information_download_requests` | `personal_information/information_about_you/your_information_download_requests.json` | `packages/core/schema/download-requests.ts` | `packages/core/parsers/download-requests.ts` | table | low | parsed + rendered |
-| `avatar_items` | `your_instagram_activity/avatars_store/avatar_items.json` | `packages/core/schema/avatar-items.ts` | `packages/core/parsers/avatar-items.ts` | none | high | parsed + raw view |
+| `your_link_history_settings` | `logged_information/link_history/your_link_history_settings.json` | `packages/core/schema/link-history-settings.ts` | `packages/core/parsers/link-history-settings.ts` | settings | medium | parsed + rendered |
+| `consents` | `preferences/settings/consents.json` | `packages/core/schema/consents.ts` | `packages/core/parsers/consents.ts` | settings | low | parsed + rendered |
+| `your_activity_off_meta_technologies_settings` | `apps_and_websites_off_of_instagram/apps_and_websites/your_activity_off_meta_technologies_settings.json` | `packages/core/schema/off-meta-settings.ts` | `packages/core/parsers/off-meta-settings.ts` | settings | medium | parsed + rendered |
+| `your_information_download_requests` | `personal_information/information_about_you/your_information_download_requests.json` | `packages/core/schema/download-requests.ts` | `packages/core/parsers/download-requests.ts` | settings | low | parsed + rendered |
+| `avatar_items` | `your_instagram_activity/avatars_store/avatar_items.json` | `packages/core/schema/avatar-items.ts` | `packages/core/parsers/avatar-items.ts` | avatar grid | high | parsed + rendered |
 | `devices` | `personal_information/device_information/devices.json` | `packages/core/schema/devices.ts` | `packages/core/parsers/devices.ts` | table | low | not started — not present in the current baseline |
-| `ad_preferences` | `ads_information/instagram_ads_and_businesses/ad_preferences.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
-| `device_camera_effects_support` | `personal_information/device_information/device_camera_effects_support.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
+| `ad_preferences` | `ads_information/instagram_ads_and_businesses/ad_preferences.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | settings | medium | parsed + rendered |
+| `device_camera_effects_support` | `personal_information/device_information/device_camera_effects_support.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | device profile | medium | parsed + rendered |
 
 ## T2 — your own behaviour and security history
 
@@ -171,7 +173,8 @@ no rule matches is parsed generically and surfaced here.
 `not present in the current baseline`
 
 A row is only marked `parsed` once its parser has a fixture, a malformed-input
-test and an empty-file test (AGENTS.md §9). `parsed + rendered` means the generic
-category view (`/categories/:id`) shows it as a table; `parsed + raw view` means the
-same view falls back to a JSON tree because the shape has no labels. Neither claims
-a bespoke view — only three categories have one (`/posts`, `/stories`, `/archived`).
+test and an empty-file test (AGENTS.md §9). `parsed + rendered` means the category
+has a view at `/categories/:id`, bespoke or generic; the View column says which.
+`parsed + raw view` is the generic view falling back to a JSON tree because the
+shape has no labels. The generic table and tree remain the fallback for every
+category without a bespoke screen.
