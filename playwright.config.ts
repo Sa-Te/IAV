@@ -39,7 +39,10 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   webServer: {
-    command: `pnpm build:e2e && pnpm --filter @instavault/web preview --port ${PORT} --strictPort`,
+    // The host is explicit: `vite preview` defaults to `localhost`, which on a
+    // runner can resolve to ::1 while the probe (and Chromium) uses 127.0.0.1.
+    // That mismatch is a 180-second timeout with no log line to explain it.
+    command: `pnpm build:e2e && pnpm --filter @instavault/web preview --host 127.0.0.1 --port ${PORT} --strictPort`,
     url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
