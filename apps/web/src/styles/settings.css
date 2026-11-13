@@ -1,0 +1,130 @@
+/* --- settings (T1 label/value) ------------------------------------------ */
+
+.settings-view {
+  max-width: 72ch;
+}
+
+.settings-summary {
+  margin: 0 0 var(--token-space-6);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.settings-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.settings-entry-heading {
+  margin: 0 0 var(--token-space-4);
+  font-size: var(--token-text-18);
+  font-weight: 600;
+}
+
+.settings-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-5);
+  margin: 0;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-1);
+}
+
+.settings-label {
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+  font-weight: 500;
+}
+
+.settings-value {
+  margin: 0;
+  color: var(--token-color-text);
+  font-size: var(--token-text-16);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.settings-description {
+  display: block;
+  margin-top: var(--token-space-1);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.settings-raw-number {
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-13);
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-date {
+  font-variant-numeric: tabular-nums;
+}
+
+.settings-absent,
+.settings-none {
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-14);
+}
+
+.settings-none {
+  margin: 0;
+}
+
+/* Long values are cut for layout only; focus reveals the full string. */
+.settings-opaque {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+  white-space: nowrap;
+}
+
+.settings-opaque:focus {
+  overflow: visible;
+  white-space: normal;
+}
+
+.settings-group {
+  margin: 0;
+}
+
+.settings-group-heading {
+  margin: 0 0 var(--token-space-1);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+  font-weight: 500;
+}
+
+.settings-group-title {
+  margin: 0 0 var(--token-space-3);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+/* The raw JSON is one disclosure away, closed until asked. */
+.settings-raw {
+  margin-top: var(--token-space-8);
+}
+
+.settings-raw pre {
+  max-height: 60vh;
+  overflow: auto;
+  padding: var(--token-space-3);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-sm);
+  background: var(--token-color-surface);
+  font-size: var(--token-text-12);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

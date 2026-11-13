@@ -205,13 +205,22 @@ describe("CategoryView — one category per privacy tier", () => {
         </RepositoryProvider>,
       );
 
-      // T5 is gated: the table only exists after the reveal (ADR 0009 amendment).
+      // T5 is gated: the content only exists after the reveal (ADR 0009 amendment).
       const gate = screen.queryByRole("button", { name: "Show this category" });
       if (gate !== null) await userEvent.setup().click(gate);
 
-      expect(await screen.findByRole("table")).toBeDefined();
-      expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0);
-      expect(screen.getAllByRole("row").length).toBeGreaterThan(1);
+      if (fixture.tier === "T1") {
+        // T1 label/value categories use the settings screen, not a table
+        // (docs/T1-DESIGN.md §4). The label is a definition term, the value a
+        // definition description.
+        expect((await screen.findByText("Ads")).tagName).toBe("DT");
+        expect(screen.getByText("personalised").tagName).toBe("DD");
+        expect(screen.queryByRole("table")).toBeNull();
+      } else {
+        expect(await screen.findByRole("table")).toBeDefined();
+        expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0);
+        expect(screen.getAllByRole("row").length).toBeGreaterThan(1);
+      }
     });
   }
 });

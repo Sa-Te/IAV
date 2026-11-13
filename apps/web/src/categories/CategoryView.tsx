@@ -1,9 +1,11 @@
 import {
   findCategory,
   isT5,
+  toSettingsView,
   toTableView,
   type CategoryRecord,
   type CategoryViewData,
+  type SettingsView as SettingsViewData,
 } from "@instavault/core";
 import { useCallback, useEffect, useState, type JSX } from "react";
 import { useParams } from "react-router-dom";
@@ -13,6 +15,7 @@ import { ThreadList } from "../messages/ThreadList.js";
 import { CategoryTable } from "./CategoryTable.js";
 import { CategoryTree } from "./CategoryTree.js";
 import { RevealGate } from "./RevealGate.js";
+import { SettingsView } from "./SettingsView.js";
 import { State } from "../ui/State.js";
 
 /** Categories that have a purpose-built view inside the generic route. */
@@ -38,6 +41,7 @@ type State =
       readonly status: "ready";
       readonly view: CategoryViewData;
       readonly record: CategoryRecord;
+      readonly settings: SettingsViewData | null;
     };
 
 /** The reader. It is only mounted once the gate (if any) has been opened. */
@@ -55,11 +59,15 @@ function CategoryData({ id }: { id: string }): JSX.Element {
       try {
         const record = await repository.getCategory(id);
         if (cancelled) return;
-        setState(
-          record === null
-            ? { status: "missing" }
-            : { status: "ready", view: toTableView(record), record },
-        );
+        if (record === null) {
+          setState({ status: "missing" });
+          return;
+        }
+        // The screen is chosen by what the record contains, within T1: the ten
+        // label/value categories share the settings screen (docs/T1-DESIGN.md).
+        // A T1 record that is not label/value returns null and keeps its old view.
+        const settings = findCategory(id)?.privacyTier === 1 ? toSettingsView(record) : null;
+        setState({ status: "ready", view: toTableView(record), record, settings });
       } catch (error) {
         if (!cancelled) {
           setState({
@@ -101,8 +109,13 @@ function CategoryData({ id }: { id: string }): JSX.Element {
         <ThreadList record={state.record} />
       )}
 
+      {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.settings !== null && (
+        <SettingsView view={state.settings} raw={state.record.data} />
+      )}
+
       {state.status === "ready" &&
         !THREAD_CATEGORIES.has(id) &&
+        state.settings === null &&
         state.view.kind === "table" &&
         state.view.total === 0 && (
           <State kind="empty" message="This category is in this export but holds no entries." />
@@ -110,12 +123,14 @@ function CategoryData({ id }: { id: string }): JSX.Element {
 
       {state.status === "ready" &&
         !THREAD_CATEGORIES.has(id) &&
+        state.settings === null &&
         state.view.kind === "table" &&
         state.view.total > 0 && <CategoryTable view={state.view} caption={label} />}
 
-      {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.view.kind === "tree" && (
-        <CategoryTree view={state.view} caption={label} />
-      )}
+      {state.status === "ready" &&
+        !THREAD_CATEGORIES.has(id) &&
+        state.settings === null &&
+        state.view.kind === "tree" && <CategoryTree view={state.view} caption={label} />}
     </>
   );
 }

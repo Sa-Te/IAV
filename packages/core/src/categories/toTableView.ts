@@ -1,6 +1,8 @@
 import type { CategorySource } from "../ingest/port.js";
 import { findCategory } from "../registry/categories.js";
-import { fixMojibake } from "../strings/fixMojibake.js";
+import { entriesOf, payloadsOf } from "./entries.js";
+import { localisedDate, textOf } from "./format.js";
+import { labelItemsOf } from "./labelValues.js";
 
 /**
  * Archive category → something a view can render without knowing the archive.
@@ -53,77 +55,14 @@ function isObject(value: unknown): value is Record<string, unknown> {
 /** One label/value pair taken verbatim from an entry. */
 type Pair = readonly [label: string, value: unknown];
 
-/** `label_values` entries are `{label, value}` in some exports and
- * `{label, vec: [{value}]}` in others; both were measured in archive-2/. */
-function fromLabelValues(entry: Record<string, unknown>): readonly Pair[] | null {
-  const labels = entry.label_values;
-  if (!Array.isArray(labels)) return null;
-
-  const pairs: Pair[] = [];
-  for (const item of labels) {
-    if (!isObject(item) || typeof item.label !== "string") continue;
-    // A label is display text, not a structural key, so mojibake repair applies
-    // here even though `normaliseStrings` deliberately leaves keys alone.
-    const label = fixMojibake(item.label);
-    if ("value" in item) {
-      pairs.push([label, item.value]);
-      continue;
-    }
-    const [first] = Array.isArray(item.vec) ? item.vec : [];
-    pairs.push([label, isObject(first) ? first.value : first]);
-  }
-  return pairs;
-}
-
-/** `string_map_data` is keyed by a display string; the key becomes the label. */
-function fromStringMap(entry: Record<string, unknown>): readonly Pair[] | null {
-  const map = entry.string_map_data;
-  if (!isObject(map)) return null;
-
-  return Object.entries(map).map(([label, raw]) => {
-    const repaired = fixMojibake(label);
-    if (!isObject(raw)) return [repaired, raw];
-    if ("value" in raw) return [repaired, raw.value];
-    // `{timestamp}` stays an object so the cell can show the raw number *and* a
-    // localised date (cellFor), rather than flattening it to a bare number here.
-    return [repaired, raw];
-  });
-}
-
+/** The flat view of the envelope; the structure lives in `labelValues.ts`. */
 function labelsOf(entry: Record<string, unknown>): readonly Pair[] | null {
-  return fromLabelValues(entry) ?? fromStringMap(entry);
-}
-
-function entriesOf(data: unknown): readonly unknown[] | null {
-  if (Array.isArray(data)) return data;
-  if (!isObject(data)) return null;
-
-  // A single envelope object is one row.
-  if (labelsOf(data) !== null) return [data];
-
-  // A named wrapper around a list: `{ig_stories: [...]}`.
-  const keys = Object.keys(data);
-  const [onlyKey] = keys;
-  const child = onlyKey === undefined ? undefined : data[onlyKey];
-  if (keys.length === 1 && Array.isArray(child)) return child;
-  return null;
-}
-
-function textOf(value: unknown): string {
-  if (value === undefined || value === null) return "";
-  if (typeof value === "string") return fixMojibake(value);
-  if (typeof value === "number" || typeof value === "boolean") return String(value);
-  return JSON.stringify(value);
+  const items = labelItemsOf(entry);
+  return items === null ? null : items.map((item) => [item.label, item.value] as const);
 }
 
 function isTimestampObject(value: unknown): value is { timestamp: number } {
   return isObject(value) && typeof value.timestamp === "number";
-}
-
-function localisedDate(timestamp: number): string {
-  // The export's timestamps are Unix seconds, not milliseconds.
-  const date = new Date(timestamp * 1000);
-  return Number.isNaN(date.getTime()) ? "invalid date" : date.toLocaleString();
 }
 
 function cellFor(value: unknown): Cell {
@@ -146,21 +85,6 @@ function columnsForEmpty(recordId: string): readonly string[] {
   // The envelope's own keys are not labels; when the measured shape is an
   // envelope, say so rather than invent a header set.
   return keys.filter((key) => key !== "fbid" && key !== "media");
-}
-
-/**
- * A category fed by several files is stored additively (`mergePayloads`): lists
- * concatenated when every file is a list, otherwise one payload per file. The
- * `sources` say which of the two happened, so no shape is guessed here.
- */
-function payloadsOf(record: {
-  readonly data: unknown;
-  readonly sources?: readonly CategorySource[];
-}): readonly unknown[] {
-  const sources = record.sources;
-  if (sources === undefined || sources.length <= 1) return [record.data];
-  if (sources.every((source) => source.kind === "array")) return [record.data];
-  return Array.isArray(record.data) ? record.data : [record.data];
 }
 
 /**

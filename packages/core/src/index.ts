@@ -78,6 +78,13 @@ export { isT5, revealCopy } from "./categories/privacy.js";
 export type { RevealCopy } from "./categories/privacy.js";
 export { PAGE_SIZE, toTableView } from "./categories/toTableView.js";
 export type { CategoryViewData, Cell, TableView, TreeView } from "./categories/toTableView.js";
+export { toSettingsView } from "./categories/settingsView.js";
+export type {
+  SettingEntry,
+  SettingField,
+  SettingsView,
+  SettingValue,
+} from "./categories/settingsView.js";
 export { fixMojibake } from "./strings/fixMojibake.js";
 export { normaliseStrings } from "./strings/normaliseStrings.js";
 export {
