@@ -255,17 +255,6 @@ export function CycloneStage({
         }
       }}
     >
-      <p className="summary" id="cyclone-help">
-        Arrow keys move through the archive, Enter opens the highlighted item, Space pauses the
-        rotation. Dragging, the wheel or the pointer tilt the vortex.
-      </p>
-
-      {!regionFocused && (
-        <p className="summary" id="cyclone-hint">
-          Press Tab to enter the 3D view controls. The page scrolls normally until you do.
-        </p>
-      )}
-
       <canvas
         ref={canvasRef}
         aria-hidden="true"
@@ -277,26 +266,45 @@ export function CycloneStage({
         }}
       />
 
-      {reducedMotion && !motionOptIn && (
-        <button type="button" className="button" onClick={() => setMotionOptIn(true)}>
-          Start motion
-        </button>
-      )}
-
-      <button
-        type="button"
-        className="button"
-        aria-pressed={paused}
-        onClick={() => setPaused((value) => !value)}
-      >
-        {paused ? "Resume motion" : "Pause motion"}
-      </button>
-
-      {!available && (
-        <p className="summary">
-          This browser cannot start the 3D view. The grid below shows the same items.
+      {/* Instructions float over the canvas, top-left: they must be readable, and
+          they must not push the canvas down by a single pixel. */}
+      <div className="cyclone-overlay cyclone-overlay-top">
+        <p className="cyclone-note" id="cyclone-help">
+          Arrow keys move through the archive, Enter opens the highlighted item, Space pauses the
+          rotation. Dragging, the wheel or the pointer tilt the vortex.
         </p>
-      )}
+
+        {!regionFocused && (
+          <p className="cyclone-note" id="cyclone-hint">
+            Press Tab to enter the 3D view controls. The page scrolls normally until you do.
+          </p>
+        )}
+
+        {!available && (
+          <p className="cyclone-note">
+            This browser cannot start the 3D view. The grid below shows the same items.
+          </p>
+        )}
+      </div>
+
+      {/* The controls float, bottom-centre and compact: a full-width bar over a
+          full-bleed canvas is a second page. */}
+      <div className="cyclone-overlay cyclone-overlay-bottom">
+        {reducedMotion && !motionOptIn && (
+          <button type="button" className="button" onClick={() => setMotionOptIn(true)}>
+            Start motion
+          </button>
+        )}
+
+        <button
+          type="button"
+          className="button"
+          aria-pressed={paused}
+          onClick={() => setPaused((value) => !value)}
+        >
+          {paused ? "Resume motion" : "Pause motion"}
+        </button>
+      </div>
 
       <ul className="visually-hidden" aria-label="All media, in cyclone order">
         {items.map((item, index) => (

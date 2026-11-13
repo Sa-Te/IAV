@@ -261,6 +261,9 @@ th {
 /* --- application shell (M10) -------------------------------------------- */
 
 .app-header {
+  position: relative;
+  z-index: 1;
+  min-height: var(--token-layout-header);
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -354,36 +357,4 @@ th {
   .skip-link {
     transition: none;
   }
-}
-
-/* The cyclone owns its viewport: header + canvas fit the screen, and the page
-   does not scroll under the spiral. No body overflow trickery — the layout is
-   simply not taller than the window. */
-.cyclone-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: calc(100dvh - var(--token-space-24));
-}
-
-.cyclone {
-  display: flex;
-  flex-direction: column;
-  gap: var(--token-space-2);
-  min-height: 0;
-  flex: 1;
-}
-
-.cyclone-canvas {
-  display: block;
-  flex: 1;
-  width: 100%;
-  min-height: 0;
-  border-radius: var(--token-radius-lg);
-  background: var(--token-color-sunken);
-  touch-action: none;
-}
-
-.cyclone .summary {
-  margin: 0;
 }

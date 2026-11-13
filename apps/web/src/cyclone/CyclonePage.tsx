@@ -119,8 +119,10 @@ export function CyclonePage(): JSX.Element {
   }
 
   return (
-    <div className="gallery cyclone-page">
-      <h1>Cyclone</h1>
+    <div className="cyclone-page">
+      {/* Still the document's one h1; it just must not take the space a heading
+          would take above a full-bleed canvas. */}
+      <h1 className="visually-hidden">Cyclone</h1>
       <CycloneStage
         items={items}
         reducedMotion={reducedMotion}

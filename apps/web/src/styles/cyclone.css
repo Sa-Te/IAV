@@ -1,0 +1,63 @@
+/* The cyclone owns the viewport: the canvas fills everything under the header,
+   edge to edge, and the controls float over it on the one glass recipe. Being
+   fixed, it adds no height to the document, so the window never scrolls and the
+   footer stays behind the canvas instead of below it. */
+.cyclone-page {
+  position: fixed;
+  inset: var(--token-layout-header) 0 0 0;
+  overflow: hidden;
+}
+
+.cyclone {
+  position: absolute;
+  inset: 0;
+}
+
+.cyclone-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--token-color-sunken);
+  touch-action: none;
+}
+
+/* Floating, not stacking: the instructions sit over the canvas, and the pointer
+   still tilts and drags whatever is behind them. */
+.cyclone-overlay {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-2);
+  padding: var(--token-space-2) var(--token-space-3);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  background: var(--token-glass-bg);
+  backdrop-filter: var(--token-glass-blur);
+}
+
+.cyclone-overlay-top {
+  top: var(--token-space-4);
+  left: var(--token-space-4);
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 46ch;
+  pointer-events: none;
+}
+
+.cyclone-overlay-bottom {
+  bottom: var(--token-space-4);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.cyclone-note {
+  margin: 0;
+  font-size: var(--token-text-13);
+  color: var(--token-color-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cyclone-overlay {
+    backdrop-filter: none;
+  }
+}

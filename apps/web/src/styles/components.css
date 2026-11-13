@@ -245,6 +245,7 @@
 
 .detail {
   position: fixed;
+  z-index: 20;
   overscroll-behavior: contain;
   touch-action: manipulation;
   inset: 0;
