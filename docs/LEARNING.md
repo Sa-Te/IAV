@@ -139,3 +139,13 @@ progress.
   core reducer, and reduced motion is one guard there instead of three listeners each
   remembering it —
   vault: `mind-maps/2026-11-13_cyclone-interaction.md`
+- 2026-11-13 — `sidebar-is-navigation` — the shell's navigation is a persistent sidebar:
+  galleries, then five tier disclosures, each opening to its own page — not a table of 86
+  rows —
+  vault: `architecture/2026-11-13_sidebar-and-tiers.md`
+- 2026-11-13 — `ribbon-not-cylinder` — the cyclone's width comes from the layout's x-extent,
+  derived from the viewport aspect; the camera stays at 9 units and never moves —
+  vault: `learning-notes/2026-11-13_session-14.md`
+- 2026-11-13 — `video-poster-once` — a `<video>` paints nothing before a frame is decoded, so
+  one poster is drawn on the main thread, stored under a `poster:` key and reused —
+  vault: `learning-notes/2026-11-13_session-14.md`

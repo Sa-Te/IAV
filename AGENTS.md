@@ -258,6 +258,10 @@ view — DOM, canvas or WebGL — reads the same tokens.
 - **Empty, loading, error and unavailable are four visibly different states**, rendered
   through one component (`apps/web/src/ui/State.tsx`). This is non-negotiable and it is
   the second half of the original bug.
+- **The one outbound link.** A caption card may show a URL the person themselves
+  saved; it is a real `<a>` with the destination as its accessible name, opens with
+  `rel="noreferrer noopener"`, and the app never fetches it. It is the only
+  outbound link in the app, and it exists because the user put it there.
 - **3D views (cyclone, map):** WebGL is opt-in. Load with a dynamic import so the GL
   code is its own chunk, ship a non-WebGL fallback, cap the item count, and share the
   same media URL cache as the DOM views.

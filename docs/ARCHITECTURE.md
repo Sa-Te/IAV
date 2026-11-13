@@ -100,7 +100,12 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/messages/ThreadConversation.tsx` | One conversation chronologically with media through the cache, and the read-only note. |
 | `packages/tokens/src/tokens.css` | Every colour, space, radius, type, shadow and glass value; Umber and Paper as data, plus the system fallback. |
 | `apps/web/src/ui/State.tsx` | The four async states — loading, empty, error, unavailable — announced and styled once. |
-| `apps/web/src/ui/AppShell.tsx` | Skip link, header (wordmark, nav, theme), one main landmark, honest footer. |
+| `apps/web/src/ui/AppShell.tsx` | Skip link, the persistent sidebar, one main landmark, honest footer. |
+| `apps/web/src/ui/Sidebar.tsx` | Galleries, five tier disclosures, the modal sheet under 900px (ADR 0011). |
+| `apps/web/src/categories/useCategoryRows.ts` | The registry joined to the repository: one hook for the sidebar, the tier pages and the overview. |
+| `apps/web/src/routes/TierPage.tsx` | `/tiers/tN`: present category cards first, absent ones in their own group. |
+| `apps/web/src/categories/CategoryIndex.tsx` | `/categories`: an overview of the five tiers, not a table of 86 rows. |
+| `apps/web/src/media/poster.ts` | One poster frame per video, generated once and stored in the existing thumbs store. |
 | `apps/web/src/ui/ThemeSwitch.tsx` | System/Umber/Paper as a native radio group; stores only an explicit choice. |
 | `scripts/check-styles.mjs` | Fails the build on a raw hex, an arbitrary Tailwind value or a gradient outside the tokens package. |
 | `packages/core/src/cyclone/layout.ts` | Golden-angle spiral with a wrapping vertical coordinate: deterministic, endless, no accumulated state. |

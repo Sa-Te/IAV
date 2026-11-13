@@ -92,8 +92,10 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
    categories and media to IndexedDB on this device. You should see
    `reading → resolving → storing`, then a summary: categories, entries,
    media stored, media missing, unrecognised files, and a shape fingerprint.
-2. Open `/` for everything, `/categories` for every parsed category, `/posts`,
-   `/stories`, `/archived` for one gallery, or `/cyclone` for the 3D view. — one tile per post, real
+2. Open `/` for everything, `/posts`, `/stories`, `/archived` for one gallery,
+   `/cyclone` for the 3D view, and `/categories` or `/tiers/t1` … `/tiers/t5` for
+   the archive's categories, grouped by the privacy tier they belong to. The
+   sidebar is the way around all of it. — one tile per post, real
    photos, and a line above saying how many posts and media files are on the
    device. Click a tile for the full-size image, caption and date; Escape closes
    and returns focus to the tile.
