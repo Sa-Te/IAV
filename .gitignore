@@ -60,3 +60,7 @@ playwright-report/
 vendor/
 go.work
 go.work.sum
+
+# --- Local knowledge graph (D2: rebuilt locally, never committed) -----------
+graphify-out/
+.graphify_state.json

@@ -378,6 +378,14 @@ Green check on a fresh clone is a feature.
 - `docs/adr/NNNN-title.md` — one page per decision that would be expensive to
   reverse. Format: context, options considered, decision, consequences.
 - Comments in code explain why. The doc explains what and why-not.
+- **Query the graph before grepping for a name.** `graphify query`, `graphify path A B`
+  and `graphify explain X` answer "where is this defined" and "who calls this" more
+  cheaply than a search. Use them first for symbol questions.
+- **Rebuild after structural change.** `graphify update .` after adding, moving or
+  deleting modules. A stale graph is worse than none.
+- **The graph is a map, not evidence.** Every edge is tagged EXTRACTED or INFERRED.
+  An INFERRED edge is an INFERENCE under §15 — to claim any behaviour as FACT you must
+  still read the file and quote the line.
 
 ---
 
