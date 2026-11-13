@@ -53,7 +53,19 @@ export { projectCards } from "./cyclone/projection.js";
 export type { Camera, ScreenCard } from "./cyclone/projection.js";
 export { pickNearest } from "./cyclone/picking.js";
 export { DEFAULT_WINDOW_SIZE, residentWindow } from "./cyclone/window.js";
-export { advance } from "./cyclone/motion.js";
+export {
+  advance,
+  easeTilt,
+  IDLE_VELOCITY,
+  MAX_SPIN,
+  NO_TILT,
+  PHASE_PER_PIXEL,
+  reducePhase,
+  stillPhase,
+  TILT_LIMIT,
+  tiltTarget,
+} from "./cyclone/motion.js";
+export type { PhaseEvent, PhaseState, Tilt } from "./cyclone/motion.js";
 export { isT5, revealCopy } from "./categories/privacy.js";
 export type { RevealCopy } from "./categories/privacy.js";
 export { PAGE_SIZE, toTableView } from "./categories/toTableView.js";

@@ -1,13 +1,30 @@
-import { VERTICAL_SPACING, type MediaItemView } from "@instavault/core";
+import {
+  advance,
+  easeTilt,
+  NO_TILT,
+  PHASE_PER_PIXEL,
+  reducePhase,
+  stillPhase,
+  tiltTarget,
+  VERTICAL_SPACING,
+  type MediaItemView,
+  type Tilt,
+} from "@instavault/core";
 import { useCallback, useEffect, useRef, useState, type JSX } from "react";
 
 import type { CycloneHandle } from "./startCyclone.js";
 
-/** World units per second of idle rotation: slow enough to read, fast enough to notice. */
-const VELOCITY = 0.35;
+/** A pointer that travelled further than this between press and release is a drag, not a click. */
+const CLICK_SLOP_PX = 8;
 
 /**
  * The canvas, the hidden keyboard list, and the decisions about motion.
+ *
+ * All three interactions — pointer tilt, wheel and drag — only *decide a
+ * velocity*; the arithmetic is in `@instavault/core`'s cyclone motion module, and
+ * the phase only ever changes through `advance()` (AGENTS.md §3, one physics
+ * path). Reduced motion is enforced inside that module, so a listener that
+ * forgets it still cannot move the vortex.
  *
  * The canvas is `aria-hidden` and never a tab stop: the same sequence is exposed
  * as a visually-hidden list of real buttons, ordered exactly as the cyclone lays
@@ -27,7 +44,12 @@ export function CycloneStage({
 }): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const handleRef = useRef<CycloneHandle | null>(null);
-  const phaseRef = useRef(0);
+  const motionRef = useRef(stillPhase());
+  const tiltRef = useRef<Tilt>(NO_TILT);
+  const tiltTargetRef = useRef<Tilt>(NO_TILT);
+  const dragRef = useRef<{ y: number; at: number } | null>(null);
+  // Survives the release: the click that follows a drag must not open a card.
+  const dragMovedRef = useRef(0);
   const pausedRef = useRef(false);
 
   const [highlight, setHighlight] = useState(0);
@@ -52,14 +74,86 @@ export function CycloneStage({
       return;
     }
 
+    const pushPhase = (): void => {
+      handle.setPhase(motionRef.current.phase);
+    };
+
+    const onWheel = (event: WheelEvent): void => {
+      // The vortex owns the wheel while it is running: without this the page
+      // scrolls underneath the cards and the archive jumps out of view.
+      event.preventDefault();
+      motionRef.current = reducePhase(
+        motionRef.current,
+        { type: "wheel", deltaY: event.deltaY },
+        reducedMotion,
+      );
+      pushPhase();
+    };
+
+    const onPointerDown = (event: PointerEvent): void => {
+      dragRef.current = { y: event.clientY, at: event.timeStamp };
+      dragMovedRef.current = 0;
+      canvas.setPointerCapture?.(event.pointerId);
+    };
+
+    const onPointerMove = (event: PointerEvent): void => {
+      const rect = canvas.getBoundingClientRect();
+      tiltTargetRef.current = tiltTarget(
+        event.clientX - rect.left,
+        event.clientY - rect.top,
+        rect.width,
+        rect.height,
+      );
+
+      const drag = dragRef.current;
+      if (drag === null) return;
+      // Dragging down moves the sequence down, which is a falling phase.
+      const deltaPhase = -(event.clientY - drag.y) * PHASE_PER_PIXEL;
+      const dtMs = Math.max(1, event.timeStamp - drag.at);
+      dragMovedRef.current += Math.abs(event.clientY - drag.y);
+      dragRef.current = { y: event.clientY, at: event.timeStamp };
+      motionRef.current = reducePhase(
+        motionRef.current,
+        { type: "drag", deltaPhase, dtMs },
+        reducedMotion,
+      );
+      pushPhase();
+    };
+
+    const onPointerUp = (event: PointerEvent): void => {
+      dragRef.current = null;
+      canvas.releasePointerCapture?.(event.pointerId);
+    };
+
+    const onPointerLeave = (): void => {
+      // Leaving the canvas levels the column again; the drag can continue while
+      // the pointer is captured, so only the tilt target resets.
+      if (dragRef.current === null) tiltTargetRef.current = NO_TILT;
+    };
+
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointercancel", onPointerUp);
+    canvas.addEventListener("pointerleave", onPointerLeave);
+
     let frame = 0;
     let last = performance.now();
     const tick = (now: number) => {
       const dt = Math.min(64, now - last);
       last = now;
+
+      tiltRef.current = easeTilt(tiltRef.current, tiltTargetRef.current, dt, reducedMotion);
+      handle.setTilt(tiltRef.current);
+
       if (!pausedRef.current) {
-        phaseRef.current += (VELOCITY * dt) / 1000;
-        handle.setPhase(phaseRef.current);
+        motionRef.current = reducePhase(
+          motionRef.current,
+          { type: "tick", dtMs: dt },
+          reducedMotion,
+        );
+        handle.setPhase(motionRef.current.phase);
       }
       handle.frame(dt);
       frame = requestAnimationFrame(tick);
@@ -68,10 +162,16 @@ export function CycloneStage({
 
     return () => {
       cancelAnimationFrame(frame);
+      canvas.removeEventListener("wheel", onWheel);
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointercancel", onPointerUp);
+      canvas.removeEventListener("pointerleave", onPointerLeave);
       handle.stop();
       handleRef.current = null;
     };
-  }, [animate, items, start, onUnavailable]);
+  }, [animate, items, start, onUnavailable, reducedMotion]);
 
   useEffect(() => {
     pausedRef.current = paused;
@@ -91,8 +191,12 @@ export function CycloneStage({
   const move = (delta: number) => {
     const next = (highlight + delta + items.length) % items.length;
     setHighlight(next);
-    phaseRef.current += delta * VERTICAL_SPACING;
-    handleRef.current?.setPhase(phaseRef.current);
+    // One discrete step, through the same arithmetic as everything else.
+    motionRef.current = {
+      ...motionRef.current,
+      phase: advance(motionRef.current.phase, 1, delta * VERTICAL_SPACING),
+    };
+    handleRef.current?.setPhase(motionRef.current.phase);
   };
 
   return (
@@ -125,7 +229,7 @@ export function CycloneStage({
     >
       <p className="summary" id="cyclone-help">
         Arrow keys move through the archive, Enter opens the highlighted item, Space pauses the
-        rotation.
+        rotation. Dragging, the wheel or the pointer tilt the vortex.
       </p>
 
       {!regionFocused && (
@@ -138,11 +242,11 @@ export function CycloneStage({
         ref={canvasRef}
         aria-hidden="true"
         className="cyclone-canvas"
-        onPointerMove={(event) => {
-          const rect = event.currentTarget.getBoundingClientRect();
-          handleRef.current?.pointer(event.clientX - rect.left, event.clientY - rect.top);
+        onClick={() => {
+          // A drag that ended here is not a click on the highlighted card.
+          if (dragMovedRef.current > CLICK_SLOP_PX) return;
+          openDetail(highlight);
         }}
-        onClick={() => openDetail(highlight)}
       />
 
       {reducedMotion && !motionOptIn && (

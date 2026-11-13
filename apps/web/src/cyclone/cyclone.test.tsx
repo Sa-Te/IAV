@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { CategoryRecord } from "@instavault/core";
+import { IDLE_VELOCITY, MAX_SPIN, TILT_LIMIT, type CategoryRecord } from "@instavault/core";
 import type { ArchiveRepository } from "@instavault/storage";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -19,6 +19,7 @@ function handle() {
     stop: vi.fn(),
     pointer: () => null,
     setPhase: vi.fn(),
+    setTilt: vi.fn(),
     frame: vi.fn(),
     stats: () => ({ resident: 0, bytes: 0, drawCalls: 0 }),
     renderer: "test",
@@ -230,5 +231,156 @@ describe("the texture budget is a refusal, not a crash", () => {
     expect(logEntries().some((entry) => entry.message.includes("shader failed to compile"))).toBe(
       true,
     );
+  });
+});
+
+/**
+ * Pointer tilt, wheel and drag. The arithmetic is core's; these tests only prove
+ * the stage decides an event is real, hands it over, and lets the frame carry the
+ * result — plus that reduced motion wins over all three.
+ */
+function stubFrames(): (now: number) => void {
+  const pending: FrameRequestCallback[] = [];
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) =>
+    pending.push(callback),
+  );
+  vi.stubGlobal("cancelAnimationFrame", () => undefined);
+  return (now: number) => {
+    for (const callback of pending.splice(0)) callback(now);
+  };
+}
+
+function sizedCanvas(container: HTMLElement, width = 800, height = 600): HTMLCanvasElement {
+  const canvas = container.querySelector("canvas");
+  if (canvas === null) throw new Error("no canvas");
+  canvas.getBoundingClientRect = () =>
+    ({ left: 0, top: 0, width, height, right: width, bottom: height, x: 0, y: 0 }) as DOMRect;
+  return canvas;
+}
+
+function phases(instance: ReturnType<typeof handle>): number[] {
+  return instance.setPhase.mock.calls.map(([value]) => value as number);
+}
+
+describe("cyclone interactions", () => {
+  it("moves the phase on a wheel, bounded, and stops the page scrolling", async () => {
+    const frames = stubFrames();
+    const instance = handle();
+    startMock.mockReturnValue(instance);
+    const { container } = render(
+      <MemoryRouter>
+        <RepositoryProvider repository={repository(12)}>
+          <CyclonePage />
+        </RepositoryProvider>
+      </MemoryRouter>,
+    );
+    await screen.findByRole("list", { name: "All media, in cyclone order" });
+    const canvas = sizedCanvas(container);
+
+    // fireEvent returns false when the handler called preventDefault.
+    expect(fireEvent.wheel(canvas, { deltaY: 1000 })).toBe(false);
+
+    let now = performance.now();
+    for (let frame = 0; frame < 5; frame += 1) frames((now += 16));
+    const forward = phases(instance).at(-1) ?? 0;
+    expect(forward).toBeGreaterThan(0);
+    // A hard flick cannot outrun idle plus the spin ceiling.
+    expect(forward).toBeLessThan((IDLE_VELOCITY + MAX_SPIN) * 5 * 16 + 0.01);
+
+    expect(fireEvent.wheel(canvas, { deltaY: -1000 })).toBe(false);
+    for (let frame = 0; frame < 5; frame += 1) frames((now += 16));
+    const backward = phases(instance).at(-1) ?? 0;
+    expect(backward).toBeLessThan(forward);
+  });
+
+  it("leans by the pointer, clamped at its limit", async () => {
+    const frames = stubFrames();
+    const instance = handle();
+    startMock.mockReturnValue(instance);
+    const { container } = render(
+      <MemoryRouter>
+        <RepositoryProvider repository={repository(12)}>
+          <CyclonePage />
+        </RepositoryProvider>
+      </MemoryRouter>,
+    );
+    await screen.findByRole("list", { name: "All media, in cyclone order" });
+    const canvas = sizedCanvas(container);
+
+    // Far above and to the right of the canvas: the pointer cannot over-lean it.
+    fireEvent.pointerMove(canvas, { clientX: 5000, clientY: -5000 });
+    let now = performance.now();
+    for (let frame = 0; frame < 40; frame += 1) frames((now += 16));
+
+    const tilt = instance.setTilt.mock.calls.at(-1)?.[0] as { yaw: number; pitch: number };
+    expect(tilt.yaw).toBeLessThanOrEqual(TILT_LIMIT);
+    expect(tilt.pitch).toBeGreaterThanOrEqual(-TILT_LIMIT);
+    // Eased all the way to the clamped target, not stuck near the centre.
+    expect(tilt.yaw).toBeGreaterThan(TILT_LIMIT * 0.9);
+    expect(tilt.pitch).toBeLessThan(-TILT_LIMIT * 0.9);
+  });
+
+  it("carries a drag's velocity after release and decays it within three seconds", async () => {
+    const frames = stubFrames();
+    const instance = handle();
+    startMock.mockReturnValue(instance);
+    const { container } = render(
+      <MemoryRouter>
+        <RepositoryProvider repository={repository(12)}>
+          <CyclonePage />
+        </RepositoryProvider>
+      </MemoryRouter>,
+    );
+    await screen.findByRole("list", { name: "All media, in cyclone order" });
+    const canvas = sizedCanvas(container);
+
+    fireEvent.pointerDown(canvas, { clientY: 500, pointerId: 1 });
+    fireEvent.pointerMove(canvas, { clientY: 400, pointerId: 1 });
+    fireEvent.pointerUp(canvas, { clientY: 400, pointerId: 1 });
+
+    let now = performance.now();
+    for (let frame = 0; frame < 200; frame += 1) frames((now += 16));
+
+    const recorded = phases(instance);
+    const early = (recorded[2] ?? 0) - (recorded[1] ?? 0);
+    const late = (recorded.at(-1) ?? 0) - (recorded.at(-2) ?? 0);
+
+    // The flick moved it faster than idle at first, and is back to a crawl by 3 s.
+    expect(early).toBeGreaterThan(IDLE_VELOCITY * 16 * 2);
+    expect(late).toBeLessThan(early / 10);
+    expect(late).toBeGreaterThan(0);
+  });
+
+  it("ignores wheel, drag and tilt under reduced motion, even with motion opted in", async () => {
+    const frames = stubFrames();
+    const instance = handle();
+    startMock.mockReturnValue(instance);
+    reduceMotion(true);
+    const user = userEvent.setup();
+    const { container } = render(
+      <MemoryRouter>
+        <RepositoryProvider repository={repository(12)}>
+          <CyclonePage />
+        </RepositoryProvider>
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Start motion" }));
+    const canvas = sizedCanvas(container);
+
+    fireEvent.wheel(canvas, { deltaY: 4000 });
+    fireEvent.pointerMove(canvas, { clientX: 5000, clientY: -5000 });
+    fireEvent.pointerDown(canvas, { clientY: 500, pointerId: 1 });
+    fireEvent.pointerMove(canvas, { clientY: 200, pointerId: 1 });
+    fireEvent.pointerUp(canvas, { clientY: 200, pointerId: 1 });
+
+    let now = performance.now();
+    for (let frame = 0; frame < 30; frame += 1) frames((now += 16));
+
+    expect(instance.setPhase.mock.calls.length).toBeGreaterThan(0);
+    expect(phases(instance).every((value) => value === 0)).toBe(true);
+    for (const [tilt] of instance.setTilt.mock.calls) {
+      expect(tilt).toEqual({ yaw: 0, pitch: 0 });
+    }
   });
 });

@@ -1,4 +1,4 @@
-import { residentWindow, type CardTransform } from "@instavault/core";
+import { NO_TILT, residentWindow, type CardTransform, type Tilt } from "@instavault/core";
 
 import { createContext, type GlContext } from "./gl/context.js";
 import { createProgram } from "./gl/program.js";
@@ -25,6 +25,7 @@ export interface CycloneHandle {
   stop(): void;
   pointer(x: number, y: number): number | null;
   setPhase(phase: number): void;
+  setTilt(tilt: Tilt): void;
   frame(dtMs: number): void;
   stats(): { resident: number; bytes: number; drawCalls: number };
   renderer: string;
@@ -49,11 +50,9 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
   const { gl, caps } = context;
   const program = createProgram(gl);
   const renderer = createRenderer(gl, program);
-  const layout: readonly CardTransform[] = vortexLayout(options.items.length, 0, {
-    cardAspect: CARD_ASPECT,
-  });
 
   let phase = 0;
+  let tilt: Tilt = NO_TILT;
   let highlight: number | null = null;
   let drawCalls = 0;
 
@@ -112,17 +111,24 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
   const width = () => options.canvas.clientWidth || 1;
   const height = () => options.canvas.clientHeight || 1;
 
-  const project = (yaw: number, pitch: number) =>
-    projectCards(layout, {
-      yaw,
-      pitch,
+  // The layout is a function of the phase, so it is built for the frame being
+  // drawn. Building it once and scrolling the window over it meant the cards
+  // never moved: the phase was only a texture-window number.
+  const layoutAt = (at: number): readonly CardTransform[] =>
+    vortexLayout(options.items.length, at, { cardAspect: CARD_ASPECT });
+
+  const project = (at: number, view: Tilt) =>
+    projectCards(layoutAt(at), {
+      yaw: view.yaw,
+      pitch: view.pitch,
       distance: 9,
       fovY: FOV_Y,
       viewport: { width: width(), height: height() },
     });
 
-  const draw = (yaw: number, pitch: number): void => {
-    const screen = project(yaw, pitch);
+  const draw = (): void => {
+    const layout = layoutAt(phase);
+    const screen = project(phase, tilt);
     const instances: Instance[] = [];
     for (const card of screen) {
       if (!card.visible) continue;
@@ -141,7 +147,7 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
     drawCalls = renderer.draw({ instances, background: BACKGROUND });
   };
 
-  void textures.setWindow(residentWindow(options.items.length, 0).concat()).then(() => draw(0, 0));
+  void textures.setWindow(residentWindow(options.items.length, 0).concat()).then(() => draw());
 
   return {
     stop() {
@@ -151,7 +157,7 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
       if (textureObject !== null) gl.deleteTexture(textureObject);
     },
     pointer(x, y) {
-      const picked = pickNearest(project(0, 0), { x, y }, MAX_PICK_RADIUS);
+      const picked = pickNearest(project(phase, tilt), { x, y }, MAX_PICK_RADIUS);
       if (picked !== highlight) {
         highlight = picked;
         options.onHighlight?.(picked);
@@ -162,12 +168,15 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
       phase = next;
       void textures
         .setWindow(residentWindow(options.items.length, Math.floor(phase)))
-        .then(() => draw(0, 0));
+        .then(() => draw());
     },
-    // The caller owns the clock; this signature exists so the loop can pass dt
-    // once tilt/velocity live in the handle (they do not yet — pointer tilt is M12).
+    setTilt(next) {
+      tilt = next;
+    },
+    // The caller owns the clock: it advances the phase and the tilt, then asks for
+    // a frame. Nothing here reads time (AGENTS.md §3, one physics path).
     frame() {
-      draw(0, 0);
+      draw();
     },
     stats() {
       const stats = textures.stats();

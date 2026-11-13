@@ -51,11 +51,11 @@ test("the device takes the branch its capabilities allow, and says why if it fal
   await page.goto("/cyclone");
 
   const found = await caps(page);
-  // The runner's numbers are the evidence for which branch CI exercises.
-  test.info().annotations.push({
-    type: "webgl2",
-    description: `layers=${found.maxArrayTextureLayers} renderer=${found.renderer}`,
-  });
+  // The runner's numbers are the evidence for which branch CI exercises, and the
+  // CI log is where they have to be readable after the fact.
+  console.warn(
+    `cyclone probe: webgl2=${found.webgl2} layers=${found.maxArrayTextureLayers} renderer=${found.renderer}`,
+  );
 
   const fallback = page.getByText(/cannot start the 3D view|needs more cards/);
   const canvas = page.locator("canvas.cyclone-canvas");
