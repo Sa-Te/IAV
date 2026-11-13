@@ -1,5 +1,6 @@
 import { useState, type JSX, type ReactNode } from "react";
 
+import { BackToTop } from "./BackToTop.js";
 import { Sidebar } from "./Sidebar.js";
 import { ThemeSwitch } from "./ThemeSwitch.js";
 
@@ -64,6 +65,8 @@ export function AppShell({ children }: { children: ReactNode }): JSX.Element {
         <main id="main" tabIndex={-1} className="app-main">
           {children}
         </main>
+
+        <BackToTop />
 
         <footer className="app-footer">
           <p>

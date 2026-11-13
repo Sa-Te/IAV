@@ -120,3 +120,21 @@ describe("sidebar", () => {
     ).toBeNull();
   });
 });
+
+describe("back to top", () => {
+  it("appears only after a screenful of scroll and returns to the top", async () => {
+    const user = userEvent.setup();
+    renderShell();
+    await screen.findByRole("navigation", { name: "Galleries" });
+
+    expect(screen.queryByRole("button", { name: "Back to top" })).toBeNull();
+    window.scrollY = 900;
+    window.dispatchEvent(new Event("scroll"));
+    const button = await screen.findByRole("button", { name: "Back to top" });
+
+    const scrollTo = vi.fn();
+    vi.stubGlobal("scrollTo", scrollTo);
+    await user.click(button);
+    expect(scrollTo).toHaveBeenCalled();
+  });
+});

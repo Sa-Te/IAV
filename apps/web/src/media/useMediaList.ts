@@ -37,9 +37,17 @@ export function useMediaList(category: string): {
   );
   const [counts, setCounts] = useState<Readonly<Record<string, number>>>(hit?.counts ?? {});
   const [attempt, setAttempt] = useState(0);
+  const previous = useRef(category);
 
   useEffect(() => {
     let cancelled = false;
+    // A different category is a different list: showing the previous one while the
+    // next loads is how /posts appeared to "not reload" after visiting /everything.
+    // Only on an actual change, so a cache hit still never flashes a loading state.
+    if (previous.current !== category) {
+      previous.current = category;
+      setState({ status: "loading" });
+    }
 
     // A cache hit renders immediately — no loading state, ever — and a later
     // refresh updates in place through the subscription.
@@ -52,7 +60,10 @@ export function useMediaList(category: string): {
     });
 
     if (cached !== undefined) {
-      // A later mount inside the same page session: nothing to fetch.
+      // A later mount inside the same page session: nothing to fetch, but the state
+      // must say so (a category change reset it to loading above).
+      setState({ status: "ready", items: cached.items });
+      setCounts(cached.counts);
       return unsubscribe;
     }
 
