@@ -32,20 +32,22 @@ describe("settings screen — one entry", () => {
     expect(screen.queryByRole("table")).toBeNull();
   });
 
-  it("shows a timestamp as a localised date with the raw number beside it", () => {
+  it("shows a timestamp as a localised date, with the raw number only in the title", () => {
     renderData({ label_values: [{ label: "Last login", timestamp_value: 1_786_001_771 }] });
 
     expect(screen.getByText("Last login").tagName).toBe("DT");
-    expect(screen.getByText("1786001771")).toBeDefined();
-    // The localised date is a second presentation of the same value.
+    // The raw Unix number is not printed beside the date; it is the hover title.
+    expect(screen.queryByText("1786001771")).toBeNull();
     const date = document.querySelector(".settings-date");
     expect(date?.textContent).toBeTruthy();
-    expect(date?.textContent).not.toBe("1786001771");
+    expect(date?.getAttribute("title")).toBe("1786001771");
   });
 
-  it("shows 0 as the raw number and never as 1970", () => {
+  it("shows 0 as Not set and never as 1970", () => {
     renderData({ label_values: [{ label: "Never", timestamp_value: 0 }] });
-    expect(screen.getByText("0")).toBeDefined();
+    const value = document.querySelector(".settings-absent");
+    expect(value?.textContent).toBe("Not set");
+    expect(value?.getAttribute("title")).toBe("0");
     expect(screen.queryByText(/1970/)).toBeNull();
   });
 

@@ -50,14 +50,19 @@ export function FieldValue({ field }: { field: SettingField }): JSX.Element {
 
     case "timestamp":
       return value.date === null ? (
-        // 0 is the export's "not set": the raw number is the fact, a 1970 date
-        // would be an invented event.
-        <span className="settings-raw-number">{value.raw}</span>
+        // 0 is the export's "not set". The raw number is in the title and the
+        // raw JSON; a 1970 date would be an invented event.
+        <span className="settings-absent" title={String(value.raw)}>
+          Not set
+        </span>
       ) : (
-        <>
-          <span className="settings-date">{value.date}</span>{" "}
-          <span className="settings-raw-number">{value.raw}</span>
-        </>
+        <time
+          className="settings-date"
+          dateTime={new Date(value.raw * 1000).toISOString()}
+          title={String(value.raw)}
+        >
+          {value.date}
+        </time>
       );
 
     case "list":

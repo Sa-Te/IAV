@@ -69,10 +69,7 @@ export function CategoryTable({
                 >
                   {/* The full value is always in `title`; the visible text is cut
                       for layout only. Nothing is paraphrased. */}
-                  <span title={cell.text}>{truncate(cell.text)}</span>
-                  {cell.secondary !== undefined && (
-                    <span className="cell-secondary"> {cell.secondary}</span>
-                  )}
+                  <span title={cell.title ?? cell.text}>{truncate(cell.text)}</span>
                 </td>
               ))}
             </tr>

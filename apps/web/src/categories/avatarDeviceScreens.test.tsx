@@ -54,7 +54,7 @@ describe("avatar items screen", () => {
     renderAvatars(13);
 
     expect(screen.getByText("13 items")).toBeDefined();
-    expect(screen.getAllByText("No image")).toHaveLength(13);
+    expect(screen.getAllByText("Image not included in the export")).toHaveLength(13);
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(13);
     expect(screen.getByRole("heading", { level: 2, name: "Item 1" })).toBeDefined();
     expect(screen.queryByRole("img")).toBeNull();

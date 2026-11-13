@@ -29,7 +29,9 @@ describe("toTableView — the four observed shapes", () => {
     expect(view.columns).toEqual(["Saved on", "armadillo_devices", "timestamp"]);
     expect(view.total).toBe(2);
     expect(view.rows[0]?.[0]).toEqual({ text: "14 November 2023" });
-    expect(view.rows[1]?.[2]?.text).toBe("1700000100");
+    // The timestamp column shows the date; the raw number is only the title.
+    expect(view.rows[1]?.[2]?.text).not.toBe("1700000100");
+    expect(view.rows[1]?.[2]?.title).toBe("1700000100");
   });
 
   it("reads a single envelope object as one row", () => {
@@ -58,9 +60,9 @@ describe("toTableView — the four observed shapes", () => {
     if (view.kind !== "table") return;
     expect(view.columns).toEqual(["Author", "Time"]);
     expect(view.rows[0]?.[0]).toEqual({ text: "someone" });
-    // The raw number stays, the localised date is a second presentation of it.
-    expect(view.rows[0]?.[1]?.text).toBe("1700000000");
-    expect(view.rows[0]?.[1]?.secondary).toEqual(expect.any(String));
+    // The date is visible; the raw Unix number is only the hover title.
+    expect(view.rows[0]?.[1]?.text).not.toBe("1700000000");
+    expect(view.rows[0]?.[1]?.title).toBe("1700000000");
   });
 
   it("falls back to a tree for a shape with no labels anywhere", () => {

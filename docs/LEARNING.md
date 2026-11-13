@@ -177,7 +177,8 @@ progress.
   present-but-empty category shows no count rather than a bare zero —
   vault: `learning-notes/2026-11-13_session-16.md`
 - 2026-11-13 — `absent-is-not-zero` — a zero timestamp is the export's "not set",
-  not 1 January 1970; the raw number stays visible and the invented date does not —
+  not 1 January 1970; the screen says "Not set", and the raw number stays in the
+  hover title and the raw JSON —
   vault: `learning-notes/2026-11-13_session-16.md`
 - 2026-11-13 — `fallback-is-the-proof` — a bespoke screen returns `null` when the
   record does not match its measured shape, so a changed export degrades to the

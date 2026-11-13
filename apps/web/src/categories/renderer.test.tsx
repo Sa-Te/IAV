@@ -249,7 +249,7 @@ describe("CategoryView — the two measured T1 outliers", () => {
       </RepositoryProvider>,
     );
 
-    expect(await screen.findByText("No image")).toBeDefined();
+    expect(await screen.findByText("Image not included in the export")).toBeDefined();
     expect(screen.getByRole("heading", { level: 2, name: "Item 1" })).toBeDefined();
     expect(screen.queryByText("Raw tree")).toBeNull();
   });

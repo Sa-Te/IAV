@@ -186,8 +186,8 @@ Rules the table cannot satisfy and this screen must:
   under the value, never a tooltip only.
 - An opaque value is truncated visually to about eighty characters and expands on
   keyboard focus; its full text is its accessible name, and it is never prettified.
-- A timestamp is localised date primary, raw number secondary. `0` is shown as the
-  raw number with no date.
+- A timestamp is a localised date only. The raw Unix number is the hover title and
+  the raw JSON, never printed beside the date. `0` is "Not set", not 1970.
 - A non-empty URL is a real `<a rel="noreferrer noopener" target="_blank">` whose
   accessible name is the destination. The app never fetches it.
 - The raw JSON stays behind a closed disclosure.
@@ -199,25 +199,21 @@ Rules the table cannot satisfy and this screen must:
 ┌ Avatar items ───────────────────────────────────────────────┐
 │ 13 items · images are remote URLs, not fetched              │
 │                                                             │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐                   │
-│  │ item 1   │  │ item 2   │  │ item 3   │                   │
-│  │ no image │  │ no image │  │ no image │                   │
-│  │ 379 char │  │ 380 char │  │ 381 char │                   │
-│  └──────────┘  └──────────┘  └──────────┘                   │
-│                                                             │
-│  Item 1                                                     │
-│    Type            short text                               │
-│    Acquired        18 November 2025 · 1763…                 │
-│    Item            https://… (opens in a new tab)           │
+│  (1) Item 1                  (2) Item 2                     │
+│      Image not included          Image not included         │
+│      Type FREE                   Type FREE                  │
+│      Acquired 12/4/2025…         Acquired 12/3/2025…        │
+│      item https://… (link)       item https://… (link)      │
 │                                                             │
 │  ▸ Raw data                                                 │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-A tile is a labelled placeholder: the item's ordinal, "no image on this device"
-and the URL length. It never renders a broken image icon and never invents a
-thumbnail. The URL is a link; clicking it is the person's choice and the only
-network request in the app that the app itself did not make.
+A small rounded tile is a labelled placeholder: the item's ordinal, "Image not
+included in the export" and the URL as a link. It never renders a broken image
+icon and never invents a thumbnail. The URL is a link; clicking it is the
+person's choice and the only network request in the app that the app itself did
+not make.
 
 ### Group C — the device screen
 
@@ -236,8 +232,8 @@ network request in the app that the app itself did not make.
 │    … eight rows                                             │
 │                                                             │
 │  Records (30)                                               │
-│    Record 1                    12 Nov 2026 · 1792…          │
-│    Record 2                    13 Nov 2026 · 1793…          │
+│    Record 1                    12 Nov 2026                  │
+│    Record 2                    13 Nov 2026                  │
 │    …                                                        │
 └─────────────────────────────────────────────────────────────┘
 ```

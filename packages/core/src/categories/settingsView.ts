@@ -43,7 +43,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function timestampValue(raw: number): SettingValue {
   // The export writes 0 for "not set". A 1970 date would be an invented event;
-  // the raw number stays visible and the date is omitted.
+  // the raw number is kept for the title and the raw JSON, and no date is shown.
   return { kind: "timestamp", raw, date: raw === 0 ? null : localisedDate(raw) };
 }
 

@@ -24,11 +24,10 @@ import { labelItemsOf } from "./labelValues.js";
  */
 
 export interface Cell {
-  /** The value as the export wrote it. For a timestamp: the raw number. */
+  /** The value as the export wrote it, except a timestamp: that shows its date. */
   readonly text: string;
-  /** A second presentation of the *same* value — a localised date for a
-   * timestamp. Never replaces `text`. */
-  readonly secondary?: string;
+  /** Extra detail for a hover title only. Never a second visible column. */
+  readonly title?: string;
 }
 
 export interface TableView {
@@ -67,7 +66,9 @@ function isTimestampObject(value: unknown): value is { timestamp: number } {
 
 function cellFor(value: unknown): Cell {
   if (isTimestampObject(value)) {
-    return { text: String(value.timestamp), secondary: localisedDate(value.timestamp) };
+    // The person reads a date. The raw Unix number is kept in the hover title and
+    // in the stored record, never printed beside the date.
+    return { text: localisedDate(value.timestamp), title: String(value.timestamp) };
   }
   return { text: textOf(value) };
 }

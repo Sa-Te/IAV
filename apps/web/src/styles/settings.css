@@ -59,13 +59,6 @@
   font-size: var(--token-text-13);
 }
 
-.settings-raw-number {
-  color: var(--token-color-text-muted);
-  font-family: var(--token-font-mono);
-  font-size: var(--token-text-13);
-  font-variant-numeric: tabular-nums;
-}
-
 .settings-date {
   font-variant-numeric: tabular-nums;
 }
@@ -133,8 +126,8 @@
 
 .avatar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
-  gap: var(--token-space-4);
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--token-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -142,30 +135,55 @@
 
 .avatar-card {
   display: flex;
-  flex-direction: column;
-  gap: var(--token-space-2);
+  align-items: flex-start;
+  gap: var(--token-space-3);
   padding: var(--token-space-3);
   border: 1px solid var(--token-color-border);
   border-radius: var(--token-radius-md);
   background: var(--token-color-surface);
 }
 
-/* A placeholder, not a broken image: there is no local bitmap to draw. */
+/* A placeholder, not a broken image: the export has a remote URL, no bitmap. */
 .avatar-placeholder {
+  flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 1;
-  border: 1px dashed var(--token-color-border);
-  border-radius: var(--token-radius-sm);
+  width: var(--token-space-12);
+  height: var(--token-space-12);
+  border: 1px solid var(--token-color-border);
+  border-radius: 50%;
   color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
   font-size: var(--token-text-13);
+  font-variant-numeric: tabular-nums;
+}
+
+.avatar-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-1);
+  min-width: 0;
 }
 
 .avatar-heading {
   margin: 0;
   font-size: var(--token-text-14);
   font-weight: 600;
+}
+
+.avatar-note {
+  margin: 0;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+}
+
+.avatar-card .settings-fields {
+  gap: var(--token-space-2);
+}
+
+.avatar-card .settings-value {
+  font-size: var(--token-text-14);
 }
 
 /* --- device effects ------------------------------------------------------ */

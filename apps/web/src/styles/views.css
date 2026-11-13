@@ -50,13 +50,6 @@ th {
   margin: 0 0 var(--token-space-6);
 }
 
-.cell-secondary {
-  display: block;
-  color: var(--token-color-text-muted);
-  font-size: var(--token-text-13);
-  font-variant-numeric: tabular-nums;
-}
-
 /* Numeric columns: right-aligned and tabular, so digits line up down the column. */
 .tabular {
   text-align: right;

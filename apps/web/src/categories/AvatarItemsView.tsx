@@ -31,45 +31,48 @@ export function AvatarItemsView({
           {view.items.map((item) => (
             <li className="avatar-card" key={item.ordinal}>
               <span className="avatar-placeholder" aria-hidden="true">
-                No image
+                {item.ordinal}
               </span>
-              <h2 className="avatar-heading">Item {item.ordinal}</h2>
-              <dl className="settings-fields">
-                <div className="settings-field">
-                  <dt className="settings-label">Type</dt>
-                  <dd className="settings-value">
-                    {item.type === "" ? (
-                      <span className="settings-absent">Not provided</span>
-                    ) : (
-                      item.type
-                    )}
-                  </dd>
-                </div>
-                <div className="settings-field">
-                  <dt className="settings-label">Acquired</dt>
-                  <dd className="settings-value">
-                    {item.acquiredDate === null ? (
-                      <span className="settings-absent">Not provided</span>
-                    ) : (
-                      item.acquiredDate
-                    )}
-                  </dd>
-                </div>
-                <div className="settings-field">
-                  <dt className="settings-label">item</dt>
-                  <dd className="settings-value">
-                    <a
-                      href={item.item}
-                      rel="noreferrer noopener"
-                      target="_blank"
-                      className="settings-opaque"
-                      title={item.item}
-                    >
-                      {item.item}
-                    </a>
-                  </dd>
-                </div>
-              </dl>
+              <div className="avatar-card-body">
+                <h2 className="avatar-heading">Item {item.ordinal}</h2>
+                <p className="avatar-note">Image not included in the export</p>
+                <dl className="settings-fields">
+                  <div className="settings-field">
+                    <dt className="settings-label">Type</dt>
+                    <dd className="settings-value">
+                      {item.type === "" ? (
+                        <span className="settings-absent">Not provided</span>
+                      ) : (
+                        item.type
+                      )}
+                    </dd>
+                  </div>
+                  <div className="settings-field">
+                    <dt className="settings-label">Acquired</dt>
+                    <dd className="settings-value">
+                      {item.acquiredDate === null ? (
+                        <span className="settings-absent">Not provided</span>
+                      ) : (
+                        item.acquiredDate
+                      )}
+                    </dd>
+                  </div>
+                  <div className="settings-field">
+                    <dt className="settings-label">item</dt>
+                    <dd className="settings-value">
+                      <a
+                        href={item.item}
+                        rel="noreferrer noopener"
+                        target="_blank"
+                        className="settings-opaque"
+                        title={item.item}
+                      >
+                        {item.item}
+                      </a>
+                    </dd>
+                  </div>
+                </dl>
+              </div>
             </li>
           ))}
         </ul>
