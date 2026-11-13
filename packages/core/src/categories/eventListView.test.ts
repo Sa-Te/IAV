@@ -211,6 +211,7 @@ describe("groupByMonthAndYear — the year level", () => {
     hero: { label: "Name", text: hero },
     url: null,
     shortcode: null,
+    preview: null,
     fields: [],
   });
 

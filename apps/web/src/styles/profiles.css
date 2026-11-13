@@ -1,0 +1,148 @@
+/* --- personal_information: one local profile photo ----------------------- */
+
+.profile-view {
+  max-width: 72ch;
+}
+
+.profile-photo {
+  display: block;
+  width: min(12rem, 100%);
+  aspect-ratio: 1;
+  object-fit: cover;
+  margin: 0 0 var(--token-space-6);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+}
+
+.profile-photo.is-pending,
+.profile-photo.is-failed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12rem;
+  height: 12rem;
+  padding: var(--token-space-3);
+  background: var(--token-color-surface);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+  text-align: center;
+}
+
+/* --- profile_photos ---------------------------------------------------- */
+
+.profile-figures {
+  display: grid;
+  gap: var(--token-space-6);
+  margin: var(--token-space-4) 0 0;
+}
+
+.profile-figure {
+  max-width: 26rem;
+  margin: 0;
+}
+
+.profile-figure-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+}
+
+.profile-figure-photo.is-pending,
+.profile-figure-photo.is-failed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--token-space-4);
+  background: var(--token-color-surface);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+  text-align: center;
+}
+
+.profile-figure-caption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-1);
+  margin-top: var(--token-space-3);
+}
+
+/* The caption is the one place the serif is used: it is prose, not UI. */
+.profile-figure-text {
+  color: var(--token-color-text);
+  font-family: var(--token-font-serif);
+  font-size: var(--token-text-16);
+  font-style: italic;
+  line-height: 1.5;
+}
+
+.profile-figure-date,
+.profile-figure-size {
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- saved posts by collection ---------------------------------------- */
+
+.saved-view {
+  max-width: 80ch;
+}
+
+.saved-folder {
+  border-bottom: 1px solid var(--token-color-border);
+}
+
+.saved-folder:first-of-type {
+  border-top: 1px solid var(--token-color-border);
+}
+
+.saved-folder-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--token-space-3);
+  padding: var(--token-space-3) var(--token-space-2);
+  border-radius: var(--token-radius-sm);
+  cursor: pointer;
+}
+
+.saved-folder-summary:hover {
+  background: var(--token-color-raised);
+}
+
+.saved-folder-name {
+  font-size: var(--token-text-16);
+  font-weight: 600;
+}
+
+.saved-folder-meta {
+  flex: none;
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-12);
+  white-space: nowrap;
+}
+
+.saved-posts {
+  margin: 0;
+  padding: 0 var(--token-space-2) var(--token-space-4);
+  list-style: none;
+}
+
+.saved-post {
+  padding: var(--token-space-3) 0;
+  border-top: 1px solid var(--token-color-border);
+}
+
+.saved-post-caption {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--token-text-14);
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}

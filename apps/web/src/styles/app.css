@@ -121,6 +121,7 @@
 @import "./views.css";
 @import "./settings.css";
 @import "./events.css";
+@import "./profiles.css";
 /* Its own file: the cyclone is a full-bleed view with rules no other route shares. */
 @import "./cyclone.css";
 @import "./shell.css";

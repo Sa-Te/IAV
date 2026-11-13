@@ -3,9 +3,11 @@ import type {
   EventEntry,
   EventListView as EventListViewData,
   EventMonth,
+  EventPreview,
   EventYear,
+  PollOption,
 } from "@instavault/core";
-import { useState, type JSX } from "react";
+import { useState, type CSSProperties, type JSX } from "react";
 
 import { State } from "../ui/State.js";
 import { pluralCount } from "./counts.js";
@@ -66,6 +68,74 @@ function PlainList({
   );
 }
 
+/**
+ * The export's colours, applied rather than printed (docs/T3-DESIGN.md §6).
+ *
+ * The value is an arbitrary string from the archive, so it is never interpolated
+ * into CSS text — React sets the property, and an invalid value is simply ignored
+ * by the browser. A swatch carries the value as its accessible name, so a screen
+ * reader still hears what a sighted reader sees.
+ */
+function colourStyle(property: "backgroundColor" | "color", value: string | null): CSSProperties {
+  return value === null || value.length > 40 ? {} : { [property]: value };
+}
+
+function StickerPreview({
+  preview,
+}: {
+  preview: Extract<EventPreview, { kind: "sticker" }>;
+}): JSX.Element {
+  return (
+    <p
+      className="event-sticker"
+      role="img"
+      aria-label={preview.emoji === null ? "Sticker" : `Sticker ${preview.emoji}`}
+      style={{
+        ...colourStyle("backgroundColor", preview.backgroundColour),
+        ...colourStyle("color", preview.textColour),
+      }}
+    >
+      <span aria-hidden="true">{preview.emoji}</span>
+    </p>
+  );
+}
+
+/** A poll's option sizes are the export's; 12–40px keeps a bad value on the page. */
+function optionSize(size: number): CSSProperties {
+  if (!Number.isFinite(size) || size <= 0) return {};
+  return { fontSize: `${Math.min(Math.max(Math.round(size), 12), 40)}px` };
+}
+
+function PollPreview({
+  preview,
+}: {
+  preview: Extract<EventPreview, { kind: "poll" }>;
+}): JSX.Element {
+  return (
+    <div className="event-poll">
+      <ul className="event-poll-options">
+        {preview.options.map((option: PollOption, index) => (
+          <li
+            key={`${option.text}-${index}`}
+            className="event-poll-option"
+            style={optionSize(option.size)}
+          >
+            {option.text}
+          </li>
+        ))}
+      </ul>
+      {preview.colour !== null && preview.colour.length <= 40 && (
+        <span
+          className="event-poll-colour"
+          role="img"
+          aria-label={`Poll colour: ${preview.colour}`}
+          style={colourStyle("backgroundColor", preview.colour)}
+        />
+      )}
+    </div>
+  );
+}
+
 function EntryRow({ entry }: { entry: EventEntry }): JSX.Element {
   return (
     <li className="event-row">
@@ -74,7 +144,9 @@ function EntryRow({ entry }: { entry: EventEntry }): JSX.Element {
           {entry.date}
         </time>
       )}
+      {entry.preview?.kind === "sticker" && <StickerPreview preview={entry.preview} />}
       {entry.hero !== null && <p className="event-hero">{entry.hero.text}</p>}
+      {entry.preview?.kind === "poll" && <PollPreview preview={entry.preview} />}
       {entry.url !== null && (
         <p className="event-link">
           <a

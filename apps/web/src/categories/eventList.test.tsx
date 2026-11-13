@@ -23,6 +23,7 @@ function entry(ordinal: number, timestamp: number | null, hero: string | null = 
     hero: hero === null ? null : { label: "Caption", text: hero },
     url: null,
     shortcode: null,
+    preview: null,
     fields: [],
   };
 }

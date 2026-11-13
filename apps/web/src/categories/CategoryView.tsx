@@ -6,6 +6,8 @@ import {
   toEventListView,
   toMediaItems,
   toNameListView,
+  toSavedCollectionsView,
+  toSavedPostsByFolder,
   toSettingsView,
   toTableView,
   type AvatarItemsView as AvatarItemsViewData,
@@ -14,6 +16,7 @@ import {
   type EventListView as EventListViewData,
   type MediaItemView,
   type NameListView as NameListViewData,
+  type SavedByFolderView,
   type SettingsView as SettingsViewData,
   type TableView,
   type TreeView,
@@ -29,7 +32,9 @@ import { CategoryTree } from "./CategoryTree.js";
 import { DeviceEffectsView } from "./DeviceEffectsView.js";
 import { EventListView } from "./EventListView.js";
 import { NameListView } from "./NameListView.js";
+import { ProfilePhotosView } from "./ProfilePhotosView.js";
 import { ProfileView } from "./ProfileView.js";
+import { SavedFoldersView } from "./SavedFoldersView.js";
 import { RevealGate } from "./RevealGate.js";
 import { SettingsView } from "./SettingsView.js";
 import { State } from "../ui/State.js";
@@ -125,6 +130,12 @@ type Screen =
       readonly media: readonly MediaItemView[];
     }
   | { readonly kind: "name-list"; readonly view: NameListViewData }
+  | { readonly kind: "photos"; readonly media: readonly MediaItemView[] }
+  | {
+      readonly kind: "saved";
+      readonly view: SavedByFolderView;
+      readonly showLoose: boolean;
+    }
   | { readonly kind: "table"; readonly view: TableView }
   | { readonly kind: "tree"; readonly view: TreeView };
 
@@ -140,7 +151,7 @@ type State =
  * outliers get their own (docs/T1-DESIGN.md §3, §5). A record that does not match
  * the expected shape falls back to the table or the raw tree.
  */
-function screenOf(id: string, record: CategoryRecord): Screen {
+function screenOf(id: string, record: CategoryRecord, sibling: CategoryRecord | null): Screen {
   if (findCategory(id)?.privacyTier === 1) {
     if (id === "avatar_items") {
       const avatar = toAvatarItemsView(record);
@@ -160,8 +171,33 @@ function screenOf(id: string, record: CategoryRecord): Screen {
   }
 
   if (findCategory(id)?.privacyTier === 3 && EVENT_T3.has(id)) {
+    // Saved posts and collections are one idea: the membership is nested in the
+    // collection file, so the screen joins the two records by URL. When the other
+    // half is absent the event list is still the right shape for saved_posts.
+    if (id === "saved_collections") {
+      const collections = toSavedCollectionsView(record);
+      const joined =
+        collections === null
+          ? null
+          : sibling === null
+            ? collections
+            : toSavedPostsByFolder(sibling, collections);
+      if (joined !== null) return { kind: "saved", view: joined, showLoose: false };
+    }
+    if (id === "saved_posts" && sibling !== null) {
+      const collections = toSavedCollectionsView(sibling);
+      const grouped = toSavedPostsByFolder(record, collections);
+      if (grouped !== null && grouped.folders.length > 0) {
+        return { kind: "saved", view: grouped, showLoose: true };
+      }
+    }
+
     const event = toEventListView(record);
     if (event !== null) return { kind: "event", view: event };
+  }
+
+  if (id === "profile_photos") {
+    return { kind: "photos", media: toMediaItems(id, record.data) };
   }
 
   if (findCategory(id)?.privacyTier === 2 && PROFILE_T2.has(id)) {
@@ -204,7 +240,19 @@ function CategoryData({ id }: { id: string }): JSX.Element {
           setState({ status: "missing" });
           return;
         }
-        setState({ status: "ready", record, screen: screenOf(id, record) });
+        // Saved posts and collections are two halves of one screen (see screenOf).
+        // A missing or unreadable sibling is a normal state, not a failure: the
+        // record in hand still renders.
+        const siblingId =
+          id === "saved_posts"
+            ? "saved_collections"
+            : id === "saved_collections"
+              ? "saved_posts"
+              : null;
+        const sibling =
+          siblingId === null ? null : await repository.getCategory(siblingId).catch(() => null);
+        if (cancelled) return;
+        setState({ status: "ready", record, screen: screenOf(id, record, sibling) });
       } catch (error) {
         if (!cancelled) {
           setState({
@@ -274,6 +322,18 @@ function CategoryData({ id }: { id: string }): JSX.Element {
         state.screen.kind === "name-list" && (
           <NameListView view={state.screen.view} raw={state.record.data} />
         )}
+
+      {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.screen.kind === "photos" && (
+        <ProfilePhotosView media={state.screen.media} source={repository} raw={state.record.data} />
+      )}
+
+      {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.screen.kind === "saved" && (
+        <SavedFoldersView
+          view={state.screen.view}
+          showLoose={state.screen.showLoose}
+          raw={state.record.data}
+        />
+      )}
 
       {state.status === "ready" &&
         !THREAD_CATEGORIES.has(id) &&

@@ -89,7 +89,7 @@ afterEach(cleanup);
 
 describe("T3 screens — routing", () => {
   for (const id of EVENT_T3) {
-    it(`renders ${id} as an event list`, async () => {
+    it(`renders ${id} on a measured screen`, async () => {
       const user = userEvent.setup();
       renderView([recordFor(id)], id);
 
@@ -97,6 +97,14 @@ describe("T3 screens — routing", () => {
       // gate is the same one.
       if ((GATED_T3 as readonly string[]).includes(id)) {
         await user.click(screen.getByRole("button", { name: "Show this category" }));
+      }
+
+      // Saved collections are folders of posts (savedScreens.test.tsx); every other
+      // measured T3 category is the event list. Neither is the generic table.
+      if (id === "saved_collections") {
+        await screen.findByText(/collection/);
+        expect(document.querySelector(".saved-view")).not.toBeNull();
+        return;
       }
 
       await screen.findByText("1 entry");

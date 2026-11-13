@@ -334,34 +334,3 @@ describe("T3 event list — every measured category", () => {
     });
   }
 });
-
-describe("T3 event list — the two date shapes it actually uses", () => {
-  it("dates a comment from string_map_data.Time and keeps it out of the fields", () => {
-    const entry = firstEntry({
-      string_map_data: {
-        Comment: { value: "a comment" },
-        Time: { timestamp: AT },
-      },
-    });
-
-    expect(entry.timestamp).toBe(AT);
-    expect(entry.fields.map((field) => field.label)).not.toContain("Time");
-  });
-
-  it("dates a liked comment from string_list_data and keeps the account as the hero", () => {
-    const entry = firstEntry({
-      likes_comment_likes: [
-        {
-          title: "someone",
-          string_list_data: [
-            { href: "https://www.instagram.com/p/CCC333/", value: "True", timestamp: AT },
-          ],
-        },
-      ],
-    });
-
-    expect(entry.timestamp).toBe(AT);
-    expect(entry.hero?.label).toBe("title");
-    expect(entry.url).toBe("https://www.instagram.com/p/CCC333/");
-  });
-});

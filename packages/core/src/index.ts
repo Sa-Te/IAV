@@ -101,6 +101,9 @@ export type {
   EventMonth,
   EventYear,
 } from "./categories/eventListView.js";
+export type { EventPreview, PollOption } from "./categories/eventPreview.js";
+export { toSavedCollectionsView, toSavedPostsByFolder } from "./categories/savedByFolder.js";
+export type { SavedByFolderView, SavedFolder, SavedItem } from "./categories/savedByFolder.js";
 export { toNameListView } from "./categories/nameListView.js";
 export type { NameListView, NameListSection } from "./categories/nameListView.js";
 export { toAvatarItemsView } from "./categories/avatarItemsView.js";

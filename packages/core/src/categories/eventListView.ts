@@ -1,7 +1,9 @@
 import type { CategorySource } from "../ingest/port.js";
 import { entriesOf, payloadsOf } from "./entries.js";
 import { localisedDate } from "./format.js";
+import { labelsConsumedByPreview, previewOf, type EventPreview } from "./eventPreview.js";
 import { labelItemsOf, type LabelItem } from "./labelValues.js";
+import { nestedUrlOf } from "./nestedUrl.js";
 import { toSettingField, type SettingField } from "./settingsView.js";
 
 /**
@@ -25,6 +27,8 @@ export interface EventEntry {
   readonly hero: { readonly label: string; readonly text: string } | null;
   readonly url: string | null;
   readonly shortcode: string | null;
+  /** A sticker or poll worth rendering as itself; null for every other row. */
+  readonly preview: EventPreview | null;
   /** Remaining fields with content; empty and absent fields are omitted. */
   readonly fields: readonly SettingField[];
 }
@@ -198,15 +202,19 @@ function entryFrom(raw: Record<string, unknown>, ordinal: number): EventEntry | 
   }
 
   const urlMatch = urlOf(items);
-  const url = urlMatch?.url ?? listHref;
+  const url = urlMatch?.url ?? listHref ?? nestedUrlOf(raw);
   const urlItem = urlMatch?.item ?? null;
 
   const { timestamp: dated, dateItem } = dateOf(raw, items);
   const timestamp = dated ?? listTimestamp;
 
+  const preview = previewOf(items);
+  const consumed = labelsConsumedByPreview(preview, items);
+
   const fields = items
     .filter(
       (item) =>
+        !consumed.has(item.label) &&
         item.label !== heroItem?.label &&
         item.label !== urlItem?.label &&
         item.label !== dateItem?.label,
@@ -221,6 +229,7 @@ function entryFrom(raw: Record<string, unknown>, ordinal: number): EventEntry | 
     hero,
     url,
     shortcode: url === null ? null : shortcodeOf(url),
+    preview,
     fields,
   };
 }
