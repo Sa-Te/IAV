@@ -3,11 +3,13 @@ import {
   isT5,
   toAvatarItemsView,
   toDeviceEffectsView,
+  toEventListView,
   toSettingsView,
   toTableView,
   type AvatarItemsView as AvatarItemsViewData,
   type CategoryRecord,
   type DeviceEffectsView as DeviceEffectsViewData,
+  type EventListView as EventListViewData,
   type SettingsView as SettingsViewData,
   type TableView,
   type TreeView,
@@ -21,12 +23,37 @@ import { AvatarItemsView } from "./AvatarItemsView.js";
 import { CategoryTable } from "./CategoryTable.js";
 import { CategoryTree } from "./CategoryTree.js";
 import { DeviceEffectsView } from "./DeviceEffectsView.js";
+import { EventListView } from "./EventListView.js";
 import { RevealGate } from "./RevealGate.js";
 import { SettingsView } from "./SettingsView.js";
 import { State } from "../ui/State.js";
 
 /** Categories that have a purpose-built view inside the generic route. */
 const THREAD_CATEGORIES = new Set(["messages_inbox", "messages_requests"]);
+
+/**
+ * The T2 categories the measurement assigned to the event/activity screen
+ * (docs/T2-DESIGN.md §6). Scoped by id because only these were measured; a
+ * record that does not match the shape falls back to the table or tree.
+ */
+const EVENT_CATEGORIES = new Set([
+  "link_history",
+  "login_activity",
+  "logout_activity",
+  "posts_viewed",
+  "posts_you're_interested_or_not_interested_in",
+  "posts_you're_not_interested_in",
+  "profile_activity",
+  "profile_changes",
+  "profile_privacy_changes",
+  "profile_searches",
+  "profile_status_changes",
+  "stories_viewed",
+  "suggested_profiles_viewed",
+  "videos_watched",
+  "word_or_phrase_searches",
+  "your_ownership_of_digital_items",
+]);
 
 /**
  * `/categories/:id` — the generic view for any parsed category.
@@ -44,6 +71,7 @@ type Screen =
   | { readonly kind: "settings"; readonly view: SettingsViewData }
   | { readonly kind: "avatar"; readonly view: AvatarItemsViewData }
   | { readonly kind: "device"; readonly view: DeviceEffectsViewData }
+  | { readonly kind: "event"; readonly view: EventListViewData }
   | { readonly kind: "table"; readonly view: TableView }
   | { readonly kind: "tree"; readonly view: TreeView };
 
@@ -71,6 +99,11 @@ function screenOf(id: string, record: CategoryRecord): Screen {
     }
     const settings = toSettingsView(record);
     if (settings !== null) return { kind: "settings", view: settings };
+  }
+
+  if (findCategory(id)?.privacyTier === 2 && EVENT_CATEGORIES.has(id)) {
+    const event = toEventListView(record);
+    if (event !== null) return { kind: "event", view: event };
   }
 
   const view = toTableView(record);
@@ -144,6 +177,10 @@ function CategoryData({ id }: { id: string }): JSX.Element {
 
       {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.screen.kind === "device" && (
         <DeviceEffectsView view={state.screen.view} raw={state.record.data} />
+      )}
+
+      {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.screen.kind === "event" && (
+        <EventListView view={state.screen.view} raw={state.record.data} />
       )}
 
       {state.status === "ready" &&

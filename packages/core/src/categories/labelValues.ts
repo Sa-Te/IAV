@@ -85,6 +85,12 @@ function fromStringMap(map: Record<string, unknown>): readonly LabelItem[] {
     const link = href === undefined ? {} : { href };
     const timestamp = typeof raw.timestamp === "number" ? raw.timestamp : undefined;
     if ("value" in raw) {
+      // A string-map object can carry an empty `value` and a real `timestamp`
+      // beside it (login_activity.Time is the measured example). The timestamp is
+      // the value; an empty string is not a date.
+      if (typeof raw.value === "string" && raw.value.trim() === "" && timestamp !== undefined) {
+        return { label, value: { timestamp }, hasValue: true, timestamp, ...link };
+      }
       // The value wins, as it does in the flat table; a timestamp beside it is
       // metadata that the raw JSON still preserves.
       return { label, value: raw.value, hasValue: true, ...link };

@@ -51,7 +51,7 @@ function fieldsFromVec(vec: readonly unknown[]): readonly SettingField[] {
   return vec.map((element, index) => {
     if (isObject(element) && typeof element.label === "string") {
       const [item] = labelItemsOf({ label_values: [element] }) ?? [];
-      if (item !== undefined) return fieldFrom(item);
+      if (item !== undefined) return toSettingField(item);
     }
     return {
       label: `Item ${index + 1}`,
@@ -60,7 +60,7 @@ function fieldsFromVec(vec: readonly unknown[]): readonly SettingField[] {
   });
 }
 
-function fieldFrom(item: LabelItem): SettingField {
+export function toSettingField(item: LabelItem): SettingField {
   const base = {
     label: item.label,
     ...(item.title === undefined ? {} : { title: item.title }),
@@ -68,7 +68,7 @@ function fieldFrom(item: LabelItem): SettingField {
   };
 
   if (item.dict !== undefined) {
-    return { ...base, value: { kind: "list", fields: item.dict.map(fieldFrom) } };
+    return { ...base, value: { kind: "list", fields: item.dict.map(toSettingField) } };
   }
   if (item.vec !== undefined) {
     return { ...base, value: { kind: "list", fields: fieldsFromVec(item.vec) } };
@@ -93,7 +93,7 @@ function fieldsOf(entry: Record<string, unknown>): readonly SettingField[] | nul
   const items = labelItemsOf(entry);
   if (items === null) return null;
 
-  const fields = items.map(fieldFrom);
+  const fields = items.map(toSettingField);
   if (typeof entry.timestamp === "number") {
     // The envelope's own key, kept verbatim as the label. It is metadata, not a
     // setting, but hiding it would drop a value the table used to show.

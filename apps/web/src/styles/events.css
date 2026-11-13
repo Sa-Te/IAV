@@ -1,0 +1,132 @@
+/*
+ * The T2 event/activity screen. Month button, day heading, row. Tokens only:
+ * hierarchy is type size, weight and space, never a tint.
+ */
+
+.event-view {
+  max-width: 80ch;
+}
+
+.event-months,
+.event-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.event-month {
+  border-bottom: 1px solid var(--token-color-border);
+}
+
+.event-month:first-child {
+  border-top: 1px solid var(--token-color-border);
+}
+
+.event-month-button {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--token-space-3);
+  width: 100%;
+  padding: var(--token-space-3) var(--token-space-2);
+  border: 0;
+  border-radius: var(--token-radius-sm);
+  background: none;
+  color: var(--token-color-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.event-month-button:hover {
+  background: var(--token-color-raised);
+}
+
+.event-month-meta {
+  flex: none;
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-12);
+  white-space: nowrap;
+}
+
+.event-month-panel {
+  padding: 0 var(--token-space-2) var(--token-space-4);
+}
+
+.event-day {
+  margin-top: var(--token-space-6);
+}
+
+.event-day-heading {
+  margin: 0 0 var(--token-space-2);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+  font-weight: 500;
+}
+
+.event-row {
+  padding: var(--token-space-3) 0;
+  border-top: 1px solid var(--token-color-border);
+}
+
+.event-row:first-child {
+  border-top: 0;
+}
+
+.event-date {
+  display: block;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+  font-variant-numeric: tabular-nums;
+}
+
+.event-hero {
+  display: -webkit-box;
+  margin: var(--token-space-1) 0 0;
+  overflow: hidden;
+  color: var(--token-color-text);
+  font-size: var(--token-text-16);
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.event-link {
+  margin: var(--token-space-1) 0 0;
+  font-size: var(--token-text-13);
+}
+
+.event-shortcode {
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-13);
+}
+
+/* The remaining fields are secondary to the date and the hero. */
+.event-row .settings-fields {
+  gap: var(--token-space-2);
+  margin-top: var(--token-space-2);
+}
+
+.event-row .settings-value {
+  font-size: var(--token-text-14);
+}
+
+.event-note {
+  margin: 0 0 var(--token-space-3);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.event-more {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-3);
+  margin-top: var(--token-space-2);
+}
+
+.event-more p {
+  margin: 0;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+}

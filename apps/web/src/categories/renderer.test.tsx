@@ -280,3 +280,44 @@ describe("CategoryView — the two measured T1 outliers", () => {
     expect(screen.queryByText("Entry 1")).toBeNull();
   });
 });
+
+describe("CategoryView — a T2 event category", () => {
+  it("renders posts_viewed as the event list, not a table", async () => {
+    const data = [
+      {
+        timestamp: 1_700_000_000,
+        media: [],
+        label_values: [
+          { label: "Caption", value: "a caption" },
+          {
+            label: "URL",
+            href: "https://www.instagram.com/p/De1mMaNF7pZ/",
+            value: "",
+          },
+        ],
+      },
+    ];
+    render(
+      <RepositoryProvider
+        repository={fakeRepository({
+          posts_viewed: {
+            id: "posts_viewed",
+            resolvedTier: 1,
+            entryCount: 1,
+            data,
+            sources: [{ path: "posts_viewed.json", entryCount: 1, kind: "array" }],
+            warnings: [],
+          },
+        })}
+      >
+        <CategoryView id="posts_viewed" />
+      </RepositoryProvider>,
+    );
+
+    expect(await screen.findByText("a caption")).toBeDefined();
+    expect(
+      screen.getByRole("link", { name: "https://www.instagram.com/p/De1mMaNF7pZ/" }),
+    ).toBeDefined();
+    expect(screen.queryByRole("table")).toBeNull();
+  });
+});

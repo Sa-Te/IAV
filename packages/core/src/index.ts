@@ -85,6 +85,13 @@ export type {
   SettingsView,
   SettingValue,
 } from "./categories/settingsView.js";
+export { shortcodeOf, toEventListView } from "./categories/eventListView.js";
+export type {
+  EventDay,
+  EventEntry,
+  EventListView,
+  EventMonth,
+} from "./categories/eventListView.js";
 export { toAvatarItemsView } from "./categories/avatarItemsView.js";
 export type { AvatarItem, AvatarItemsView } from "./categories/avatarItemsView.js";
 export { toDeviceEffectsView } from "./categories/deviceEffectsView.js";
