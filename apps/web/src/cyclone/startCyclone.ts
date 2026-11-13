@@ -64,6 +64,9 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
 
   // One array texture, allocated once: 96 layers of 256² RGBA is ~25 MB (D2).
   const slots = new Map<number, number>();
+  // Each card keeps its picture's own shape. A fixed quad stretched every landscape
+  // photo to portrait and back (M17 point 1).
+  const aspects = new Map<number, number>();
   const textureObject = gl.createTexture();
   if (textureObject === null) return null;
   gl.bindTexture(gl.TEXTURE_2D_ARRAY, textureObject);
@@ -92,9 +95,14 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
           bitmap,
         );
         slots.set(index, layer);
+        aspects.set(index, bitmap.width / bitmap.height);
       },
       clear(layer) {
-        for (const [index, value] of slots) if (value === layer) slots.delete(index);
+        for (const [index, value] of slots) {
+          if (value !== layer) continue;
+          slots.delete(index);
+          aspects.delete(index);
+        }
       },
     },
     {
@@ -140,12 +148,18 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
       if (!card.visible) continue;
       const layer = slots.get(card.index);
       if (layer === undefined) continue;
-      const scale = (layout[card.index]?.scale ?? 1) * 0.09;
+      const aspect = aspects.get(card.index);
+      if (aspect === undefined || !Number.isFinite(aspect) || aspect <= 0) continue;
+      const scaleX = (layout[card.index]?.scale ?? 1) * 0.09;
+      // A quad is normalised per canvas axis, so equal numbers are not a square:
+      // the height has to carry the canvas aspect divided by the picture's.
+      const scaleY = (scaleX * (width() / height())) / aspect;
       const alpha = 0.55 + 0.45 * Math.min(1, card.depth / 12);
       instances.push({
         x: card.x / width(),
         y: card.y / height(),
-        scale: card.index === highlight ? scale * 1.15 : scale,
+        scaleX: card.index === highlight ? scaleX * 1.15 : scaleX,
+        scaleY: card.index === highlight ? scaleY * 1.15 : scaleY,
         layer,
         alpha: card.index === highlight ? 1 : alpha,
       });

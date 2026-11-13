@@ -11,8 +11,9 @@ export interface Instance {
   /** Normalised screen position of the card centre (0..1). */
   readonly x: number;
   readonly y: number;
-  /** Normalised half-size. */
-  readonly scale: number;
+  /** Normalised half-width and half-height: a card keeps its own picture's shape. */
+  readonly scaleX: number;
+  readonly scaleY: number;
   /** Layer in the texture array, or -1 when no texture is resident yet. */
   readonly layer: number;
   readonly alpha: number;
@@ -106,8 +107,8 @@ export function createRenderer(gl: WebGL2RenderingContext, program: WebGLProgram
         const at = index * FLOATS_PER_INSTANCE;
         instanceData[at] = instance.x;
         instanceData[at + 1] = instance.y;
-        instanceData[at + 2] = instance.scale;
-        instanceData[at + 3] = instance.scale;
+        instanceData[at + 2] = instance.scaleX;
+        instanceData[at + 3] = instance.scaleY;
         instanceData[at + 4] = instance.layer;
         instanceData[at + 5] = instance.alpha;
       });

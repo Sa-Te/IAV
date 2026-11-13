@@ -65,7 +65,8 @@ describe("renderer", () => {
       instances: Array.from({ length: 96 }, (_, index) => ({
         x: 0.5,
         y: 0.5,
-        scale: 0.05,
+        scaleX: 0.05,
+        scaleY: 0.05,
         layer: index,
         alpha: 0.8,
       })),
