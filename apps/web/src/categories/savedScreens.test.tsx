@@ -177,6 +177,9 @@ describe("saved collections — one folder per collection", () => {
     if (folder === null) return;
     expect(within(folder).getByText("inside a folder")).toBeDefined();
     expect(
+      within(folder).getByText("inside a folder").closest("li")?.querySelector("time"),
+    ).not.toBeNull();
+    expect(
       within(folder).getByRole("link", { name: "https://www.instagram.com/p/AAA111/" }),
     ).toBeDefined();
     // The uncollected post belongs to the saved-posts screen, not this one.
@@ -200,6 +203,9 @@ describe("saved posts — folders, then what is in none", () => {
     expect(loose).not.toBeNull();
     if (folder === null || loose === null) return;
     expect(within(folder).getByText("inside a folder")).toBeDefined();
+    expect(
+      within(folder).getByText("inside a folder").closest("li")?.querySelector("time"),
+    ).not.toBeNull();
     expect(within(loose).getByText("no folder")).toBeDefined();
   });
 

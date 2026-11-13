@@ -47,9 +47,9 @@ function Photo({ item, source }: { item: MediaItemView; source: MediaSource }): 
             })}
           </time>
         )}
-        <span className="profile-figure-size">
-          {media.status === "ready" ? "Stored in this archive" : "Local file"}
-        </span>
+        {media.status === "ready" && (
+          <span className="profile-figure-size">Stored in this archive</span>
+        )}
       </figcaption>
     </figure>
   );

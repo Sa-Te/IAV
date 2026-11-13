@@ -41,7 +41,11 @@ function PostRow({ post }: { post: SavedItem }): JSX.Element {
           </a>
         </p>
       )}
-      {post.date !== null && <p className="event-date">{post.date}</p>}
+      {post.date !== null && post.timestamp !== null && (
+        <time className="event-date" dateTime={new Date(post.timestamp * 1000).toISOString()}>
+          {post.date}
+        </time>
+      )}
     </li>
   );
 }
