@@ -20,7 +20,7 @@ function handle() {
     pointer: () => null,
     setPhase: vi.fn(),
     frame: vi.fn(),
-    stats: () => ({ resident: 0, bytes: 0, drawn: 0 }),
+    stats: () => ({ resident: 0, bytes: 0, drawCalls: 0 }),
     renderer: "test",
   };
 }

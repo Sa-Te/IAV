@@ -25,6 +25,7 @@ export interface Frame {
 
 export interface Renderer {
   resize(width: number, height: number, dpr: number): void;
+  /** Issues the frame and returns how many `drawElementsInstanced` calls it made. */
   draw(frame: Frame): number;
   dispose(): void;
 }
@@ -76,7 +77,7 @@ export function createRenderer(gl: WebGL2RenderingContext, program: WebGLProgram
   gl.useProgram(program);
 
   let instanceData = new Float32Array(0);
-  let drawn = 0;
+  let drawCalls = 0;
 
   return {
     resize(width, height, dpr) {
@@ -92,7 +93,7 @@ export function createRenderer(gl: WebGL2RenderingContext, program: WebGLProgram
     draw(frame) {
       gl.clearColor(frame.background[0], frame.background[1], frame.background[2], 1);
       gl.clear(gl.COLOR_BUFFER_BIT);
-      drawn = 0;
+      drawCalls = 0;
 
       // Nothing resident yet: a clear, not a crash (the first frames of a load).
       if (frame.instances.length === 0) return 0;
@@ -127,8 +128,8 @@ export function createRenderer(gl: WebGL2RenderingContext, program: WebGLProgram
         frame.instances.length,
       );
       gl.bindVertexArray(null);
-      drawn = frame.instances.length;
-      return drawn;
+      drawCalls = 1;
+      return drawCalls;
     },
 
     dispose() {

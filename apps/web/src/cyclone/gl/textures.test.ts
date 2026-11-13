@@ -25,8 +25,21 @@ function sink(layers = 96): LayerSink & { uploads: number[]; cleared: number[] }
   };
 }
 
+/**
+ * A bitmap that behaves like the platform's: `close()` releases the pixels, and
+ * afterwards the dimensions are 0. A fake that keeps them lies about the one bug
+ * the browser actually showed (resident bytes stuck at 0).
+ */
 function bitmap(width = THUMBNAIL_SIZE, height = THUMBNAIL_SIZE) {
-  return { width, height, close: vi.fn() } as unknown as ImageBitmap;
+  const handle = {
+    width,
+    height,
+    close: vi.fn(() => {
+      handle.width = 0;
+      handle.height = 0;
+    }),
+  };
+  return handle as unknown as ImageBitmap;
 }
 
 describe("texture window", () => {

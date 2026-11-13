@@ -20,7 +20,13 @@ const FPS_WINDOW = 120;
 export function DevCycloneStats(): JSX.Element {
   const repository = useArchiveRepository();
   const { state } = useMediaList("all");
-  const [stats, setStats] = useState({ fps: 0, drawn: 0, resident: 0, bytes: 0, renderer: "–" });
+  const [stats, setStats] = useState({
+    fps: 0,
+    drawCalls: 0,
+    resident: 0,
+    bytes: 0,
+    renderer: "–",
+  });
   const frames = useRef<number[]>([]);
   const handleRef = useRef<CycloneHandle | null>(null);
 
@@ -34,7 +40,7 @@ export function DevCycloneStats(): JSX.Element {
       const snapshot = handle.stats();
       setStats({
         fps: recent.length,
-        drawn: snapshot.drawn,
+        drawCalls: snapshot.drawCalls,
         resident: snapshot.resident,
         bytes: snapshot.bytes,
         renderer: handle.renderer,
@@ -62,7 +68,7 @@ export function DevCycloneStats(): JSX.Element {
       <h1>Cyclone stats</h1>
       <p className="summary">
         fps (last {FPS_WINDOW} frames): <strong>{stats.fps}</strong> · draw calls:{" "}
-        <strong>{stats.drawn}</strong> · resident textures: <strong>{stats.resident}</strong> ·{" "}
+        <strong>{stats.drawCalls}</strong> · resident textures: <strong>{stats.resident}</strong> ·{" "}
         resident bytes: <strong>{stats.bytes.toLocaleString()}</strong>
       </p>
       <p className="summary">GPU: {stats.renderer}</p>

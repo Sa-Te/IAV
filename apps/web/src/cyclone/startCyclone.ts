@@ -26,7 +26,7 @@ export interface CycloneHandle {
   pointer(x: number, y: number): number | null;
   setPhase(phase: number): void;
   frame(dtMs: number): void;
-  stats(): { resident: number; bytes: number; drawn: number };
+  stats(): { resident: number; bytes: number; drawCalls: number };
   renderer: string;
 }
 
@@ -55,7 +55,7 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
 
   let phase = 0;
   let highlight: number | null = null;
-  let drawn = 0;
+  let drawCalls = 0;
 
   // One array texture, allocated once: 96 layers of 256² RGBA is ~25 MB (D2).
   const slots = new Map<number, number>();
@@ -138,7 +138,7 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
         alpha: card.index === highlight ? 1 : alpha,
       });
     }
-    drawn = renderer.draw({ instances, background: BACKGROUND });
+    drawCalls = renderer.draw({ instances, background: BACKGROUND });
   };
 
   void textures.setWindow(residentWindow(options.items.length, 0).concat()).then(() => draw(0, 0));
@@ -171,7 +171,7 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
     },
     stats() {
       const stats = textures.stats();
-      return { resident: stats.resident, bytes: stats.bytes, drawn };
+      return { resident: stats.resident, bytes: stats.bytes, drawCalls };
     },
     renderer: caps.renderer,
   };

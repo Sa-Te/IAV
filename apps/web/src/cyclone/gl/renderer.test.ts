@@ -50,9 +50,9 @@ describe("renderer", () => {
     const { gl, calls } = fakeGl();
     const renderer = createRenderer(gl, {} as WebGLProgram);
 
-    const drawn = renderer.draw({ instances: [], background: [0, 0, 0] });
+    const drawCalls = renderer.draw({ instances: [], background: [0, 0, 0] });
 
-    expect(drawn).toBe(0);
+    expect(drawCalls).toBe(0);
     expect(calls.clear).toBe(1);
     expect(calls.drawElementsInstanced).toBe(0);
   });
@@ -61,7 +61,7 @@ describe("renderer", () => {
     const { gl, calls } = fakeGl();
     const renderer = createRenderer(gl, {} as WebGLProgram);
 
-    const drawn = renderer.draw({
+    const drawCalls = renderer.draw({
       instances: Array.from({ length: 96 }, (_, index) => ({
         x: 0.5,
         y: 0.5,
@@ -72,7 +72,8 @@ describe("renderer", () => {
       background: [0, 0, 0],
     });
 
-    expect(drawn).toBe(96);
+    // The report is draw calls, not cards: 96 cards are one instanced call (ADR 0010).
+    expect(drawCalls).toBe(1);
     expect(calls.drawElementsInstanced).toBe(1);
   });
 

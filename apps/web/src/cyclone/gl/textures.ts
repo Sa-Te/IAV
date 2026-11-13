@@ -107,10 +107,14 @@ export function createTextureWindow(
         return;
       }
       sink.upload(layer, bitmap, index);
+      // Read the size *before* close: an ImageBitmap reports 0x0 once closed, so
+      // measuring afterwards kept the resident-byte total at 0 with 16 textures
+      // resident (seen in the M16 browser run).
+      const { width, height } = bitmap;
       bitmap.close();
       resident.set(index, {
         layer,
-        bytes: bitmap.width * bitmap.height * BYTES_PER_PIXEL,
+        bytes: width * height * BYTES_PER_PIXEL,
       });
     })();
 
