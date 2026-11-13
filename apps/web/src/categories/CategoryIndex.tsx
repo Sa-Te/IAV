@@ -1,197 +1,51 @@
-import { CATEGORIES, toMediaItems, toTableView } from "@instavault/core";
-import { useEffect, useState, type JSX } from "react";
+import type { JSX } from "react";
+import { Link } from "react-router-dom";
 
-import { useArchiveRepository } from "../repository/RepositoryContext.js";
+import { TIERS, useCategoryRows } from "./useCategoryRows.js";
 import { State } from "../ui/State.js";
 
 /**
- * `/categories` — every registry row, grouped by privacy tier.
+ * `/categories` — an overview of the five tiers, not a 86-row table.
  *
- * The row set comes from the **registry**, joined to the repository for counts and
- * view kind. A repository alone can render an empty page when it returns nothing
- * (or a record it cannot read); the registry always knows all 86 categories, so an
- * absent category is a greyed row, never a missing one.
- *
- * This is infrastructure, not the visual pass: semantic tables, no framework.
- * A category that is not in the current export is shown greyed with "not in this
- * export" and no link, because ADR 0002 says absence is a normal state; hiding the
- * row would make an ordinary export look broken.
+ * Nobody scans a directory of every category (M18's report: "no people would go
+ * and look into it like this"); the tiers are the way in, each leading to its own
+ * page of cards. The per-category route is unchanged.
  */
-
-const TIERS: readonly { readonly tier: 1 | 2 | 3 | 4 | 5; readonly heading: string }[] = [
-  { tier: 1, heading: "T1 — settings and mechanics" },
-  { tier: 2, heading: "T2 — your own behaviour and security history" },
-  { tier: 3, heading: "T3 — your own media and content" },
-  { tier: 4, heading: "T4 — third-party identities" },
-  { tier: 5, heading: "T5 — third-party authored text" },
-];
-
-/** Categories whose generic route renders a purpose-built panel, not a table/tree. */
-const THREAD_CATEGORIES = new Set(["messages_inbox", "messages_requests"]);
-
-/** Categories that already have a dedicated route; the index links there instead. */
-const DEDICATED: Readonly<Record<string, string>> = {
-  posts: "/posts",
-  stories: "/stories",
-  archived_posts: "/archived",
-};
-
-type State =
-  | { readonly status: "loading" }
-  | { readonly status: "failed"; readonly message: string }
-  | { readonly status: "ready" };
-
-interface Row {
-  readonly id: string;
-  readonly label: string;
-  readonly tier: 1 | 2 | 3 | 4 | 5;
-  readonly present: boolean;
-  readonly entries: number;
-  readonly media: number;
-  readonly files: number;
-  readonly view: "gallery" | "table" | "raw tree" | "thread list" | "—";
-  readonly href: string | null;
-}
-
 export function CategoryIndex(): JSX.Element {
-  const repository = useArchiveRepository();
-  const [state, setState] = useState<State>({ status: "loading" });
-  const [rows, setRows] = useState<readonly Row[]>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    void (async () => {
-      try {
-        const records = await repository.listCategories();
-        const byId = new Map(records.map((record) => [record.id, record]));
-        if (cancelled) return;
-
-        const nextRows = CATEGORIES.filter((category) => category.id !== "unrecognised").map(
-          (category): Row => {
-            const record = byId.get(category.id);
-            if (record === undefined) {
-              return {
-                id: category.id,
-                label: category.label,
-                tier: category.privacyTier,
-                present: false,
-                entries: 0,
-                media: 0,
-                files: 0,
-                view: "—",
-                href: null,
-              };
-            }
-            // ponytail: the index builds each view only to learn its kind. 72
-            // categories, largest 42k rows, once per page — if a profile ever
-            // shows this, add a kind probe beside toTableView instead.
-            //
-            // One unreadable record must not take the page with it: a stale or
-            // malformed row degrades to "present, no counts" rather than a throw
-            // that leaves the whole index blank.
-            let view: ReturnType<typeof toTableView>;
-            let media = 0;
-            try {
-              view = toTableView(record);
-              media = toMediaItems(category.id, record.data).length;
-            } catch {
-              view = { kind: "tree", value: null };
-            }
-            return {
-              id: category.id,
-              label: category.label,
-              tier: category.privacyTier,
-              present: true,
-              // A single-envelope object counts as one row in the view even when
-              // the stored entryCount (array children) is 0, so show what the
-              // viewer will see.
-              entries: view.kind === "table" ? view.total : record.entryCount,
-              media,
-              files: record.sources?.length ?? 1,
-              view:
-                DEDICATED[category.id] !== undefined
-                  ? "gallery"
-                  : THREAD_CATEGORIES.has(category.id)
-                    ? "thread list"
-                    : view.kind === "table"
-                      ? "table"
-                      : "raw tree",
-              href: DEDICATED[category.id] ?? `/categories/${encodeURIComponent(category.id)}`,
-            };
-          },
-        );
-        setRows(nextRows);
-        setState({ status: "ready" });
-      } catch (error) {
-        if (!cancelled) {
-          setState({
-            status: "failed",
-            message: error instanceof Error ? error.message : "The categories could not be read.",
-          });
-        }
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [repository]);
-
-  const present = rows.filter((row) => row.present).length;
+  const rows = useCategoryRows();
+  const catalogue = rows.status === "ready" ? rows.rows : [];
 
   return (
     <div className="gallery">
-      <h1>All categories</h1>
+      <h1>Categories</h1>
+      <p className="summary">
+        Instagram's export is organised here by what the data is: five tiers, from account settings
+        to other people's words.
+      </p>
 
-      {state.status === "loading" && <State kind="loading" message="Reading the archive…" />}
+      {rows.status === "loading" && <State kind="loading" message="Reading the archive…" />}
+      {rows.status === "failed" && <State kind="error" message={rows.message} />}
 
-      {state.status === "failed" && <State kind="error" message={state.message} />}
-
-      {state.status === "ready" && (
-        <>
-          <p className="summary">
-            {present} of {rows.length} categories are in this export.
-          </p>
-
+      {rows.status === "ready" && (
+        <ul className="tier-overview">
           {TIERS.map((group) => {
-            const groupRows = rows.filter((row) => row.tier === group.tier);
+            const tierRows = catalogue.filter((row) => row.tier === group.tier);
+            const present = tierRows.filter((row) => row.present).length;
             return (
-              <section key={group.tier} aria-labelledby={`tier-${group.tier}`}>
-                <h2 id={`tier-${group.tier}`}>{group.heading}</h2>
-                <table>
-                  <caption>{groupRows.length} categories</caption>
-                  <thead>
-                    <tr>
-                      <th scope="col">Category</th>
-                      <th scope="col">Entries</th>
-                      <th scope="col">Media</th>
-                      <th scope="col">View</th>
-                      <th scope="col">Files</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {groupRows.map((row) => (
-                      <tr key={row.id} className={row.present ? undefined : "absent"}>
-                        <td>
-                          {row.href === null ? (
-                            <span>{row.label}</span>
-                          ) : (
-                            <a href={row.href}>{row.label}</a>
-                          )}
-                        </td>
-                        <td>{row.present ? row.entries : "—"}</td>
-                        <td>{row.media > 0 ? row.media : ""}</td>
-                        <td>{row.present ? row.view : <em>not in this export</em>}</td>
-                        <td>{row.files > 1 ? row.files : ""}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </section>
+              <li key={group.tier}>
+                <Link to={`/tiers/t${group.tier}`} className="tier-overview-link">
+                  <span className="tier-overview-name">
+                    T{group.tier} — {group.name}
+                  </span>
+                  <span className="tier-overview-meta">
+                    {present} of {tierRows.length} in this export
+                  </span>
+                  <span className="tier-overview-description">{group.description}</span>
+                </Link>
+              </li>
             );
           })}
-        </>
+        </ul>
       )}
     </div>
   );

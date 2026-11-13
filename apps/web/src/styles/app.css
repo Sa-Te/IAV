@@ -121,3 +121,4 @@
 @import "./views.css";
 /* Its own file: the cyclone is a full-bleed view with rules no other route shares. */
 @import "./cyclone.css";
+@import "./shell.css";

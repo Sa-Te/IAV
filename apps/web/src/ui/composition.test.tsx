@@ -60,15 +60,16 @@ describe("composition", () => {
 
   it("marks exactly one nav item as current and keeps counts as muted suffixes", async () => {
     renderPage();
-    const nav = await screen.findByRole("navigation", { name: "Categories" });
+    // M18: navigation moved into the sidebar; the same rule holds there.
+    const nav = await screen.findByRole("navigation", { name: "Galleries" });
 
     expect(nav.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
 
-    const counts = nav.querySelectorAll(".nav-count");
+    const counts = nav.querySelectorAll(".sidebar-count");
     expect(counts.length).toBeGreaterThan(0);
     for (const count of counts) {
       // A suffixed number, not a filled badge.
-      expect(count.className).toBe("nav-count");
+      expect(count.className).toBe("sidebar-count");
     }
   });
 

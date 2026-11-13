@@ -4,7 +4,7 @@
    footer stays behind the canvas instead of below it. */
 .cyclone-page {
   position: fixed;
-  inset: var(--token-layout-header) 0 0 0;
+  inset: 0 0 0 var(--token-layout-sidebar);
   overflow: hidden;
 }
 

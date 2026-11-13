@@ -3,6 +3,7 @@ import { lazy, Suspense, type JSX } from "react";
 import { CategoryIndex } from "../categories/CategoryIndex.js";
 import { State } from "../ui/State.js";
 import { CategoryRoute } from "../categories/CategoryView.js";
+import { TierPage } from "./TierPage.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { DevIngest } from "./DevIngest.js";
 import { DevLogs } from "./DevLogs.js";
@@ -50,6 +51,7 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
     },
     { path: "/categories", element: <CategoryIndex /> },
     { path: "/categories/:id", element: <CategoryRoute /> },
+    { path: "/tiers/:tier", element: <TierPage /> },
   ];
 
   if (dev) {

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { CATEGORIES, type CategoryRecord } from "@instavault/core";
+import type { CategoryRecord } from "@instavault/core";
 import type { ArchiveRepository } from "@instavault/storage";
 import { cleanup, render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
@@ -9,8 +9,6 @@ import { RepositoryProvider } from "../repository/RepositoryContext.js";
 import { CategoryIndex } from "./CategoryIndex.js";
 
 afterEach(cleanup);
-
-const REGISTRY_ROWS = CATEGORIES.filter((category) => category.id !== "unrecognised").length;
 
 function record(id: string): CategoryRecord {
   return {
@@ -47,22 +45,24 @@ function renderIndex(repository: ArchiveRepository): void {
 }
 
 describe("category index is built from the registry", () => {
-  it("renders every registry row even when only three are stored", async () => {
+  it("lists every tier even when only three categories are stored", async () => {
     renderIndex(repo(async () => [record("posts"), record("stories"), record("followers")]));
-    await screen.findByText(/categories are in this export/);
+    await screen.findAllByText(/of \d+ in this export/);
 
-    // One row per registry category, plus the tables' header rows.
-    const bodyRows = document.querySelectorAll("tbody tr");
-    expect(bodyRows.length).toBe(REGISTRY_ROWS);
-    expect(screen.getAllByText("not in this export").length).toBe(REGISTRY_ROWS - 3);
+    // Every tier is offered, and the counts say how much of it arrived.
+    for (const tier of [1, 2, 3, 4, 5]) {
+      expect(screen.getByRole("link", { name: new RegExp(`^T${tier} —`) })).toBeDefined();
+    }
+    expect(screen.getAllByText(/of \d+ in this export/).length).toBe(5);
   });
 
-  it("renders every registry row, greyed, when the store is empty", async () => {
+  it("lists every tier, with zero present, when the store is empty", async () => {
     renderIndex(repo(async () => []));
-    await screen.findByText(/categories are in this export/);
+    await screen.findAllByText(/of \d+ in this export/);
 
-    expect(document.querySelectorAll("tbody tr").length).toBe(REGISTRY_ROWS);
-    expect(screen.getAllByText("not in this export").length).toBe(REGISTRY_ROWS);
+    for (const label of screen.getAllByText(/in this export/)) {
+      expect(label.textContent).toMatch(/^0 of \d+ in this export$/);
+    }
   });
 
   it("shows an error state, never an empty page, when the read fails", async () => {
@@ -75,6 +75,6 @@ describe("category index is built from the registry", () => {
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("IndexedDB is unavailable");
     // The page still names itself; it is not blank.
-    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("All categories");
+    expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Categories");
   });
 });

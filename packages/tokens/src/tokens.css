@@ -34,6 +34,7 @@
 
   /* The header is the one piece of chrome every full-bleed view has to sit under. */
   --token-layout-header: 56px;
+  --token-layout-sidebar: 264px;
 
   /* Radius */
   --token-radius-sm: 6px;

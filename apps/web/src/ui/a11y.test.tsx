@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { CategoryRecord } from "@instavault/core";
 import type { ArchiveRepository } from "@instavault/storage";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -56,12 +56,17 @@ describe("landmark and heading walk", () => {
 
     await screen.findByRole("table");
 
-    expect(screen.getAllByRole("banner")).toHaveLength(1);
+    // M18: the header banner is gone; navigation is the sidebar. One main
+    // landmark and one footer still hold, and the sidebar is one complementary
+    // landmark with two named navigations inside it.
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(screen.getAllByRole("contentinfo")).toHaveLength(1);
+    expect(screen.getAllByRole("complementary")).toHaveLength(1);
     expect(screen.getAllByRole("navigation", { name: "Categories" })).toHaveLength(1);
 
-    const levels = screen
+    // The page's own heading walk starts at h1; the sidebar's h2 headings are a
+    // separate landmark and are skipped here for that reason.
+    const levels = within(screen.getByRole("main"))
       .getAllByRole("heading")
       .map((heading) => Number(heading.tagName.slice(1)));
     expect(levels[0]).toBe(1);

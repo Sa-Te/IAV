@@ -126,7 +126,8 @@ describe("CategoryGallery", () => {
     await screen.findByText(/4 items/);
 
     // Three categories contributed: a regression to "posts only" would render 2.
-    expect(screen.getAllByRole("listitem")).toHaveLength(4);
+    // Scoped to the grid: the sidebar has list items of its own.
+    expect(document.querySelectorAll(".grid > li")).toHaveLength(4);
     // The story is a video: it has no alt text, it has an accessible tile name.
     expect(await screen.findByRole("button", { name: "story one" })).toBeTruthy();
     expect(await screen.findByAltText("archived one")).toBeTruthy();
@@ -135,7 +136,7 @@ describe("CategoryGallery", () => {
   it("shows only the requested category on a category route", async () => {
     renderGallery(repository(), "posts", "/posts");
     await screen.findByText(/2 items/);
-    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    expect(document.querySelectorAll(".grid > li")).toHaveLength(2);
   });
 });
 
@@ -194,10 +195,10 @@ describe("MediaDetail", () => {
   });
 });
 
-describe("Nav", () => {
+describe("Sidebar galleries", () => {
   it("lists only categories with media and marks the current one", async () => {
     renderGallery(repository(), "posts", "/posts");
-    const nav = await screen.findByRole("navigation", { name: "Categories" });
+    const nav = await screen.findByRole("navigation", { name: "Galleries" });
 
     expect(await within(nav).findByRole("link", { name: /Posts/ })).toBeTruthy();
     expect(await within(nav).findByRole("link", { name: /Stories/ })).toBeTruthy();
@@ -225,6 +226,7 @@ describe("dev route gate", () => {
       "/cyclone",
       "/categories",
       "/categories/:id",
+      "/tiers/:tier",
     ]);
   });
 });
