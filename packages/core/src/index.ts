@@ -42,8 +42,15 @@ export type {
 } from "./messages/threads.js";
 export {
   BASE_RADIUS,
+  camera,
+  CAMERA_DISTANCE,
+  CARD_SIZE_SHARE,
   focusedIndex,
+  FOV_Y,
   GOLDEN_ANGLE,
+  RIBBON_DEPTH,
+  RIBBON_SPREAD_SHARE,
+  ribbonSpread,
   totalHeightOf,
   vortexLayout,
   RADIUS_BREATH,

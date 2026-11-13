@@ -1,4 +1,6 @@
 import {
+  camera,
+  CARD_SIZE_SHARE,
   focusedIndex,
   NO_TILT,
   residentWindow,
@@ -45,6 +47,7 @@ export interface StartOptions {
 }
 
 const CARD_ASPECT = 0.75;
+const CAMERA = camera();
 /**
  * How far from a card's centre a pointer still counts as being on it. Cards are
  * a tenth of the canvas wide, so a fixed 72px radius made most of a card dead
@@ -52,7 +55,6 @@ const CARD_ASPECT = 0.75;
  */
 const PICK_RADIUS_SHARE = 0.12;
 const MIN_PICK_RADIUS = 72;
-const FOV_Y = Math.PI / 3;
 const BACKGROUND: readonly [number, number, number] = [0.07, 0.063, 0.055];
 
 export function startCyclone(options: StartOptions): CycloneHandle | null {
@@ -135,14 +137,17 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
   // drawn. Building it once and scrolling the window over it meant the cards
   // never moved: the phase was only a texture-window number.
   const layoutAt = (at: number): readonly CardTransform[] =>
-    vortexLayout(options.items.length, at, { cardAspect: CARD_ASPECT });
+    vortexLayout(options.items.length, at, {
+      cardAspect: CARD_ASPECT,
+      viewport: { width: width(), height: height() },
+    });
 
   const project = (at: number, view: Tilt) =>
     projectCards(layoutAt(at), {
       yaw: view.yaw,
       pitch: view.pitch,
       distance: 9,
-      fovY: FOV_Y,
+      fovY: CAMERA.fovY,
       viewport: { width: width(), height: height() },
     });
 
@@ -156,7 +161,7 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
       if (layer === undefined) continue;
       const aspect = aspects.get(card.index);
       if (aspect === undefined || !Number.isFinite(aspect) || aspect <= 0) continue;
-      const scaleX = (layout[card.index]?.scale ?? 1) * 0.09;
+      const scaleX = (layout[card.index]?.scale ?? 1) * CARD_SIZE_SHARE;
       // A quad is normalised per canvas axis, so equal numbers are not a square:
       // the height has to carry the canvas aspect divided by the picture's.
       const scaleY = (scaleX * (width() / height())) / aspect;
