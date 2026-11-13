@@ -1,6 +1,7 @@
 import type { MediaItemView, MediaState } from "@instavault/core";
 import { useEffect, useRef, useState, type JSX } from "react";
 
+import { POSTER_EDGE, requestPoster, type PosterStore } from "./poster.js";
 import { useInViewport } from "./useInViewport.js";
 import { useMediaUrl, type MediaSource } from "./useMediaUrl.js";
 
@@ -26,10 +27,48 @@ function assertNever(value: never): never {
   throw new Error(`unhandled media state: ${JSON.stringify(value)}`);
 }
 
-function reasonText(reason: "missing" | "decode" | "timeout" | "unloadable"): string {
+function reasonText(reason: "missing" | "decode" | "timeout" | "unloadable" | "poster"): string {
   if (reason === "missing") return "Not stored";
   if (reason === "timeout") return "Timed out";
+  if (reason === "poster") return "No poster";
   return "Cannot display";
+}
+
+/** The repository, as the poster store sees it. Optional: not every caller has one. */
+type PosterSource = MediaSource & {
+  getThumbnail?: (path: string) => Promise<{ blob: Blob } | null>;
+  putThumbnail?: (row: {
+    path: string;
+    blob: Blob;
+    type: string;
+    width: number;
+    height: number;
+    sourceBytes: number;
+  }) => Promise<void>;
+};
+
+function posterStoreOf(source: PosterSource): PosterStore | null {
+  const get = source.getThumbnail;
+  const put = source.putThumbnail;
+  if (get === undefined || put === undefined) return null;
+  return {
+    get: async (path) => (await get(path))?.blob ?? null,
+    put: (path, blob) =>
+      put({
+        path,
+        blob,
+        type: blob.type === "" ? "image/webp" : blob.type,
+        width: POSTER_EDGE,
+        height: POSTER_EDGE,
+        sourceBytes: blob.size,
+      }),
+  };
+}
+
+function formatDuration(seconds: number): string {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "";
+  const whole = Math.round(seconds);
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 }
 
 export function MediaTile({
@@ -45,6 +84,39 @@ export function MediaTile({
   const nearViewport = useInViewport(ref);
   const media = useMediaUrl(nearViewport ? item.id : null, source, undefined, "thumb");
   const [unloadable, setUnloadable] = useState(false);
+  const [poster, setPoster] = useState<string | null>(null);
+  const [posterFailed, setPosterFailed] = useState(false);
+  const [duration, setDuration] = useState("");
+
+  // A video tile asks for one still frame, once, through the existing store.
+  const isVideo = media.status === "ready" && media.mime.startsWith("video/");
+  useEffect(() => {
+    if (!nearViewport || !isVideo) return;
+    const store = posterStoreOf(source as PosterSource);
+    let cancelled = false;
+    let objectUrl: string | null = null;
+
+    void (async () => {
+      const blob = await source.getMediaBlob(item.id);
+      if (blob === null || store === null) {
+        if (!cancelled) setPosterFailed(true);
+        return;
+      }
+      const result = await requestPoster(item.id, blob, store);
+      if (cancelled) return;
+      if (result === null) {
+        setPosterFailed(true);
+        return;
+      }
+      objectUrl = URL.createObjectURL(result);
+      setPoster(objectUrl);
+    })();
+
+    return () => {
+      cancelled = true;
+      if (objectUrl !== null) URL.revokeObjectURL(objectUrl);
+    };
+  }, [nearViewport, isVideo, item.id, source]);
   const mediaRef = useRef<HTMLImageElement | HTMLVideoElement | null>(null);
 
   // A new URL deserves a fresh chance, even if the previous one failed to load.
@@ -73,7 +145,9 @@ export function MediaTile({
       ? reasonText(media.reason)
       : unloadable
         ? reasonText("unloadable")
-        : null;
+        : posterFailed
+          ? reasonText("poster")
+          : null;
 
   const body = (state: MediaState): JSX.Element => {
     switch (state.status) {
@@ -106,16 +180,28 @@ export function MediaTile({
           );
         }
         return state.mime.startsWith("video/") ? (
-          <video
-            ref={(element) => {
-              mediaRef.current = element;
-            }}
-            src={state.url}
-            muted
-            preload="metadata"
-            aria-hidden="true"
-            data-testid="tile-video"
-          />
+          <span className="tile-video-frame">
+            <video
+              ref={(element) => {
+                mediaRef.current = element;
+              }}
+              src={state.url}
+              poster={poster ?? undefined}
+              muted
+              preload="metadata"
+              aria-hidden="true"
+              data-testid="tile-video"
+              onLoadedMetadata={(event) =>
+                setDuration(formatDuration(event.currentTarget.duration))
+              }
+            />
+            {/* A video is identifiable before its poster arrives: the glyph says
+                "play", the duration says how long. */}
+            <span className="tile-play" aria-hidden="true">
+              ▶
+            </span>
+            {duration !== "" && <span className="tile-duration">{duration}</span>}
+          </span>
         ) : (
           <img
             ref={(element) => {

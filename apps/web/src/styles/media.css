@@ -1,0 +1,28 @@
+/* Media tiles beyond the grid: what a video shows before its poster arrives. */
+/* --- video tiles ---------------------------------------------------------- */
+.tile-video-frame {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tile-play,
+.tile-duration {
+  position: absolute;
+  bottom: var(--token-space-1);
+  padding: 0 var(--token-space-1);
+  border-radius: var(--token-radius-sm);
+  background: var(--token-color-scrim);
+  color: var(--token-color-on-scrim);
+  font-size: var(--token-text-12);
+}
+
+.tile-play {
+  left: var(--token-space-1);
+}
+
+.tile-duration {
+  right: var(--token-space-1);
+  font-family: var(--token-font-mono);
+}
