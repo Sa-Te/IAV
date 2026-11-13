@@ -35,6 +35,30 @@ Counts are the app's own entry counts, not a second opinion.
 | `other_content` | Other content | 5 | yes |
 | `reels` | Reels | — | **no** — registered unmeasured, `signatures: []` (ADR 0008) |
 
+### `liked_posts` — the largest list, and the year level's real test
+
+| Measure | Value |
+| --- | --- |
+| Entries | 42,197 |
+| Earliest / latest timestamp | 2015-06-14 / 2026-10-29 |
+| Distinct months holding an entry | **121** |
+| Distinct years | **12** (2015–2026) |
+| Inclusive span | **137 months** |
+
+Entries per year: 2015: 232 · 2016: 1,960 · 2017: 5,162 · 2018: 3,691 ·
+2019: 6,651 · 2020: 8,893 · 2021: 7,910 · 2022: 5,529 · 2023: 1,489 ·
+2024: 339 · 2025: 107 · 2026: 234. The busiest month holds 1,435 entries.
+
+The span is what decides the year level (D2 fixed the rule at 24 months), so it
+engages — 137 > 24, and so would 25. The number is reported because it also says
+how much of the year fold the reader will actually use: most T3 and T2 lists never
+see it.
+
+Rendered in the browser against this archive: 12 year rows covering 121 months,
+and **367 DOM nodes (53 inside the list) with every year collapsed**, zero rows.
+As rendered — newest year open, months closed — 409 nodes. That is the low
+hundreds the budget asks for, not thousands (ADR 0015).
+
 The old drift report's wrapper-key names for several of these rows
 (`story_activities_*`, `likes_media_likes`, `saved_saved_media`, …) no longer
 describe `archive-2/`: the export now writes root arrays of label/value envelopes
@@ -86,7 +110,7 @@ An additive merge is the right rule for a category Instagram splits into
 `posts_1.json` + `posts_2.json`; it is the wrong rule for one content set written
 twice in two formats. Media URI is the identity: 78 posts, 78 media items.
 
-### The fix (this commit)
+### The fix (M22)
 
 - `posts`' signature now requires the legacy shape to *not* carry `fbid`,
   `label_values` or `timestamp`. A label/value array is no longer posts; the
@@ -176,7 +200,7 @@ in `docs/archive-manifest.md` §11.
 | Media galleries | `profile_photos`, `archived_posts`, `posts`, `stories` | 4 | the existing gallery routes (D4 — never duplicated onto the event list) |
 | Fits neither | — | 0 | — |
 
-**Covered by the T2 screen unchanged (10):**
+**Covered by the T2 screen unchanged (8):**
 `story_reaction_sticker_reactions`, `story_likes`, `saved_collections`,
 `saved_posts`, `liked_posts`, `instants_interactions`, `other_content`,
 `liked_comments` (title/`string_list_data` is the measured T2 shape) — plus the
@@ -218,3 +242,50 @@ No T3 category is left on the generic table or tree.
 - `liked_comments[].string_list_data[0].value` is the same four-character string
   on all 156 entries. It is not the comment text and carries no per-entry
   information; the screen uses `title` (the account) and `href` only.
+
+## 8. T4 and T5 remaining — the projection
+
+The same probe over the 18 categories still without a bespoke screen. Measured
+from `archive-2/` on 2026-11-13; entries are the app's own counts.
+
+### T4 — third-party identities (13 present, 1 absent: `secret_conversations`)
+
+| Shape | Categories | Entries | Date on the entry | What is left |
+| --- | --- | ---: | --- | --- |
+| Dated identity list | `restricted_profiles`, `hide_story_from`, `close_friends`, `recent_follow_requests`, `follow_requests_you've_received`, `recently_unfollowed_profiles`, `blocked_profiles`, `pending_follow_requests` | 3 · 4 · 8 · 5 · 29 · 20 · 9 · 23 | yes, top-level `timestamp` | one row per interaction, hero = the person |
+| Undated identity list | `following`, `followers`, `following_hashtags` | 3,362 · 325 · 13 | no | one row per person/topic, no date fold |
+| Contact records | `synced_contacts` | 881 | no | a table, not a list |
+| Single envelope | `removed_suggestions` | 1 | no | settings-style field list |
+
+The 13 are two different screens, not one: eight are dated interactions (a person
+**and** a moment) and five are undated identity/contact lists. T2-DESIGN §7 called
+this "a person/identity list"; the measurement says that name hides the split.
+Identity lives in `string_list_data[].value` (or `title`), not in a label, so the
+event list's hero mapping cannot read it without a new field role. Nothing in T4
+carries media.
+
+### T5 — third-party authored text (5 present, 0 absent)
+
+| Category | Entries | Shape | What is left |
+| --- | ---: | --- | --- |
+| `messages_inbox` | 122 files | thread objects | thread list, already built and gated |
+| `messages_requests` | 142 files | thread objects | thread list, already built and gated |
+| `threads_viewed` | 246 | `string_map_data` with `Author`, `Time`, `URL` | the event list behind the gate, with `Author` as the hero |
+| `ai_conversations` | 2 | label/value envelope with `Summary`, `Messages`, `Image`, … | its own screen; the conversation is nested, not a row |
+| `checkout_payment_information` | 1 | label/value envelope | the settings screen behind the gate |
+
+`threads_viewed` is the only one that is the existing event list with another hero
+name. `ai_conversations` is the only genuinely new screen left in the archive.
+
+### What is blocked on a decision only the owner can make
+
+1. **T4's two shapes.** Are the eight dated rows "events about a person" (event
+   list, hero = the person) or "people, with a date" (person list, date as a
+   field)? The same data supports both; the choice decides one screen or two.
+2. **Filters and search.** D3 deferred them for T3. T4's 3,362-row `following`
+   list is the first place absence of search will be felt.
+3. **The two real comment media URIs** (`post_comments`, 2 entries): show the
+   commented-on media, or keep the row textual?
+4. **`profile_photos`' screen.** It still renders as a raw tree; the photo is only
+   reachable through Everything. A one-item gallery route is a small decision.
+5. **`note_and_repost_interactions.json`** (§7): a registry row and a tier.

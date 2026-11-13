@@ -217,3 +217,24 @@ progress.
   event lists, 2 settings pages, 2 location field lists, 3 name/place lists and
   1 profile with a local photo; the screen follows the measured content —
   vault: `architecture/2026-11-13_t2-content-groups.md`
+- 2026-11-13 — `gate-is-not-the-tier` — the reveal gate answers "must the screen
+  ask first" and the privacy tier answers "whose data is this"; comments are T3 and
+  gated at once, so the registry carries a `gated` flag beside the tier —
+  vault: `learning-notes/concepts/gate-is-not-the-tier.md`
+- 2026-11-13 — `content-identity-dedupe` — a merge needs a definition of when two
+  records are the same record; `posts.json` contains all 51 media URIs of
+  `posts_1.json`, so a URI is one post and the raw 129 is not the screen's 78 —
+  vault: `learning-notes/concepts/content-identity-dedupe.md`
+- 2026-11-13 — `signature-says-what-it-is-not` — a structural signature needs
+  `absentKeys` when a weaker shape would match an unrelated file;
+  `note_and_repost_interactions.json` was folded into posts for fourteen
+  milestones because `{media}` was too generous —
+  vault: `debug-log/2026-11-13_posts-merged-three-files.md`
+- 2026-11-13 — `fold-follows-the-span` — 7,849 entries in one month need a day cap;
+  42,197 across 137 months need a year fold above the months; the fold follows the
+  axis the data spans, not the entry count —
+  vault: `mind-maps/2026-11-13_t3-screens.md`
+- 2026-11-13 — `t3-content-groups` — the 18 present T3 categories are 11 dated
+  event lists, 3 comment lists (same screen, gated) and 4 media galleries; no T3
+  category needed a new screen —
+  vault: `architecture/2026-11-13_t3-content-groups.md`

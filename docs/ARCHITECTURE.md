@@ -49,7 +49,8 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 
 | Module | One-line responsibility |
 | --- | --- |
-| `registry/categories.ts` | The category registry: one data row per archive category, plus the unrecognised bucket (ADR 0002). |
+| `registry/categories.ts` | The category registry: one data row per archive category, plus the unrecognised bucket (ADR 0002). A row carries a privacy tier and, where the words inside are someone else's, a `gated` flag (ADR 0014). |
+| `schema/posts.ts`, `parsers/posts.ts` | The two measured `posts` shapes (legacy media groups and label/value envelopes), deduplicated by media URI (docs/T3-DESIGN.md §2). |
 | `registry/resolve.ts` | Maps one file path and its parsed sample to a category id, by name, then structure, then the unrecognised bucket. |
 | `registry/fingerprint.ts` | Turns the set of resolved categories and their first-entry keys into a short stable shape id (ADR 0005). |
 | `strings/fixMojibake.ts` | Repairs Instagram's double-encoded text in a single string (ADR 0003). |
@@ -61,9 +62,10 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `categories/settingsView.ts` | A label/value record → labelled fields, nested sections, timestamps and absent values; `null` when the record is not that shape. |
 | `categories/avatarItemsView.ts` | `avatar_items` → URL records with an ordinal and a localised acquisition time; `null` when the shape does not match. |
 | `categories/deviceEffectsView.ts` | Repeated device records grouped by identity and deduplicated only when the profile is identical; `null` when it cannot be honest. |
-| `categories/eventListView.ts` | A dated label/value record → month → day → row, with the measured hero/date/URL mapping; `null` when the record is not an event list. |
+| `categories/eventListView.ts` | A dated label/value record → year → month → day → row, with the measured hero/date/URL mapping and the 25-month threshold for the year fold (ADR 0015); `null` when the record is not an event list. |
+| `categories/entryCount.ts` | The count a screen prints when it differs from the raw per-file sum: `posts` can arrive twice in one export (docs/T3-DESIGN.md §2). |
 | `categories/nameListView.ts` | A vec of names/places plus optional explanatory text → a paginated name list; `null` when the record has neither. |
-| `categories/privacy.ts` | Which categories are T5, and the copy shown before one is revealed; reads the registry, never a hardcoded id list. |
+| `categories/privacy.ts` | Which categories gate — tier 5 or the registry's `gated` flag — and the copy shown before one is revealed; reads the registry, never a hardcoded id list (ADR 0014). |
 | `media/cache.ts` | Bounded media cache: one entry and one in-flight decode per path, LRU by count at 150, evict = revoke URL then close bitmap, `releaseAll` for teardown. |
 | `media/thumbnail.ts` | Thumbnail geometry and the encode contract: max edge 512, aspect preserved, never upscaled, type taken from what the encoder produced. |
 | `messages/threads.ts` | Thread identity from the path (family + folder), summaries, newest-first ordering, and one thread's messages in chronological order. |
@@ -90,12 +92,12 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/useMediaList.ts` | Pages one category — or every category — out of the repository. |
 | `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. |
 | `apps/web/src/routes/Nav.tsx` | Categories that actually have media, with counts; `aria-current` comes from the router. |
-| `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: chooses the screen by measured content (T1 settings/avatar/device, T2 event/profile/name list/settings, table/tree otherwise) and keeps loading / empty / failed distinct. |
+| `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: chooses the screen by measured content (T1 settings/avatar/device, T2 event/profile/name list/settings, T3 event list for fourteen categories, table/tree otherwise) and keeps loading / empty / failed distinct. |
 | `apps/web/src/categories/settingsFields.tsx` | The field renderer: definition lists, nested sections, opaque values that expand on focus, real links and timestamps. |
 | `apps/web/src/categories/SettingsView.tsx` | The T1 label/value screen: one entry as a page, many as sections, raw JSON behind a closed disclosure. |
 | `apps/web/src/categories/AvatarItemsView.tsx` | The avatar grid: labelled placeholders, no invented thumbnails, the URL as a user-initiated link. |
 | `apps/web/src/categories/DeviceEffectsView.tsx` | The device profile: identity and support lists once, the varying records as a list. |
-| `apps/web/src/categories/EventListView.tsx` | The T2 event/activity screen: month button → day heading → row, 7 days and 200 rows at a time, URL shortcode link, raw disclosure. |
+| `apps/web/src/categories/EventListView.tsx` | The event/activity screen for T2 and T3: year button (only over 24 months) → month button → day heading → row, 7 days and 200 rows at a time, URL shortcode link, raw disclosure. |
 | `apps/web/src/categories/ProfileView.tsx` | `personal_information`: the one local profile photo through the media layer, plus the labelled fields. |
 | `apps/web/src/categories/NameListView.tsx` | The three T2 name/place lists, 200 names at a time. |
 | `apps/web/src/categories/RawDisclosure.tsx` | The one closed raw-JSON disclosure every bespoke screen ends with. |
@@ -104,7 +106,7 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/styles/events.css` | The event list, profile photo and name list; tokens only. |
 | `apps/web/src/categories/CategoryTable.tsx` | Semantic table, sticky header, 100 rows per page; long values keep their full text in `title`. |
 | `apps/web/src/categories/CategoryTree.tsx` | Collapsible JSON tree that builds children only on expand, behind the "we have not interpreted it" banner. |
-| `apps/web/src/categories/RevealGate.tsx` | T5 gate: renders copy + one button, mounts the reader only after the click, never persists the reveal. |
+| `apps/web/src/categories/RevealGate.tsx` | The reveal gate: renders copy + one button, mounts the reader only after the click, never persists the reveal. Used for tier 5 and for the `gated` comment categories (ADR 0014). |
 | `apps/web/src/media/MediaCaches.tsx` | Creates the per-root original and thumbnail caches from the repository; releases both on teardown. |
 | `apps/web/src/media/useInViewport.ts` | IntersectionObserver with a 200px margin; once seen, stays seen, so scrolling back does not re-request. |
 | `packages/worker/src/thumbnails.ts` | Decode → OffscreenCanvas → webp (whatever type comes back), off the main thread. |

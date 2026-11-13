@@ -10,11 +10,14 @@ ZIP and shows it back to you.
 
 **Pre-alpha, browser-only.** The import path works end to end: a ZIP is parsed in
 a worker, stored in IndexedDB, and rendered through galleries, a 3D cyclone and
-per-category screens. T1 and T2 now have bespoke screens: T1 settings, the avatar
-grid and the device profile; T2 event/activity lists grouped by month and day,
-T2 settings, a profile with its local photo, and the name/place lists. T3–T5
-render through the generic table or raw tree until their content is measured.
-There is no server, no account and no network egress.
+per-category screens. T1, T2 and T3 now have bespoke screens: T1 settings, the
+avatar grid and the device profile; T2 event/activity lists, settings, a profile
+with its local photo, and the name/place lists; T3's fourteen activity and comment
+lists, plus three media galleries. Long lists fold by year and then month; three
+T3 comment categories ask before they render because the words in them were
+written by other people. T4 and T5 still render through the generic table or raw
+tree until their content is measured. There is no server, no account and no
+network egress.
 
 ## What v1 is
 
@@ -100,9 +103,10 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
    sidebar is the way around all of it. T1's settings categories open as labelled
    fields rather than a table; avatar items open as a grid of placeholders because
    their images are remote URLs the app never fetches; device camera effects open
-   as one profile with its records. Long T2 lists group by month and day, a
-   profile photo is shown from the local blob, and a post URL is a real link the
-   app never fetches.
+   as one profile with its records. Long lists group by month and day, and by year
+   first when they span more than two years — 42,197 liked posts are twelve year
+   rows, not 121 month buttons. A profile photo is shown from the local blob, and a
+   post URL is a real link the app never fetches.
 
 **What privacy means in practice.** The ZIP is read with the browser's own file
 API, parsed in a worker in the same tab, and stored in IndexedDB. Nothing is
@@ -121,9 +125,12 @@ on this device. Fonts are self-hosted, and `pnpm check:styles` refuses a raw col
 an arbitrary utility value or a gradient outside the token file.
 
 **Some categories ask before they show.** Categories that hold other people's words
-(messages, AI conversations, payment records) render behind a single "Show this
-category" button, so a route click on a shared screen does not open someone's
-conversation. The reveal is not remembered: reloading the page gates them again.
+render behind a single "Show this category" button, so a route click on a shared
+screen does not open someone's conversation: messages, AI conversations, payment
+records, and the three comment categories — the comments other people wrote on
+your posts and reels, and the comments you liked. Comments stay on the "your
+content" page; the gate is not a tier (ADR 0014). The reveal is not remembered:
+reloading the page gates them again.
 
 **Every parsed category has a page.** `/categories` lists all of them by privacy
 tier; a category whose shape carries no labels renders as a collapsible JSON tree

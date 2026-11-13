@@ -3,18 +3,21 @@
 Completion tracker for "every archive category implemented". A category is done
 only when its row says parsed + rendered + tested (AGENTS.md §16).
 
-**87 categories inventoried, 72 present, 15 not in the current baseline, 2 with
-the full per-category fixture set.** Plus one unrecognised bucket (ADR 0002, tier
-3) that is always present by design.
+**87 categories inventoried, 72 present, 15 not in the current baseline, 3 with
+the full per-category fixture set** (`stories`, `archived_posts`, `posts`). Plus
+one unrecognised bucket (ADR 0002, tier 3) that is always present by design.
 
-Of the 72 present in `archive-2/`, **12 T1 and 24 T2 categories now have a
-bespoke screen** — ten T1 settings pages, one avatar grid, one device profile;
-sixteen T2 event lists, four T2 settings pages, one profile with a local photo,
-three T2 name/place lists (M20/M21) — **3 media categories have their own gallery
-routes**, and **2 message categories render as a thread list** behind the T5
-reveal gate. The rest render through the generic table, or the raw tree when the
-shape carries no labels. The fifteen absent rows stay registered: absence is a
-normal state (ADR 0002), and an ordinary export must not look broken.
+Of the 72 present in `archive-2/`, **12 T1, 24 T2 and all 18 T3 categories now
+have a bespoke screen** — ten T1 settings pages, one avatar grid, one device
+profile; sixteen T2 event lists, four T2 settings pages, one profile with a local
+photo, three T2 name/place lists (M20/M21); fourteen T3 event lists (three of them
+gated) — **3 media categories have their own gallery routes**, two more render
+their media inside another screen (T2's profile photo, T3's `profile_photos` as a
+raw tree whose photo is reachable through Everything), and **2 message categories
+render as a thread list** behind the reveal gate. The rest render through the
+generic table, or the raw tree when the shape carries no labels. The fifteen
+absent rows stay registered: absence is a normal state (ADR 0002), and an
+ordinary export must not look broken.
 
 `reels` is registered by name only: no reels file exists in this baseline, so it has
 no measured shape (ADR 0008 permits an empty signature list) and no observed media
@@ -107,27 +110,34 @@ actually has, and the View column says which screen renders it.
 
 ## T3 — your own media and content
 
+Measured in M22 (`docs/T3-DESIGN.md`). Fourteen categories are dated label/value
+lists and render through the event list; four are media and keep their gallery
+routes. Three of the lists contain other people's words and carry `gated: true`
+in the registry — they stay on this tier page and ask before they render
+(ADR 0014). `posts` is the only T3 category with a dedicated schema and parser:
+the other rows are read by the shared label/value reader, and the column says so.
+
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `profile_photos` | `your_instagram_activity/media/profile_photos.json` | `packages/core/schema/profile-photos.ts` | `packages/core/parsers/profile-photos.ts` | gallery | low | parsed + raw view |
-| `story_reaction_sticker_reactions` | `your_instagram_activity/story_interactions/story_reaction_sticker_reactions.json` | `packages/core/schema/story-reactions.ts` | `packages/core/parsers/story-reactions.ts` | list | high | parsed + rendered |
-| `reels_comments` | `your_instagram_activity/comments/reels_comments.json` | `packages/core/schema/reels-comments.ts` | `packages/core/parsers/reels-comments.ts` | list | medium | parsed + rendered |
-| `questions` | `your_instagram_activity/story_interactions/questions.json` | `packages/core/schema/story-questions.ts` | `packages/core/parsers/story-questions.ts` | list | high | parsed + rendered |
-| `emoji_sliders` | `your_instagram_activity/story_interactions/emoji_sliders.json` | `packages/core/schema/emoji-sliders.ts` | `packages/core/parsers/emoji-sliders.ts` | list | high | parsed + rendered |
-| `archived_posts` | `your_instagram_activity/media/archived_posts.json` | `packages/core/schema/archived-posts.ts` | `packages/core/parsers/archived-posts.ts` | gallery | low | parsed + rendered + tested |
-| `quizzes` | `your_instagram_activity/story_interactions/quizzes.json` | `packages/core/schema/story-quizzes.ts` | `packages/core/parsers/story-quizzes.ts` | list | high | parsed + rendered |
-| `posts` | `your_instagram_activity/media/posts_1.json` | `packages/core/schema/posts.ts` | `packages/core/parsers/posts.ts` | gallery | medium | parsed + raw view |
-| `reels` | `your_instagram_activity/media/reels.json` | `packages/core/schema/opaque.ts` | `packages/core/parsers/opaque.ts` | none | medium | registered, unmeasured — absent from the current baseline |
-| `story_likes` | `your_instagram_activity/likes/story_likes.json` | `packages/core/schema/story-likes.ts` | `packages/core/parsers/story-likes.ts` | list | medium | parsed + rendered |
-| `liked_comments` | `your_instagram_activity/likes/liked_comments.json` | `packages/core/schema/liked-comments.ts` | `packages/core/parsers/liked-comments.ts` | list | low | parsed + raw view |
+| `profile_photos` | `your_instagram_activity/media/profile_photos.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | tree (the photo is in Everything) | low | parsed + raw view |
+| `story_reaction_sticker_reactions` | `your_instagram_activity/story_interactions/story_reaction_sticker_reactions.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `reels_comments` | `your_instagram_activity/comments/reels_comments.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
+| `questions` | `your_instagram_activity/story_interactions/questions.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `emoji_sliders` | `your_instagram_activity/story_interactions/emoji_sliders.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `archived_posts` | `your_instagram_activity/media/archived_posts.json` | `packages/core/schema/archivedPosts.ts` | `packages/core/parsers/archivedPosts.ts` | gallery | low | parsed + rendered + tested |
+| `quizzes` | `your_instagram_activity/story_interactions/quizzes.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `posts` | `your_instagram_activity/media/posts.json`, `.../posts_1.json` | `packages/core/src/schema/posts.ts` | `packages/core/src/parsers/posts.ts` | gallery | medium | parsed + rendered + tested |
+| `reels` | `your_instagram_activity/media/reels.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | registered, unmeasured — absent from the current baseline |
+| `story_likes` | `your_instagram_activity/likes/story_likes.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
+| `liked_comments` | `your_instagram_activity/likes/liked_comments.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | low | parsed + rendered + tested |
 | `stories` | `your_instagram_activity/media/stories.json` | `packages/core/schema/stories.ts` | `packages/core/parsers/stories.ts` | gallery | high | parsed + rendered + tested |
-| `saved_collections` | `your_instagram_activity/saved/saved_collections.json` | `packages/core/schema/saved-collections.ts` | `packages/core/parsers/saved-collections.ts` | list | high | parsed + rendered |
-| `post_comments` | `your_instagram_activity/comments/post_comments_1.json` | `packages/core/schema/post-comments.ts` | `packages/core/parsers/post-comments.ts` | list | high | parsed + rendered |
-| `polls` | `your_instagram_activity/story_interactions/polls.json` | `packages/core/schema/story-polls.ts` | `packages/core/parsers/story-polls.ts` | list | high | parsed + rendered |
-| `saved_posts` | `your_instagram_activity/saved/saved_posts.json` | `packages/core/schema/saved-posts.ts` | `packages/core/parsers/saved-posts.ts` | list | high | parsed + rendered |
-| `liked_posts` | `your_instagram_activity/likes/liked_posts.json` | `packages/core/schema/liked-posts.ts` | `packages/core/parsers/liked-posts.ts` | list | medium | parsed + rendered |
-| `instants_interactions` | `your_instagram_activity/instants/instants_interactions.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
-| `other_content` | `your_instagram_activity/media/other_content.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
+| `saved_collections` | `your_instagram_activity/saved/saved_collections.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `post_comments` | `your_instagram_activity/comments/post_comments_1.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `polls` | `your_instagram_activity/story_interactions/polls.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `saved_posts` | `your_instagram_activity/saved/saved_posts.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `liked_posts` | `your_instagram_activity/likes/liked_posts.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
+| `instants_interactions` | `your_instagram_activity/instants/instants_interactions.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
+| `other_content` | `your_instagram_activity/media/other_content.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
 
 ## T4 — third-party identities
 
