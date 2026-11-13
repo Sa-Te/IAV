@@ -48,20 +48,31 @@ type PosterSource = MediaSource & {
 };
 
 function posterStoreOf(source: PosterSource): PosterStore | null {
-  const get = source.getThumbnail;
-  const put = source.putThumbnail;
-  if (get === undefined || put === undefined) return null;
+  if (source.getThumbnail === undefined || source.putThumbnail === undefined) return null;
+  // Called through `source`, never through an extracted reference: the repository's
+  // methods use `this.db`, and a detached call throws "reading 'db'" per tile.
   return {
-    get: async (path) => (await get(path))?.blob ?? null,
-    put: (path, blob) =>
-      put({
-        path,
-        blob,
-        type: blob.type === "" ? "image/webp" : blob.type,
-        width: POSTER_EDGE,
-        height: POSTER_EDGE,
-        sourceBytes: blob.size,
-      }),
+    get: async (path) => {
+      try {
+        return (await source.getThumbnail?.(path))?.blob ?? null;
+      } catch {
+        return null;
+      }
+    },
+    put: async (path, blob) => {
+      try {
+        await source.putThumbnail?.({
+          path,
+          blob,
+          type: blob.type === "" ? "image/webp" : blob.type,
+          width: POSTER_EDGE,
+          height: POSTER_EDGE,
+          sourceBytes: blob.size,
+        });
+      } catch {
+        /* a poster that cannot be stored is regenerated next visit */
+      }
+    },
   };
 }
 
