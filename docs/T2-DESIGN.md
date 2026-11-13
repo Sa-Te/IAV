@@ -159,3 +159,35 @@ The 16 event lists are the input to commit 3. The settings reuse, the profile
 photo and the location field lists are the input to commit 4. The three
 name/place lists are genuinely different and stay on the generic view in M21;
 they are the next measured design, not a second event list.
+
+## 7. Applying this to T3–T5
+
+The same probe over the 36 remaining present categories (18 T3, 13 T4, 5 T5)
+says the event-list screen is the right shape for **14 more**:
+
+| Group | Remaining present | What it needs |
+| --- | ---: | --- |
+| Event/activity lists (dated label/value records) | 14 | the T2 event-list screen, after a per-category hero/date check: 13 T3 + `threads_viewed` (T5) |
+| Person/identity lists (12 T4 people + `following_hashtags`) | 13 | a person/identity list screen; all 13 present T4 rows |
+| Comment list (`liked_comments`, `string_list_data`, no date) | 1 | a list screen |
+| Conversation metadata (`ai_conversations`) | 1 | its own screen; it is not an event |
+| Settings (`checkout_payment_information`, T5 gate) | 1 | the settings screen, behind the reveal gate |
+| Media galleries (`posts`, `stories`, `archived_posts`, `profile_photos`) | 4 | the existing gallery routes |
+| Thread lists (`messages_inbox`, `messages_requests`) | 2 | the existing thread list |
+
+The 14 event lists are: `emoji_sliders`, `instants_interactions`, `liked_posts`
+(42,197 entries), `other_content`, `polls`, `post_comments`, `questions`,
+`quizzes`, `reels_comments`, `saved_collections`, `saved_posts`, `story_likes`,
+`story_reaction_sticker_reactions` and `threads_viewed`. The 42,197-entry
+`liked_posts` is the scale test for the month/day caps; it is four times the
+largest T2 list.
+
+The event screen is one component, but enabling it for a category is still a
+measurement step: the hero priority covers `Caption`/`Title`/`Name`/`Search`/
+`Changed`/`Activation Type`; `post_comments`, `reels_comments` and
+`threads_viewed` have no caption-like label and would use the plain field list;
+`questions` and `quizzes` use `Question`, which is not in the priority and would
+also use the plain list until a measured mapping says otherwise. The 13 T4
+identity/follow rows and `ai_conversations` are the genuinely new designs; they
+are not the event list with a different name. `following_hashtags` is a topic
+list rather than a person list, but it shares the list-shaped design.

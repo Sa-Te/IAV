@@ -61,6 +61,8 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `categories/settingsView.ts` | A label/value record → labelled fields, nested sections, timestamps and absent values; `null` when the record is not that shape. |
 | `categories/avatarItemsView.ts` | `avatar_items` → URL records with an ordinal and a localised acquisition time; `null` when the shape does not match. |
 | `categories/deviceEffectsView.ts` | Repeated device records grouped by identity and deduplicated only when the profile is identical; `null` when it cannot be honest. |
+| `categories/eventListView.ts` | A dated label/value record → month → day → row, with the measured hero/date/URL mapping; `null` when the record is not an event list. |
+| `categories/nameListView.ts` | A vec of names/places plus optional explanatory text → a paginated name list; `null` when the record has neither. |
 | `categories/privacy.ts` | Which categories are T5, and the copy shown before one is revealed; reads the registry, never a hardcoded id list. |
 | `media/cache.ts` | Bounded media cache: one entry and one in-flight decode per path, LRU by count at 150, evict = revoke URL then close bitmap, `releaseAll` for teardown. |
 | `media/thumbnail.ts` | Thumbnail geometry and the encode contract: max edge 512, aspect preserved, never upscaled, type taken from what the encoder produced. |
@@ -88,14 +90,18 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/useMediaList.ts` | Pages one category — or every category — out of the repository. |
 | `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. |
 | `apps/web/src/routes/Nav.tsx` | Categories that actually have media, with counts; `aria-current` comes from the router. |
-| `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: chooses the screen by measured content (settings/avatar/device within T1, table/tree otherwise) and keeps loading / empty / failed distinct. |
+| `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: chooses the screen by measured content (T1 settings/avatar/device, T2 event/profile/name list/settings, table/tree otherwise) and keeps loading / empty / failed distinct. |
 | `apps/web/src/categories/settingsFields.tsx` | The field renderer: definition lists, nested sections, opaque values that expand on focus, real links and timestamps. |
 | `apps/web/src/categories/SettingsView.tsx` | The T1 label/value screen: one entry as a page, many as sections, raw JSON behind a closed disclosure. |
 | `apps/web/src/categories/AvatarItemsView.tsx` | The avatar grid: labelled placeholders, no invented thumbnails, the URL as a user-initiated link. |
 | `apps/web/src/categories/DeviceEffectsView.tsx` | The device profile: identity and support lists once, the varying records as a list. |
+| `apps/web/src/categories/EventListView.tsx` | The T2 event/activity screen: month button → day heading → row, 7 days and 200 rows at a time, URL shortcode link, raw disclosure. |
+| `apps/web/src/categories/ProfileView.tsx` | `personal_information`: the one local profile photo through the media layer, plus the labelled fields. |
+| `apps/web/src/categories/NameListView.tsx` | The three T2 name/place lists, 200 names at a time. |
 | `apps/web/src/categories/RawDisclosure.tsx` | The one closed raw-JSON disclosure every bespoke screen ends with. |
 | `apps/web/src/categories/counts.ts` | One count vocabulary: 1 entry / 2 entries / 1 media item / 2 media items, and no bare zero. |
 | `apps/web/src/styles/settings.css` | The settings, avatar and device screens; tokens only. |
+| `apps/web/src/styles/events.css` | The event list, profile photo and name list; tokens only. |
 | `apps/web/src/categories/CategoryTable.tsx` | Semantic table, sticky header, 100 rows per page; long values keep their full text in `title`. |
 | `apps/web/src/categories/CategoryTree.tsx` | Collapsible JSON tree that builds children only on expand, behind the "we have not interpreted it" banner. |
 | `apps/web/src/categories/RevealGate.tsx` | T5 gate: renders copy + one button, mounts the reader only after the click, never persists the reveal. |

@@ -10,9 +10,11 @@ ZIP and shows it back to you.
 
 **Pre-alpha, browser-only.** The import path works end to end: a ZIP is parsed in
 a worker, stored in IndexedDB, and rendered through galleries, a 3D cyclone and
-per-category screens. T1's settings, avatar and device categories have bespoke
-screens (M20); the other tiers render through the generic table or raw tree until
-their content is measured. There is no server, no account and no network egress.
+per-category screens. T1 and T2 now have bespoke screens: T1 settings, the avatar
+grid and the device profile; T2 event/activity lists grouped by month and day,
+T2 settings, a profile with its local photo, and the name/place lists. T3–T5
+render through the generic table or raw tree until their content is measured.
+There is no server, no account and no network egress.
 
 ## What v1 is
 
@@ -98,7 +100,9 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
    sidebar is the way around all of it. T1's settings categories open as labelled
    fields rather than a table; avatar items open as a grid of placeholders because
    their images are remote URLs the app never fetches; device camera effects open
-   as one profile with its records.
+   as one profile with its records. Long T2 lists group by month and day, a
+   profile photo is shown from the local blob, and a post URL is a real link the
+   app never fetches.
 
 **What privacy means in practice.** The ZIP is read with the browser's own file
 API, parsed in a worker in the same tab, and stored in IndexedDB. Nothing is

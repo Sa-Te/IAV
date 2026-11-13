@@ -188,3 +188,24 @@ progress.
   capability with an `oe` expiry, not a file; an expired signature cannot be
   recomputed locally, so the honest UI shows the URL as text with its expiry —
   vault: `debug-log/2026-11-13_expired-avatar-urls.md`
+- 2026-11-13 — `month-is-the-fold` — a 7,849-row list is a DOM problem, not a
+  rendering problem; group by month, open the newest, show seven days and 200 rows
+  at a time — see `docs/adr/0013-event-list-grouping.md`
+- 2026-11-13 — `hero-from-the-export` — the hero is the first non-empty measured
+  caption-like label (`Caption`, `Title`, `Name`, `Search`, `Changed`,
+  `Activation Type`); a category with none gets the plain field list, not an
+  invented title — vault: `architecture/2026-11-13_event-list-grouping.md`
+- 2026-11-13 — `timestamp-inside-string-map` — `{value: "", timestamp: 1786001771}`
+  is a date, not an empty string; the envelope reader must prefer the timestamp
+  when the value is empty —
+  vault: `debug-log/2026-11-13_stories-viewed-dom.md`
+- 2026-11-13 — `one-photo-is-still-media` — `personal_information`'s profile photo
+  is a root-relative local blob and goes through the same three-state media layer
+  as every other image; it is not a remote URL —
+  vault: `learning-notes/2026-11-13_session-17.md`
+- 2026-11-13 — `name-list-not-event-list` — a `vec` of names or places is a
+  paginated list, not an event; it has no date and no hero —
+  vault: `mind-maps/2026-11-13_t2-screens.md`
+- 2026-11-13 — `graph-before-grep` — query the local graph before a name search;
+  an EXTRACTED edge is a map, an INFERRED edge is still an INFERENCE under §15 —
+  see `AGENTS.md` §12

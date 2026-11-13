@@ -7,13 +7,14 @@ only when its row says parsed + rendered + tested (AGENTS.md §16).
 the full per-category fixture set.** Plus one unrecognised bucket (ADR 0002, tier
 3) that is always present by design.
 
-Of the 72 present in `archive-2/`, **12 T1 categories now have a bespoke screen**
-— ten settings pages, one avatar grid, one device profile (M20) — **3 media
-categories have their own gallery routes**, and **2 message categories render as
-a thread list** behind the T5 reveal gate. The rest render through the generic
-table, or the raw tree when the shape carries no labels. The fifteen absent rows
-stay registered: absence is a normal state (ADR 0002), and an ordinary export
-must not look broken.
+Of the 72 present in `archive-2/`, **12 T1 and 24 T2 categories now have a
+bespoke screen** — ten T1 settings pages, one avatar grid, one device profile;
+sixteen T2 event lists, four T2 settings pages, one profile with a local photo,
+three T2 name/place lists (M20/M21) — **3 media categories have their own gallery
+routes**, and **2 message categories render as a thread list** behind the T5
+reveal gate. The rest render through the generic table, or the raw tree when the
+shape carries no labels. The fifteen absent rows stay registered: absence is a
+normal state (ADR 0002), and an ordinary export must not look broken.
 
 `reels` is registered by name only: no reels file exists in this baseline, so it has
 no measured shape (ADR 0008 permits an empty signature list) and no observed media
@@ -74,35 +75,35 @@ actually has, and the View column says which screen renders it.
 
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `posts_you're_not_interested_in` | `your_instagram_activity/other_activity/posts_you're_not_interested_in.json` | `packages/core/schema/not-interested.ts` | `packages/core/parsers/not-interested.ts` | list | high | parsed + rendered |
-| `other_categories_used_to_reach_you` | `ads_information/ads_and_topics/other_categories_used_to_reach_you.json` | `packages/core/schema/ad-categories.ts` | `packages/core/parsers/ad-categories.ts` | list | medium | parsed + rendered |
-| `profile_based_in` | `ads_information/ads_and_topics/profile_based_in.json` | `packages/core/schema/inferred-location.ts` | `packages/core/parsers/inferred-location.ts` | map | low | parsed + rendered |
-| `last_known_location` | `security_and_login_information/login_and_profile_creation/last_known_location.json` | `packages/core/schema/last-known-location.ts` | `packages/core/parsers/last-known-location.ts` | map | medium | parsed + rendered |
-| `signup_details` | `security_and_login_information/login_and_profile_creation/signup_details.json` | `packages/core/schema/signup-details.ts` | `packages/core/parsers/signup-details.ts` | table | low | parsed + rendered |
-| `personal_information` | `personal_information/personal_information/personal_information.json` | `packages/core/schema/personal-information.ts` | `packages/core/parsers/personal-information.ts` | table | medium | parsed + rendered |
-| `profile_searches` | `logged_information/recent_searches/profile_searches.json` | `packages/core/schema/profile-searches.ts` | `packages/core/parsers/profile-searches.ts` | list | medium | parsed + raw view |
-| `word_or_phrase_searches` | `logged_information/recent_searches/word_or_phrase_searches.json` | `packages/core/schema/keyword-searches.ts` | `packages/core/parsers/keyword-searches.ts` | list | medium | parsed + rendered |
-| `profile_privacy_changes` | `security_and_login_information/login_and_profile_creation/profile_privacy_changes.json` | `packages/core/schema/privacy-changes.ts` | `packages/core/parsers/privacy-changes.ts` | timeline | low | parsed + raw view |
+| `posts_you're_not_interested_in` | `your_instagram_activity/other_activity/posts_you're_not_interested_in.json` | `packages/core/schema/not-interested.ts` | `packages/core/parsers/not-interested.ts` | event list | high | parsed + rendered |
+| `other_categories_used_to_reach_you` | `ads_information/instagram_ads_and_businesses/other_categories_used_to_reach_you.json` | `packages/core/schema/ad-categories.ts` | `packages/core/parsers/ad-categories.ts` | name list | medium | parsed + rendered |
+| `profile_based_in` | `personal_information/information_about_you/profile_based_in.json` | `packages/core/schema/inferred-location.ts` | `packages/core/parsers/inferred-location.ts` | settings | low | parsed + rendered |
+| `last_known_location` | `security_and_login_information/login_and_profile_creation/last_known_location.json` | `packages/core/schema/last-known-location.ts` | `packages/core/parsers/last-known-location.ts` | settings | medium | parsed + rendered |
+| `signup_details` | `security_and_login_information/login_and_profile_creation/signup_details.json` | `packages/core/schema/signup-details.ts` | `packages/core/parsers/signup-details.ts` | settings | low | parsed + rendered |
+| `personal_information` | `personal_information/personal_information/personal_information.json` | `packages/core/schema/personal-information.ts` | `packages/core/parsers/personal-information.ts` | profile + photo | medium | parsed + rendered |
+| `profile_searches` | `logged_information/recent_searches/profile_searches.json` | `packages/core/schema/profile-searches.ts` | `packages/core/parsers/profile-searches.ts` | event list | medium | parsed + rendered |
+| `word_or_phrase_searches` | `logged_information/recent_searches/word_or_phrase_searches.json` | `packages/core/schema/keyword-searches.ts` | `packages/core/parsers/keyword-searches.ts` | event list | medium | parsed + rendered |
+| `profile_privacy_changes` | `security_and_login_information/login_and_profile_creation/profile_privacy_changes.json` | `packages/core/schema/privacy-changes.ts` | `packages/core/parsers/privacy-changes.ts` | event list | low | parsed + rendered |
 | `password_change_activity` | `security_and_login_information/login_and_profile_creation/password_change_activity.json` | `packages/core/schema/password-changes.ts` | `packages/core/parsers/password-changes.ts` | timeline | low | not started — not present in the current baseline |
 | `interest_categories` | `ads_information/ads_and_topics/interest_categories.json` | `packages/core/schema/interest-categories.ts` | `packages/core/parsers/interest-categories.ts` | list | low | not started — not present in the current baseline |
-| `locations_of_interest` | `ads_information/ads_and_topics/locations_of_interest.json` | `packages/core/schema/locations-of-interest.ts` | `packages/core/parsers/locations-of-interest.ts` | list | high | parsed + rendered |
-| `logout_activity` | `security_and_login_information/login_and_profile_creation/logout_activity.json` | `packages/core/schema/logout-activity.ts` | `packages/core/parsers/logout-activity.ts` | table | low | parsed + rendered |
+| `locations_of_interest` | `personal_information/information_about_you/locations_of_interest.json` | `packages/core/schema/locations-of-interest.ts` | `packages/core/parsers/locations-of-interest.ts` | name list | high | parsed + rendered |
+| `logout_activity` | `security_and_login_information/login_and_profile_creation/logout_activity.json` | `packages/core/schema/logout-activity.ts` | `packages/core/parsers/logout-activity.ts` | event list | low | parsed + rendered |
 | `your_activity_off_meta_technologies` | `apps_and_websites_off_of_instagram/apps_and_websites/your_activity_off_meta_technologies.json` | `packages/core/schema/off-meta-activity.ts` | `packages/core/parsers/off-meta-activity.ts` | table | high | not started — not present in the current baseline |
-| `link_history` | `logged_information/link_history/link_history.json` | `packages/core/schema/link-history.ts` | `packages/core/parsers/link-history.ts` | list | high | parsed + rendered |
-| `profile_status_changes` | `security_and_login_information/login_and_profile_creation/profile_status_changes.json` | `packages/core/schema/account-status-changes.ts` | `packages/core/parsers/account-status-changes.ts` | timeline | medium | parsed + rendered |
-| `profile_changes` | `personal_information/personal_information/profile_changes.json` | `packages/core/schema/profile-changes.ts` | `packages/core/parsers/profile-changes.ts` | timeline | medium | parsed + rendered |
+| `link_history` | `logged_information/link_history/link_history.json` | `packages/core/schema/link-history.ts` | `packages/core/parsers/link-history.ts` | event list | high | parsed + rendered |
+| `profile_status_changes` | `security_and_login_information/login_and_profile_creation/profile_status_changes.json` | `packages/core/schema/account-status-changes.ts` | `packages/core/parsers/account-status-changes.ts` | event list | medium | parsed + rendered |
+| `profile_changes` | `personal_information/personal_information/profile_changes.json` | `packages/core/schema/profile-changes.ts` | `packages/core/parsers/profile-changes.ts` | event list | medium | parsed + rendered |
 | `recommended_topics` | `preferences/your_topics/recommended_topics.json` | `packages/core/schema/topics.ts` | `packages/core/parsers/topics.ts` | list | low | not started — not present in the current baseline |
-| `login_activity` | `security_and_login_information/login_and_profile_creation/login_activity.json` | `packages/core/schema/login-activity.ts` | `packages/core/parsers/login-activity.ts` | table | low | parsed + rendered |
+| `login_activity` | `security_and_login_information/login_and_profile_creation/login_activity.json` | `packages/core/schema/login-activity.ts` | `packages/core/parsers/login-activity.ts` | event list | low | parsed + rendered |
 | `ads_viewed` | `ads_information/ads_and_topics/ads_viewed.json` | `packages/core/schema/ads-viewed.ts` | `packages/core/parsers/ads-viewed.ts` | list | low | not started — not present in the current baseline |
-| `posts_viewed` | `your_instagram_activity/other_activity/posts_viewed.json` | `packages/core/schema/posts-viewed.ts` | `packages/core/parsers/posts-viewed.ts` | list | low | parsed + rendered |
-| `suggested_profiles_viewed` | `your_instagram_activity/other_activity/suggested_profiles_viewed.json` | `packages/core/schema/suggested-profiles-viewed.ts` | `packages/core/parsers/suggested-profiles-viewed.ts` | list | low | parsed + rendered |
-| `videos_watched` | `your_instagram_activity/other_activity/videos_watched.json` | `packages/core/schema/videos-watched.ts` | `packages/core/parsers/videos-watched.ts` | list | low | parsed + rendered |
-| `advertisers_using_your_activity_or_information` | `ads_information/instagram_ads_and_businesses/advertisers_using_your_activity_or_information.json` | `packages/core/schema/advertisers.ts` | `packages/core/parsers/advertisers.ts` | table | low | parsed + rendered |
-| `posts_you're_interested_or_not_interested_in` | `ads_information/ads_and_topics/posts_you're_interested_or_not_interested_in.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | high | parsed + rendered |
-| `subscription_for_no_ads` | `ads_information/instagram_ads_and_businesses/subscription_for_no_ads.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
-| `profile_activity` | `security_and_login_information/login_and_profile_creation/profile_activity.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
-| `stories_viewed` | `your_instagram_activity/story_interactions/stories_viewed.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
-| `your_ownership_of_digital_items` | `your_instagram_activity/other_activity/your_ownership_of_digital_items.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
+| `posts_viewed` | `your_instagram_activity/other_activity/posts_viewed.json` | `packages/core/schema/posts-viewed.ts` | `packages/core/parsers/posts-viewed.ts` | event list | low | parsed + rendered |
+| `suggested_profiles_viewed` | `your_instagram_activity/other_activity/suggested_profiles_viewed.json` | `packages/core/schema/suggested-profiles-viewed.ts` | `packages/core/parsers/suggested-profiles-viewed.ts` | event list | low | parsed + rendered |
+| `videos_watched` | `your_instagram_activity/other_activity/videos_watched.json` | `packages/core/schema/videos-watched.ts` | `packages/core/parsers/videos-watched.ts` | event list | low | parsed + rendered |
+| `advertisers_using_your_activity_or_information` | `ads_information/instagram_ads_and_businesses/advertisers_using_your_activity_or_information.json` | `packages/core/schema/advertisers.ts` | `packages/core/parsers/advertisers.ts` | name list | low | parsed + rendered |
+| `posts_you're_interested_or_not_interested_in` | `ads_information/ads_and_topics/posts_you're_interested_or_not_interested_in.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered |
+| `subscription_for_no_ads` | `ads_information/instagram_ads_and_businesses/subscription_for_no_ads.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | settings | medium | parsed + rendered |
+| `profile_activity` | `security_and_login_information/login_and_profile_creation/profile_activity.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered |
+| `stories_viewed` | `your_instagram_activity/story_interactions/stories_viewed.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered |
+| `your_ownership_of_digital_items` | `your_instagram_activity/other_activity/your_ownership_of_digital_items.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered |
 
 ## T3 — your own media and content
 
@@ -174,7 +175,8 @@ no rule matches is parsed generically and surfaced here.
 
 A row is only marked `parsed` once its parser has a fixture, a malformed-input
 test and an empty-file test (AGENTS.md §9). `parsed + rendered` means the category
-has a view at `/categories/:id`, bespoke or generic; the View column says which.
-`parsed + raw view` is the generic view falling back to a JSON tree because the
-shape has no labels. The generic table and tree remain the fallback for every
-category without a bespoke screen.
+has a view at `/categories/:id`, bespoke or generic; the View column says which
+(`settings`, `event list`, `profile + photo`, `name list`, `gallery`, `table`,
+`tree`, `timeline`, `map`, `thread list`). `parsed + raw view` is the generic
+view falling back to a JSON tree because the shape has no labels. The generic
+table and tree remain the fallback for every category without a bespoke screen.
