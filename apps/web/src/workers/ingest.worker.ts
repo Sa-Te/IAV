@@ -1,6 +1,8 @@
 import { createLocalArchiveRepository } from "@instavault/storage";
 import { IngestWorkerHost, type IngestRequest } from "@instavault/worker";
 
+throw new Error("e2e drill: the ingest worker refused to start");
+
 /**
  * Composition root for the ingest worker. It is the one place that knows both
  * the concrete storage adapter and the worker host; everything below depends on
