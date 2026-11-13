@@ -294,6 +294,8 @@ view — DOM, canvas or WebGL — reads the same tokens.
   hook is tested through renderHook, not split into a pure function plus a route test,
   unless the environment cannot support it — and then the reason is written down.
 - Never `passWithNoTests`. A suite that runs zero tests is a failure.
+- A hidden-but-focusable list is proven by pressing Tab and reading
+  `document.activeElement` — not by asserting the buttons exist in the DOM.
 - Coverage percentage is not a gate. Mutation testing is not adopted.
 - Integration tests use synthetic fixtures only — never `archive/`, never a redacted slice
   of it. If a test needs the real archive it is a manual check, not a test.

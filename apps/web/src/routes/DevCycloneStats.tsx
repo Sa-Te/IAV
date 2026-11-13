@@ -65,7 +65,7 @@ export function DevCycloneStats(): JSX.Element {
   const items = state.items;
 
   return (
-    <div className="gallery">
+    <div className="gallery cyclone-stats">
       <h1>Cyclone stats</h1>
       <p className="summary">
         fps (last {FPS_WINDOW} frames): <strong>{stats.fps}</strong> · draw calls:{" "}

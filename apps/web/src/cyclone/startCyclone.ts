@@ -45,7 +45,13 @@ export interface StartOptions {
 }
 
 const CARD_ASPECT = 0.75;
-const MAX_PICK_RADIUS = 72;
+/**
+ * How far from a card's centre a pointer still counts as being on it. Cards are
+ * a tenth of the canvas wide, so a fixed 72px radius made most of a card dead
+ * space and every click resolved to nothing (M17 point 3).
+ */
+const PICK_RADIUS_SHARE = 0.12;
+const MIN_PICK_RADIUS = 72;
 const FOV_Y = Math.PI / 3;
 const BACKGROUND: readonly [number, number, number] = [0.07, 0.063, 0.055];
 
@@ -177,7 +183,8 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
       if (textureObject !== null) gl.deleteTexture(textureObject);
     },
     pointer(x, y) {
-      const picked = pickNearest(project(phase, tilt), { x, y }, MAX_PICK_RADIUS);
+      const radius = Math.max(MIN_PICK_RADIUS, width() * PICK_RADIUS_SHARE);
+      const picked = pickNearest(project(phase, tilt), { x, y }, radius);
       if (picked !== highlight) {
         highlight = picked;
         options.onHighlight?.(picked);

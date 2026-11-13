@@ -8,9 +8,19 @@
   overflow: hidden;
 }
 
-.cyclone {
+/* Scoped: `.cyclone` also rides inside /dev/cyclone-stats, where an absolutely
+   positioned canvas at inset 0 painted over the stats it was meant to illustrate. */
+.cyclone-page .cyclone {
   position: absolute;
   inset: 0;
+}
+
+/* The stats overlay shows the same stage, inline, under its own numbers. */
+.cyclone-stats .cyclone {
+  position: relative;
+  display: block;
+  height: 60vh;
+  min-height: var(--token-space-24);
 }
 
 .cyclone-canvas {

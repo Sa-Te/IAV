@@ -93,6 +93,22 @@ export function CycloneStage({
       return;
     }
 
+    /**
+     * The one place an event becomes canvas coordinates. `projectCards` works in
+     * CSS pixels against `clientWidth`/`clientHeight`, so the rect offset is the
+     * whole conversion — devicePixelRatio is already accounted for by the browser,
+     * and two copies of this is how hover and click drift apart (M17 point 3).
+     */
+    const canvasPoint = (event: { clientX: number; clientY: number }): { x: number; y: number } => {
+      const rect = canvas.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    };
+
+    const pick = (event: { clientX: number; clientY: number }): number | null => {
+      const point = canvasPoint(event);
+      return handle.pointer(point.x, point.y);
+    };
+
     const pushPhase = (): void => {
       handle.setPhase(motionRef.current.phase);
     };
@@ -117,12 +133,11 @@ export function CycloneStage({
 
     const onPointerMove = (event: PointerEvent): void => {
       const rect = canvas.getBoundingClientRect();
-      tiltTargetRef.current = tiltTarget(
-        event.clientX - rect.left,
-        event.clientY - rect.top,
-        rect.width,
-        rect.height,
-      );
+      const point = canvasPoint(event);
+      tiltTargetRef.current = tiltTarget(point.x, point.y, rect.width, rect.height);
+      // Hover and click resolve the same card, through the same conversion.
+      const hovered = pick(event);
+      if (hovered !== null) setHighlight(hovered);
 
       const drag = dragRef.current;
       if (drag === null) return;
@@ -142,6 +157,13 @@ export function CycloneStage({
     const onPointerUp = (event: PointerEvent): void => {
       dragRef.current = null;
       canvas.releasePointerCapture?.(event.pointerId);
+      // A drag that ended here is not a click on a card.
+      if (dragMovedRef.current > CLICK_SLOP_PX) return;
+      // The click resolves its own target: a null pick does nothing, and the
+      // highlight is never consulted. Opening the highlighted card is the bug
+      // that made every click show the same photo.
+      const picked = pick(event);
+      if (picked !== null) openDetail(picked);
     };
 
     const onPointerLeave = (): void => {
@@ -259,11 +281,8 @@ export function CycloneStage({
         ref={canvasRef}
         aria-hidden="true"
         className="cyclone-canvas"
-        onClick={() => {
-          // A drag that ended here is not a click on the highlighted card.
-          if (dragMovedRef.current > CLICK_SLOP_PX) return;
-          openDetail(highlight);
-        }}
+        // The card under the pointer is opened on pointerup, which knows where the
+        // pointer was; a click handler here could only guess.
       />
 
       {/* Instructions float over the canvas, top-left: they must be readable, and
