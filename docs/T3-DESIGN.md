@@ -173,39 +173,71 @@ not labels, so the event row does not render them; they stay in the raw JSON,
 which is the rule for anything the row does not interpret (AGENTS §6). Making
 them a field would be a different decision and is not taken in M22.
 
-## 4. Q18 — is a saved post linked to a saved collection?
+## 4. Q18 — saved collections and saved posts
 
-**No link exists in this export.** Measured:
+**The link exists, and it is nested.** The first M22 measurement of Q18 said
+"no linkage: 0 of 8 collection ids appear in `saved_posts`". That was wrong in the
+way measurements of nested shapes usually go wrong: it compared strings across the
+two files and never looked inside each collection, where the saved posts are
+embedded as **full records**.
 
-| Check | Result |
-| --- | --- |
-| Collection records (`saved_collections`) | 8, each with `fbid`, `label_values[Name, Type, Privacy, Update time]` |
-| Saved-post records (`saved_posts`) | 1,065, each with `fbid`, `label_values[URL, Caption, Title]` |
-| Collection `fbid`s appearing anywhere in `saved_posts` (all strings, any depth) | **0 of 8** |
-| Collection `Name` values appearing anywhere in `saved_posts` | **0 of 8** |
-| Saved-post `fbid`s appearing anywhere in `saved_collections` | **0 of 1,065** |
-| Shared `fbid` between the two files | **0** |
-| A membership key on either side | none — the two label sets are disjoint apart from `Update time`/`Title`, which are not references |
+The measured structure of one `saved_collections` entry:
 
-**Finding:** the honest screen is two separate lists, and no "collection" grouping
-can be invented from this data. That is a finding, not a failure. It is recorded
-in `docs/archive-manifest.md` §11.
+```
+[fbid, timestamp, media, label_values]
+  label_values:
+    {label: "Name", value}          — the folder's name
+    {label: "Type", value}          — "Default"
+    {label: "Privacy", value}       — "Private" | "Collaborative"
+    {label: "Update time", timestamp_value}
+    {dict: [                        — ONE label-less container
+      {title: "", dict: [           — ONE saved post
+        {label: "URL", value, href},
+        {label: "Caption", value},
+        {label: "Title", value},
+        containers: Hashtags / Owner / Brand partner
+      ]},
+      …
+    ]}
+```
+
+Measured across all eight collections in `archive-2/`:
+
+| Measure | Value |
+| --- | ---: |
+| Collections | 8 |
+| Posts nested inside collections | 356 (355 distinct URLs; one URL is in two collections) |
+| Posts per collection | 25 · 25 · 34 · 7 · 2 · 51 · 141 · 71 |
+| Those URLs that also occur in `saved_posts` | 329 |
+| Nested posts with no matching flat entry | 27 (the flat list is not a superset) |
+| `saved_posts` entries | 1,065 |
+| Saved posts in no collection | 736 |
+| A cross-file id (fbid) link | none — and none is needed |
+
+**Identity between the two files is the post URL**, the same rule `posts` uses for
+its media URI. The flat file supplies a date for a collection's post; a nested post
+with no flat entry keeps no date, and the 736 posts in no collection are shown as
+themselves.
+
+**Finding:** collections are folders, and the screen is eight folders plus the
+uncollected remainder. The earlier "two separate lists" conclusion is withdrawn.
 
 ## 5. Grouping, honestly
 
 | Group | Categories | Count | What it needs |
 | --- | --- | ---: | --- |
-| Event/activity lists | `story_reaction_sticker_reactions`, `questions`, `emoji_sliders`, `quizzes`, `story_likes`, `saved_collections`, `polls`, `saved_posts`, `liked_posts`, `instants_interactions`, `other_content` | 11 | the T2 event list |
+| Event/activity lists | `story_reaction_sticker_reactions`, `questions`, `emoji_sliders`, `quizzes`, `story_likes`, `polls`, `liked_posts`, `instants_interactions`, `other_content` | 9 | the T2 event list |
+| Saved folders | `saved_collections`, `saved_posts` | 2 | collections with their posts; the flat list joined by URL |
 | Comment lists (same screen, gated) | `post_comments`, `reels_comments`, `liked_comments` | 3 | the T2 event list behind the reveal gate |
 | Media galleries | `profile_photos`, `archived_posts`, `posts`, `stories` | 4 | the existing gallery routes (D4 — never duplicated onto the event list) |
 | Fits neither | — | 0 | — |
 
-**Covered by the T2 screen unchanged (8):**
-`story_reaction_sticker_reactions`, `story_likes`, `saved_collections`,
-`saved_posts`, `liked_posts`, `instants_interactions`, `other_content`,
-`liked_comments` (title/`string_list_data` is the measured T2 shape) — plus the
-date handling for both comment categories, which is the same
-`string_map_data.Time.timestamp` path T2 already reads.
+**Covered by the T2 screen unchanged (6):**
+`story_reaction_sticker_reactions`, `story_likes`, `liked_posts`,
+`instants_interactions`, `other_content`, `liked_comments`
+(title/`string_list_data` is the measured T2 shape) — plus the date handling for
+both comment categories, which is the same `string_map_data.Time.timestamp` path
+T2 already reads.
 
 **Need only a hero mapping (5):** `questions` and `quizzes` use `Question`;
 `polls` and `emoji_sliders` use `Question` when there is no `Caption`;
@@ -214,16 +246,24 @@ in the T2 priority list, which was measured on T2's labels only. Extending the
 priority with `Question` and `Comment` is the whole change: no new screen, no new
 date path.
 
-**Need something new (0).** Every one of the 14 dated T3 categories is a
-label/value list the T2 screen already renders. The four media categories do not
-need the event list at all.
+**Need something new (2):** `saved_collections` and `saved_posts`, because the
+collection membership is nested rather than keyed (§4); `profile_photos`, because a
+photo is not a list. Both are small, measured screens, not a new framework.
+
+**Also new on an existing screen (2):** a sticker row applies the colours it was
+drawn with, and a poll row shows its options at their own sizes, instead of
+printing `Background colour: #FFFFFF` and `Option 1 font size: 35` (ADR 0016). The
+story link a reaction, question or quiz keeps inside a label-less container is now
+the row's link.
 
 ## 6. Screen assignment
 
 | Screen | Categories | Count |
 | --- | --- | ---: |
-| Event list (month → year → day → row, §ADR 0013/0015) | the 11 event lists + the 3 comment lists | 14 |
-| Gallery (existing routes) | `posts`, `stories`, `archived_posts`, `profile_photos` | 4 |
+| Event list (month → year → day → row, ADR 0013/0015) | 9 event lists + 3 comment lists | 12 |
+| Saved folders (collection → posts) | `saved_collections`, `saved_posts` | 2 |
+| Photo | `profile_photos` (its own screen since the M22 follow-up) | 1 |
+| Gallery (existing routes) | `posts`, `stories`, `archived_posts` | 3 |
 
 No T3 category is left on the generic table or tree.
 
@@ -242,6 +282,10 @@ No T3 category is left on the generic table or tree.
 - `liked_comments[].string_list_data[0].value` is the same four-character string
   on all 156 entries. It is not the comment text and carries no per-entry
   information; the screen uses `title` (the account) and `href` only.
+- `post_comments` and `reels_comments` carry no URL anywhere in the entry, at any
+  depth (measured, 853 + 12 entries). Their rows show the owner and the words, and
+  no link can be shown without inventing one. `liked_comments` does carry an
+  `href` and shows it.
 
 ## 8. T4 and T5 remaining — the projection
 
@@ -286,6 +330,7 @@ name. `ai_conversations` is the only genuinely new screen left in the archive.
    list is the first place absence of search will be felt.
 3. **The two real comment media URIs** (`post_comments`, 2 entries): show the
    commented-on media, or keep the row textual?
-4. **`profile_photos`' screen.** It still renders as a raw tree; the photo is only
-   reachable through Everything. A one-item gallery route is a small decision.
+4. **`profile_photos`' place in the sidebar.** It now has its own screen with the
+   photo, caption and date, but no gallery route or sidebar entry of its own; it is
+   reachable from the T3 page and from `/categories` only.
 5. **`note_and_repost_interactions.json`** (§7): a registry row and a tier.

@@ -63,6 +63,9 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `categories/avatarItemsView.ts` | `avatar_items` → URL records with an ordinal and a localised acquisition time; `null` when the shape does not match. |
 | `categories/deviceEffectsView.ts` | Repeated device records grouped by identity and deduplicated only when the profile is identical; `null` when it cannot be honest. |
 | `categories/eventListView.ts` | A dated label/value record → year → month → day → row, with the measured hero/date/URL mapping and the 25-month threshold for the year fold (ADR 0015); `null` when the record is not an event list. |
+| `categories/eventPreview.ts` | The two sticker/poll shapes whose values are presentation: a colour and an option's font size (ADR 0016); everything else keeps the field list. |
+| `categories/nestedUrl.ts` | The one reader of label-less containers, and only to find the link a story reaction, question or quiz keeps inside one. |
+| `categories/savedByFolder.ts` | Collections as folders of their nested posts, and the flat saved list grouped by them with URL as identity (ADR 0017). |
 | `categories/entryCount.ts` | The count a screen prints when it differs from the raw per-file sum: `posts` can arrive twice in one export (docs/T3-DESIGN.md §2). |
 | `categories/nameListView.ts` | A vec of names/places plus optional explanatory text → a paginated name list; `null` when the record has neither. |
 | `categories/privacy.ts` | Which categories gate — tier 5 or the registry's `gated` flag — and the copy shown before one is revealed; reads the registry, never a hardcoded id list (ADR 0014). |
@@ -97,7 +100,10 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/categories/SettingsView.tsx` | The T1 label/value screen: one entry as a page, many as sections, raw JSON behind a closed disclosure. |
 | `apps/web/src/categories/AvatarItemsView.tsx` | The avatar grid: labelled placeholders, no invented thumbnails, the URL as a user-initiated link. |
 | `apps/web/src/categories/DeviceEffectsView.tsx` | The device profile: identity and support lists once, the varying records as a list. |
-| `apps/web/src/categories/EventListView.tsx` | The event/activity screen for T2 and T3: year button (only over 24 months) → month button → day heading → row, 7 days and 200 rows at a time, URL shortcode link, raw disclosure. |
+| `apps/web/src/categories/EventListView.tsx` | The event/activity screen for T2 and T3: year button (only over 24 months) → month button → day heading → row, 7 days and 200 rows at a time, URL shortcode link, a sticker/poll preview, raw disclosure. |
+| `apps/web/src/categories/SavedFoldersView.tsx` | `saved_collections` and `saved_posts`: one native `<details>` per collection, its posts, and the uncollected remainder, 200 at a time. |
+| `apps/web/src/categories/ProfilePhotosView.tsx` | `profile_photos`: the local photo through the three-state media layer, with its caption and date. |
+| `apps/web/src/styles/profiles.css` | The profile photo screens (personal_information and profile_photos); tokens only. |
 | `apps/web/src/categories/ProfileView.tsx` | `personal_information`: the one local profile photo through the media layer, plus the labelled fields. |
 | `apps/web/src/categories/NameListView.tsx` | The three T2 name/place lists, 200 names at a time. |
 | `apps/web/src/categories/RawDisclosure.tsx` | The one closed raw-JSON disclosure every bespoke screen ends with. |

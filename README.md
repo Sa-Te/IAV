@@ -106,7 +106,11 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
    as one profile with its records. Long lists group by month and day, and by year
    first when they span more than two years — 42,197 liked posts are twelve year
    rows, not 121 month buttons. A profile photo is shown from the local blob, and a
-   post URL is a real link the app never fetches.
+   post URL is a real link the app never fetches. A story reaction links to the
+   story it reacted to; an emoji slider shows the colours it was drawn with, and a
+   poll its options at their own sizes instead of printing hex codes and font
+   sizes. Saved posts are grouped by the collection they are in, with the ones in
+   no collection shown as their own group.
 
 **What privacy means in practice.** The ZIP is read with the browser's own file
 API, parsed in a worker in the same tab, and stored in IndexedDB. Nothing is

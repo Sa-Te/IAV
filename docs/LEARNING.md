@@ -238,3 +238,11 @@ progress.
   event lists, 3 comment lists (same screen, gated) and 4 media galleries; no T3
   category needed a new screen —
   vault: `architecture/2026-11-13_t3-content-groups.md`
+- 2026-11-13 — `apply-presentation-values` — a colour and a font size the export
+  stored are values to apply, not text to print; the sticker/poll preview replaces
+  "Background colour: #FFFFFF" with the colour itself (ADR 0016) —
+  vault: `architecture/2026-11-13_presentation-values.md`
+- 2026-11-13 — `membership-is-nesting` — Q18's "no link" was a measurement of the
+  wrong thing: collections embed their saved posts as records, not as ids; URL is
+  the identity between the two files (ADR 0017) —
+  vault: `debug-log/2026-11-13_q18-membership-in-the-nesting.md`

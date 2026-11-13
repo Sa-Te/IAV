@@ -10,11 +10,11 @@ one unrecognised bucket (ADR 0002, tier 3) that is always present by design.
 Of the 72 present in `archive-2/`, **12 T1, 24 T2 and all 18 T3 categories now
 have a bespoke screen** — ten T1 settings pages, one avatar grid, one device
 profile; sixteen T2 event lists, four T2 settings pages, one profile with a local
-photo, three T2 name/place lists (M20/M21); fourteen T3 event lists (three of them
-gated) — **3 media categories have their own gallery routes**, two more render
-their media inside another screen (T2's profile photo, T3's `profile_photos` as a
-raw tree whose photo is reachable through Everything), and **2 message categories
-render as a thread list** behind the reveal gate. The rest render through the
+photo, three T2 name/place lists (M20/M21); twelve T3 event lists (three of them
+gated), two saved-folder screens and one profile-photo screen — **3 media
+categories have their own gallery routes**, one more renders its media inside
+another screen (T2's profile photo), and **2 message categories render as a thread
+list** behind the reveal gate. The rest render through the
 generic table, or the raw tree when the shape carries no labels. The fifteen
 absent rows stay registered: absence is a normal state (ADR 0002), and an
 ordinary export must not look broken.
@@ -119,7 +119,7 @@ the other rows are read by the shared label/value reader, and the column says so
 
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `profile_photos` | `your_instagram_activity/media/profile_photos.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | tree (the photo is in Everything) | low | parsed + raw view |
+| `profile_photos` | `your_instagram_activity/media/profile_photos.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | photo | low | parsed + rendered |
 | `story_reaction_sticker_reactions` | `your_instagram_activity/story_interactions/story_reaction_sticker_reactions.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
 | `reels_comments` | `your_instagram_activity/comments/reels_comments.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
 | `questions` | `your_instagram_activity/story_interactions/questions.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
@@ -131,10 +131,10 @@ the other rows are read by the shared label/value reader, and the column says so
 | `story_likes` | `your_instagram_activity/likes/story_likes.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
 | `liked_comments` | `your_instagram_activity/likes/liked_comments.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | low | parsed + rendered + tested |
 | `stories` | `your_instagram_activity/media/stories.json` | `packages/core/schema/stories.ts` | `packages/core/parsers/stories.ts` | gallery | high | parsed + rendered + tested |
-| `saved_collections` | `your_instagram_activity/saved/saved_collections.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `saved_collections` | `your_instagram_activity/saved/saved_collections.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | saved folders | high | parsed + rendered + tested |
 | `post_comments` | `your_instagram_activity/comments/post_comments_1.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
 | `polls` | `your_instagram_activity/story_interactions/polls.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
-| `saved_posts` | `your_instagram_activity/saved/saved_posts.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | high | parsed + rendered + tested |
+| `saved_posts` | `your_instagram_activity/saved/saved_posts.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | saved folders (falls back to the event list when no collection file exists) | high | parsed + rendered + tested |
 | `liked_posts` | `your_instagram_activity/likes/liked_posts.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
 | `instants_interactions` | `your_instagram_activity/instants/instants_interactions.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
 | `other_content` | `your_instagram_activity/media/other_content.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
@@ -186,7 +186,7 @@ no rule matches is parsed generically and surfaced here.
 A row is only marked `parsed` once its parser has a fixture, a malformed-input
 test and an empty-file test (AGENTS.md §9). `parsed + rendered` means the category
 has a view at `/categories/:id`, bespoke or generic; the View column says which
-(`settings`, `event list`, `profile + photo`, `name list`, `gallery`, `table`,
-`tree`, `timeline`, `map`, `thread list`). `parsed + raw view` is the generic
+(`settings`, `event list`, `profile + photo`, `name list`, `gallery`, `saved folders`,
+`photo`, `table`, `tree`, `timeline`, `map`, `thread list`). `parsed + raw view` is the generic
 view falling back to a JSON tree because the shape has no labels. The generic
 table and tree remain the fallback for every category without a bespoke screen.

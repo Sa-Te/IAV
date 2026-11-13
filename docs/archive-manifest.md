@@ -713,7 +713,7 @@ There are no foreign keys. These are the only joinable edges found.
 | `personal_information` × `profile_photos` | `uri` | the **same** `media/other/` file | **certain** — the only duplicate |
 | `liked_posts`, `liked_comments`, `story_likes`, `saved_posts`, `post_comments`, `reels_comments`, `ads_viewed`, `posts_viewed`, `videos_watched`, `suggested_profiles_viewed` | username field (`title`, `value`, `Author`, `Username`, `Media Owner`) | `following` / `followers` usernames | **likely** — by string equality; names change |
 | `post_comments` / `reels_comments` | `Media Owner.value` | the post that was commented on | **weak** — owner only, no post id |
-| `saved_posts` × `saved_collections` | — | — | **none found** — no membership list |
+| `saved_posts` × `saved_collections` | the saved post's `URL` | the post records embedded inside each collection | **certain** — 329 of 356 nested posts match the flat list by URL (manifest §11, Q18) |
 | `story_likes`, `polls`, `quizzes`, `questions`, `emoji_sliders`, `story_reaction_sticker_reactions` | — | `stories` | **none found** — no story id anywhere |
 | `followers` / `following` | `value` | `synced_contacts` phone numbers | **none found** |
 
@@ -902,19 +902,18 @@ them — never by inference alone (AGENTS.md §6).
 
 ### Q18 — is a saved post linked to a saved collection?
 
-- **Probe:** read both `your_instagram_activity/saved/saved_collections.json` (8 records)
-  and `saved_posts.json` (1,065 records); collected every string value at any depth in
-  each file; tested each collection's `fbid` and each collection's `Name` against the
-  saved-post strings, each saved post's `fbid` against the collection strings, and the
-  intersection of the two `fbid` sets. Also compared the two label sets for a membership
-  key. Re-runnable as a one-pass `JSON.parse` over the two files; not part of
+- **Probe, second pass (the first was wrong):** parse `saved_collections.json` as nested records
+  instead of comparing strings across files; for each of the 8 collections, walk the label-less
+  container and count the post records inside it; then match each nested post's `URL` against the
+  1,064 distinct URLs in `saved_posts.json`. Re-runnable as a one-pass `JSON.parse`; not part of
   `pnpm verify` (AGENTS.md §9).
-- **Measured:** 0 of 8 collection `fbid`s and 0 of 8 `Name` values occur anywhere in
-  `saved_posts`; 0 of 1,065 saved-post `fbid`s occur in `saved_collections`; no `fbid`
-  is shared. Label sets: collections carry `Name`, `Type`, `Privacy`, `Update time`;
-  saved posts carry `URL`, `Caption`, `Title` plus `Hashtags`/`Owner`/`Brand partner`
-  containers. Neither file carries a collection id, a membership list or a count.
-- **Confidence:** certain for this export — every string in both files was compared.
-- **Decision:** two separate lists. No collection grouping is built, and the UI does not
-  pretend there is one. If a future export writes a membership key, it will be a new
-  measurement, not a reinterpretation of this one.
+- **Measured:** 8 collections · 356 nested post records (355 distinct URLs; one URL occurs in two
+  collections) · 25 · 25 · 34 · 7 · 2 · 51 · 141 · 71 per collection · 329 of those URLs also occur
+  in `saved_posts` · 27 nested records have no flat counterpart · 736 of the 1,065 saved posts are
+  in no collection. The link is **nesting**, not an id: the collection file embeds each post's
+  URL, caption and title inside a label-less `dict` container.
+- **Confidence:** certain for this export. The first pass looked for an `fbid` cross-reference,
+  found none, and concluded "no membership" — a measurement of the wrong thing.
+- **Decision:** collections are folders. Each collection lists the posts it nests, joined to the
+  flat list by URL for a date; the posts in no collection are shown as their own group. A future
+  export that writes ids instead of nested records is a new measurement.
