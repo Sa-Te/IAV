@@ -71,3 +71,9 @@
     backdrop-filter: none;
   }
 }
+
+/* The hamburger floats top-left when the sidebar is collapsed; the instruction
+   panel steps aside rather than sitting under it. */
+.app-shell[data-sidebar="closed"] .cyclone-overlay-top {
+  left: calc(var(--token-space-3) + 44px + var(--token-space-2));
+}

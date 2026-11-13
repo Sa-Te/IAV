@@ -15,7 +15,7 @@
 export const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
 /** Vertical distance between adjacent cards, in world units. */
-export const VERTICAL_SPACING = 1.7;
+export const VERTICAL_SPACING = 2.5;
 
 /** The camera never moves: 9 world units back, 60 degrees down the middle (D5). */
 export const CAMERA_DISTANCE = 9;
@@ -28,7 +28,7 @@ export const RIBBON_SPREAD_SHARE = 0.82;
 export const RIBBON_DEPTH = 0.6;
 
 /** A card's half-width as a share of the viewport width. */
-export const CARD_SIZE_SHARE = 0.026;
+export const CARD_SIZE_SHARE = 0.038;
 
 /** The camera, as a value. Nothing about it depends on the viewport (D5). */
 export function camera(): { readonly distance: number; readonly fovY: number } {

@@ -25,8 +25,44 @@
   gap: var(--token-space-2);
 }
 
-.sidebar-collapse,
+/* The reopen control floats over whatever the route paints: a full-bleed canvas
+   must not be able to swallow it (it did). 44px hit area, the one glass recipe. */
 .sidebar-open {
+  position: fixed;
+  top: var(--token-space-3);
+  left: var(--token-space-3);
+  z-index: 60;
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  background: var(--token-glass-bg);
+  backdrop-filter: var(--token-glass-blur);
+  cursor: pointer;
+}
+
+.sidebar-open:hover {
+  border-color: var(--token-color-border-strong);
+}
+
+.sidebar-open-bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  border-radius: var(--token-radius-full);
+  background: var(--token-color-text);
+}
+
+.sidebar-open:focus-visible {
+  outline: 2px solid var(--token-color-accent);
+  outline-offset: 2px;
+}
+
+.sidebar-collapse {
   flex: none;
 }
 

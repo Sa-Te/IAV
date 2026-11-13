@@ -39,18 +39,25 @@ export function AppShell({ children }: { children: ReactNode }): JSX.Element {
       <Sidebar collapsed={collapsed} onCollapse={toggle} />
 
       <div className="app-content">
+        {/* Fixed, and above the full-bleed cyclone canvas: the reopen control must
+            survive every route, including the one that covers the whole viewport.
+            A CSS mark rather than an icon dependency: three rules, one meaning. */}
+        {collapsed && (
+          <button
+            type="button"
+            className="sidebar-open"
+            aria-label="Show sidebar"
+            aria-expanded="false"
+            aria-controls="sidebar"
+            onClick={toggle}
+          >
+            <span className="sidebar-open-bar" aria-hidden="true" />
+            <span className="sidebar-open-bar" aria-hidden="true" />
+            <span className="sidebar-open-bar" aria-hidden="true" />
+          </button>
+        )}
+
         <div className="app-tools">
-          {collapsed && (
-            <button
-              type="button"
-              className="button sidebar-open"
-              aria-expanded="false"
-              aria-controls="sidebar"
-              onClick={toggle}
-            >
-              Show sidebar
-            </button>
-          )}
           <ThemeSwitch />
         </div>
 
