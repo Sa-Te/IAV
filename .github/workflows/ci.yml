@@ -35,3 +35,41 @@ jobs:
       # apart (AGENTS.md §10, "CI is truth").
       - name: Verify
         run: pnpm verify
+
+  # The browser lane (AGENTS.md §9). Separate from `verify` on purpose: it drives
+  # a real Chromium against the built app and cannot stay under 20 seconds.
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    needs: verify
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # The revision is playwright's, not "latest": the same build the suite was
+      # written against. `--with-deps` is the runner's own apt, not a user
+      # privilege escalation.
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Browser lane
+        run: pnpm test:e2e
+
+      - name: Upload the trace
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-trace
+          path: test-results/
+          retention-days: 7

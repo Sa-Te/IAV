@@ -47,6 +47,10 @@ profile.cov
 *.log
 logs/
 
+# --- Browser lane output (AGENTS.md §9) --------------------------------------
+test-results/
+playwright-report/
+
 # --- OS / editor -------------------------------------------------------------
 .DS_Store
 .vscode/
