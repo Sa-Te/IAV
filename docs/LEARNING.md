@@ -190,7 +190,8 @@ progress.
   vault: `debug-log/2026-11-13_expired-avatar-urls.md`
 - 2026-11-13 — `month-is-the-fold` — a 7,849-row list is a DOM problem, not a
   rendering problem; group by month, open the newest, show seven days and 200 rows
-  at a time — see `docs/adr/0013-event-list-grouping.md`
+  at a time —
+  vault: `learning-notes/concepts/event-list-grouping.md`
 - 2026-11-13 — `hero-from-the-export` — the hero is the first non-empty measured
   caption-like label (`Caption`, `Title`, `Name`, `Search`, `Changed`,
   `Activation Type`); a category with none gets the plain field list, not an
@@ -208,4 +209,11 @@ progress.
   vault: `mind-maps/2026-11-13_t2-screens.md`
 - 2026-11-13 — `graph-before-grep` — query the local graph before a name search;
   an EXTRACTED edge is a map, an INFERRED edge is still an INFERENCE under §15 —
-  see `AGENTS.md` §12
+  vault: `learning-notes/concepts/graph-before-grep.md`
+- 2026-11-13 — `graph-code-only` — the graph is built with `--code-only` and
+  `.graphifyignore`; the three privacy greps must be zero before it is trusted —
+  vault: `architecture/2026-11-13_local-code-graph.md`
+- 2026-11-13 — `t2-content-groups` — the 24 present T2 categories are 16 dated
+  event lists, 2 settings pages, 2 location field lists, 3 name/place lists and
+  1 profile with a local photo; the screen follows the measured content —
+  vault: `architecture/2026-11-13_t2-content-groups.md`
