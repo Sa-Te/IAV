@@ -53,7 +53,30 @@ pnpm dev            # Vite dev server
 pnpm build          # static build in apps/web/dist
 pnpm test           # unit + integration tests
 pnpm verify         # everything CI runs, locally
+pnpm test:e2e       # the browser lane (see below)
 ```
+
+## The browser lane
+
+`pnpm test:e2e` runs Playwright against the **built** app, served by
+`vite preview` on `127.0.0.1:4173`, and imports a synthetic export generated into
+a temp directory — no real archive, no network.
+
+```bash
+pnpm exec playwright install chromium   # once, if the pinned build is missing
+pnpm test:e2e                           # typecheck the specs, then run them
+pnpm test:e2e --repeat-each 3           # pass playwright flags through
+```
+
+It is deliberately not part of `pnpm verify`: the 20-second gate stays a
+20-second gate (AGENTS.md §9). A failing run keeps its trace under
+`test-results/`; `pnpm exec playwright show-trace test-results/.../trace.zip`
+opens it.
+
+What CI cannot verify: a runner has no GPU, so the lane asserts which branch the
+device's own WebGL2 capability probe dictates — never that the vortex renders.
+Frame rate, resident texture bytes and the one-draw-call claim are a human check
+with `/dev/cyclone-stats`.
 
 ## Try it
 

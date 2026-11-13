@@ -309,6 +309,11 @@ view — DOM, canvas or WebGL — reads the same tokens.
 - The lane is the full suite by design. If it exceeds 20s, the fix is to make a step
   faster, not to split the commands.
 - The lane must stay fast enough that `--no-verify` is never tempting.
+- **The browser lane** is a second command and a second CI job: `pnpm test:e2e`
+  (playwright against the built app through `vite preview`). It is not part of `verify`
+  and may not gate `main` until it has been seen failing in CI for a reason it claims to
+  catch — it has (M16: a worker that refused to start). It never asserts that 3D pixels
+  are correct; that is a human check.
 
 ---
 

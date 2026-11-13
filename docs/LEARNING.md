@@ -120,3 +120,22 @@ progress.
 - 2026-11-04 — `browser-before-green` — a green suite proves what its fakes model; the
   product is proven by driving a real browser against a real archive —
   vault: `learning-notes/2026-11-04_session-12.md`
+- 2026-11-13 — `e2e-lane-tests-the-build` — a browser lane drives the built app through
+  `vite preview`, never the dev server, because the faults worth catching live in the
+  build; the dev routes require a development-mode build —
+  vault: `architecture/2026-11-13_browser-lane.md`
+- 2026-11-13 — `bitmap-close-zeroes-bytes` — `ImageBitmap.close()` destroys the
+  dimensions, so byte accounting read after close reports 0; a fake that keeps them
+  hides the bug —
+  vault: `debug-log/2026-11-13_closed-bitmap-zero-bytes.md`
+- 2026-11-13 — `top-level-await-loses-messages` — a module worker's event loop starts
+  mid-load, so a message posted before its listener exists is dropped and the page waits
+  forever —
+  vault: `debug-log/2026-11-04_worker-ready-handshake.md`
+- 2026-11-13 — `layout-is-a-function-of-phase` — a spiral built once at phase 0 and
+  scrolled only by a texture window never moves; rebuild the layout per frame —
+  vault: `learning-notes/2026-11-13_session-13.md`
+- 2026-11-13 — `one-reducer-one-guard` — wheel, drag and tick all become velocity in one
+  core reducer, and reduced motion is one guard there instead of three listeners each
+  remembering it —
+  vault: `mind-maps/2026-11-13_cyclone-interaction.md`
