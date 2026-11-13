@@ -149,3 +149,15 @@ progress.
 - 2026-11-13 — `video-poster-once` — a `<video>` paints nothing before a frame is decoded, so
   one poster is drawn on the main thread, stored under a `poster:` key and reused —
   vault: `learning-notes/2026-11-13_session-14.md`
+- 2026-11-13 — `grid-columns-are-positions` — removing a grid item re-flows the rest; a
+  closed sidebar must declare one column or the content lands in the zero-width one —
+  vault: `debug-log/2026-11-13_closed-grid-column.md`
+- 2026-11-13 — `fit-not-square` — resizing a bitmap to fit 256 keeps its ratio, and the shader
+  samples only the used part of the layer; forcing 256x256 squashes every photo —
+  vault: `learning-notes/2026-11-13_session-15.md`
+- 2026-11-13 — `cache-hit-must-say-so` — a list hook that keeps the previous category's state
+  shows stale content; one that always resets shows a spinner; the hit path must set state —
+  vault: `learning-notes/2026-11-13_session-15.md`
+- 2026-11-13 — `controls-above-canvas` — a control that floats over a full-bleed canvas needs
+  its own stacking context, or the route swallows it —
+  vault: `learning-notes/2026-11-13_session-15.md`
