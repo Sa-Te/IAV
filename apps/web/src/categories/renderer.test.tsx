@@ -4,14 +4,17 @@ import type { ArchiveRepository } from "@instavault/storage";
 import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { JSX } from "react";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CategoryTable } from "./CategoryTable.js";
 import { CategoryTree } from "./CategoryTree.js";
 import { CategoryView } from "./CategoryView.js";
 import { RepositoryProvider } from "../repository/RepositoryContext.js";
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 function tableOf(count: number): TableView {
   return {

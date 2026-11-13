@@ -130,3 +130,70 @@
   color: var(--token-color-text-muted);
   font-size: var(--token-text-12);
 }
+
+/* --- personal_information: one local profile photo ----------------------- */
+
+.profile-view {
+  max-width: 72ch;
+}
+
+.profile-photo {
+  display: block;
+  width: min(12rem, 100%);
+  aspect-ratio: 1;
+  object-fit: cover;
+  margin: 0 0 var(--token-space-6);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+}
+
+.profile-photo.is-pending,
+.profile-photo.is-failed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 12rem;
+  height: 12rem;
+  padding: var(--token-space-3);
+  background: var(--token-color-surface);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+  text-align: center;
+}
+
+/* --- name/place lists ---------------------------------------------------- */
+
+.name-view {
+  max-width: 80ch;
+}
+
+.name-section {
+  margin-top: var(--token-space-6);
+}
+
+.name-heading {
+  margin: 0 0 var(--token-space-2);
+  font-size: var(--token-text-14);
+  font-weight: 600;
+}
+
+.name-text {
+  margin: 0 0 var(--token-space-3);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-14);
+}
+
+.name-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 2px var(--token-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.name-list li {
+  overflow-wrap: anywhere;
+  color: var(--token-color-text);
+  font-size: var(--token-text-14);
+}

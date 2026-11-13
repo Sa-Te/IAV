@@ -4,12 +4,16 @@ import {
   toAvatarItemsView,
   toDeviceEffectsView,
   toEventListView,
+  toMediaItems,
+  toNameListView,
   toSettingsView,
   toTableView,
   type AvatarItemsView as AvatarItemsViewData,
   type CategoryRecord,
   type DeviceEffectsView as DeviceEffectsViewData,
   type EventListView as EventListViewData,
+  type MediaItemView,
+  type NameListView as NameListViewData,
   type SettingsView as SettingsViewData,
   type TableView,
   type TreeView,
@@ -24,6 +28,8 @@ import { CategoryTable } from "./CategoryTable.js";
 import { CategoryTree } from "./CategoryTree.js";
 import { DeviceEffectsView } from "./DeviceEffectsView.js";
 import { EventListView } from "./EventListView.js";
+import { NameListView } from "./NameListView.js";
+import { ProfileView } from "./ProfileView.js";
 import { RevealGate } from "./RevealGate.js";
 import { SettingsView } from "./SettingsView.js";
 import { State } from "../ui/State.js";
@@ -55,6 +61,24 @@ const EVENT_CATEGORIES = new Set([
   "your_ownership_of_digital_items",
 ]);
 
+/** T2 categories the measurement assigned to the existing settings screen. */
+const SETTINGS_T2 = new Set([
+  "signup_details",
+  "subscription_for_no_ads",
+  "last_known_location",
+  "profile_based_in",
+]);
+
+/** The one T2 category with a real local media item (the profile photo). */
+const PROFILE_T2 = new Set(["personal_information"]);
+
+/** The three T2 name/place lists; a paginated name list, not the event list. */
+const NAME_LIST_T2 = new Set([
+  "advertisers_using_your_activity_or_information",
+  "other_categories_used_to_reach_you",
+  "locations_of_interest",
+]);
+
 /**
  * `/categories/:id` — the generic view for any parsed category.
  *
@@ -72,6 +96,12 @@ type Screen =
   | { readonly kind: "avatar"; readonly view: AvatarItemsViewData }
   | { readonly kind: "device"; readonly view: DeviceEffectsViewData }
   | { readonly kind: "event"; readonly view: EventListViewData }
+  | {
+      readonly kind: "profile";
+      readonly view: SettingsViewData;
+      readonly media: readonly MediaItemView[];
+    }
+  | { readonly kind: "name-list"; readonly view: NameListViewData }
   | { readonly kind: "table"; readonly view: TableView }
   | { readonly kind: "tree"; readonly view: TreeView };
 
@@ -104,6 +134,23 @@ function screenOf(id: string, record: CategoryRecord): Screen {
   if (findCategory(id)?.privacyTier === 2 && EVENT_CATEGORIES.has(id)) {
     const event = toEventListView(record);
     if (event !== null) return { kind: "event", view: event };
+  }
+
+  if (findCategory(id)?.privacyTier === 2 && PROFILE_T2.has(id)) {
+    const settings = toSettingsView(record);
+    if (settings !== null) {
+      return { kind: "profile", view: settings, media: toMediaItems(id, record.data) };
+    }
+  }
+
+  if (findCategory(id)?.privacyTier === 2 && NAME_LIST_T2.has(id)) {
+    const names = toNameListView(record);
+    if (names !== null) return { kind: "name-list", view: names };
+  }
+
+  if (findCategory(id)?.privacyTier === 2 && SETTINGS_T2.has(id)) {
+    const settings = toSettingsView(record);
+    if (settings !== null) return { kind: "settings", view: settings };
   }
 
   const view = toTableView(record);
@@ -182,6 +229,23 @@ function CategoryData({ id }: { id: string }): JSX.Element {
       {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.screen.kind === "event" && (
         <EventListView view={state.screen.view} raw={state.record.data} />
       )}
+
+      {state.status === "ready" &&
+        !THREAD_CATEGORIES.has(id) &&
+        state.screen.kind === "profile" && (
+          <ProfileView
+            view={state.screen.view}
+            media={state.screen.media}
+            source={repository}
+            raw={state.record.data}
+          />
+        )}
+
+      {state.status === "ready" &&
+        !THREAD_CATEGORIES.has(id) &&
+        state.screen.kind === "name-list" && (
+          <NameListView view={state.screen.view} raw={state.record.data} />
+        )}
 
       {state.status === "ready" &&
         !THREAD_CATEGORIES.has(id) &&

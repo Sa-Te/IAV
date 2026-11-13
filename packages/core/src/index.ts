@@ -92,6 +92,8 @@ export type {
   EventListView,
   EventMonth,
 } from "./categories/eventListView.js";
+export { toNameListView } from "./categories/nameListView.js";
+export type { NameListView, NameListSection } from "./categories/nameListView.js";
 export { toAvatarItemsView } from "./categories/avatarItemsView.js";
 export type { AvatarItem, AvatarItemsView } from "./categories/avatarItemsView.js";
 export { toDeviceEffectsView } from "./categories/deviceEffectsView.js";
