@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { shortcodeOf, toEventListView } from "./eventListView.js";
+import {
+  groupByMonthAndYear,
+  shortcodeOf,
+  toEventListView,
+  type EventEntry,
+} from "./eventListView.js";
 
 const at = (iso: string): number => Math.floor(new Date(iso).getTime() / 1000);
 
@@ -184,6 +189,8 @@ describe("toEventListView — edges", () => {
     expect(toEventListView({ data: [] })).toEqual({
       kind: "event-list",
       months: [],
+      years: [],
+      showYears: false,
       undated: [],
       total: 0,
       hasTimestamps: false,
@@ -193,5 +200,99 @@ describe("toEventListView — edges", () => {
   it("returns null for a record that is not a list of labelled entries", () => {
     expect(toEventListView({ data: [{ foo: "bar" }] })).toBeNull();
     expect(toEventListView({ data: undefined })).toBeNull();
+  });
+});
+
+describe("groupByMonthAndYear — the year level", () => {
+  const entry = (timestamp: number, hero: string): EventEntry => ({
+    ordinal: timestamp,
+    timestamp,
+    date: `date ${timestamp}`,
+    hero: { label: "Name", text: hero },
+    url: null,
+    shortcode: null,
+    fields: [],
+  });
+
+  /** One entry on the first of each month, oldest first, for `count` months back. */
+  function monthly(count: number, end = "2026-10"): EventEntry[] {
+    const endYear = Number(end.slice(0, 4));
+    const endMonth = Number(end.slice(5, 7));
+    return Array.from({ length: count }, (_, index) => {
+      const offset = count - 1 - index;
+      const total = endYear * 12 + (endMonth - 1) - offset;
+      const year = Math.floor(total / 12);
+      const month = (total % 12) + 1;
+      return entry(Date.UTC(year, month - 1, 1) / 1000, `${year}-${month}`);
+    });
+  }
+
+  it("does not engage below 25 months, so a short list looks as it did", () => {
+    const grouping = groupByMonthAndYear(monthly(12));
+
+    expect(grouping.spanMonths).toBe(12);
+    expect(grouping.showYears).toBe(false);
+    expect(grouping.years).toEqual([]);
+    expect(grouping.months).toHaveLength(12);
+  });
+
+  it("engages at a 30-month span", () => {
+    const grouping = groupByMonthAndYear(monthly(30));
+
+    expect(grouping.spanMonths).toBe(30);
+    expect(grouping.showYears).toBe(true);
+    expect(grouping.years.length).toBeGreaterThan(1);
+  });
+
+  it("counts empty months inside the range, because the person scrolls the range", () => {
+    // January 2024 and October 2026: 34 months apart including the empty ones.
+    const grouping = groupByMonthAndYear([
+      entry(Date.UTC(2024, 0, 1) / 1000, "old"),
+      entry(Date.UTC(2026, 9, 1) / 1000, "new"),
+    ]);
+
+    expect(grouping.spanMonths).toBe(34);
+    expect(grouping.showYears).toBe(true);
+    expect(grouping.months).toHaveLength(2);
+    expect(grouping.years.reduce((sum, year) => sum + year.monthCount, 0)).toBe(2);
+  });
+
+  it("orders years and months newest first", () => {
+    const grouping = groupByMonthAndYear(monthly(30));
+
+    const yearKeys = grouping.years.map((year) => year.key);
+    expect(yearKeys).toEqual([...yearKeys].sort().reverse());
+    for (const year of grouping.years) {
+      const keys = year.months.map((month) => month.key);
+      expect(keys).toEqual([...keys].sort().reverse());
+    }
+    expect(grouping.months[0]?.key).toBe("2026-10");
+  });
+
+  it("sums each year's months, and the years add up to the flat list", () => {
+    const grouping = groupByMonthAndYear(monthly(30));
+
+    expect(grouping.years.reduce((sum, year) => sum + year.entryCount, 0)).toBe(30);
+    const first = grouping.years[0];
+    expect(first?.label).toBe(first?.key);
+    expect(first?.monthCount).toBe(first?.months.length);
+  });
+
+  it("is deterministic and does not mutate its input", () => {
+    const entries = monthly(30);
+    const snapshot = entries.map((value) => value.timestamp);
+
+    const first = groupByMonthAndYear(entries);
+    const second = groupByMonthAndYear([...entries].reverse());
+
+    expect(entries.map((value) => value.timestamp)).toEqual(snapshot);
+    expect(second.months).toEqual(first.months);
+    expect(second.years).toEqual(first.years);
+  });
+
+  it("says nothing about years when there are no dated entries", () => {
+    const grouping = groupByMonthAndYear([]);
+
+    expect(grouping).toEqual({ months: [], years: [], spanMonths: 0, showYears: false });
   });
 });

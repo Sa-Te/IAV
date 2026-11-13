@@ -3,6 +3,7 @@ import type {
   EventEntry,
   EventListView as EventListViewData,
   EventMonth,
+  EventYear,
 } from "@instavault/core";
 import { useState, type JSX } from "react";
 
@@ -182,6 +183,51 @@ function MonthSection({
   );
 }
 
+/**
+ * The year fold (ADR 0015). Only rendered for a span over 24 months.
+ *
+ * Opening a year does not open a month: the year answers "which era", the month
+ * answers "which month", and guessing the second for the reader would put a month
+ * of rows in the DOM because they clicked a year.
+ */
+function YearSection({
+  year,
+  defaultOpen,
+}: {
+  year: EventYear;
+  defaultOpen: boolean;
+}): JSX.Element {
+  const [open, setOpen] = useState(defaultOpen);
+  const panelId = `event-year-${year.key}`;
+
+  return (
+    <li className="event-year">
+      <button
+        type="button"
+        className="event-year-button"
+        aria-expanded={open}
+        aria-controls={open ? panelId : undefined}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span>{year.label}</span>
+        <span className="event-year-meta">
+          {pluralCount(year.monthCount, "month")} ·{" "}
+          {pluralCount(year.entryCount, "entry", "entries")}
+        </span>
+      </button>
+      {open && (
+        <div id={panelId} className="event-year-panel">
+          <ol className="event-months">
+            {year.months.map((month) => (
+              <MonthSection key={month.key} month={month} defaultOpen={false} />
+            ))}
+          </ol>
+        </div>
+      )}
+    </li>
+  );
+}
+
 export function EventListView({
   view,
   raw,
@@ -197,11 +243,19 @@ export function EventListView({
         <State kind="empty" message="This category is in this export but holds no entries." />
       ) : view.hasTimestamps ? (
         <>
-          <ol className="event-months">
-            {view.months.map((month, index) => (
-              <MonthSection key={month.key} month={month} defaultOpen={index === 0} />
-            ))}
-          </ol>
+          {view.showYears ? (
+            <ol className="event-years">
+              {view.years.map((year, index) => (
+                <YearSection key={year.key} year={year} defaultOpen={index === 0} />
+              ))}
+            </ol>
+          ) : (
+            <ol className="event-months">
+              {view.months.map((month, index) => (
+                <MonthSection key={month.key} month={month} defaultOpen={index === 0} />
+              ))}
+            </ol>
+          )}
           {view.undated.length > 0 && <PlainList entries={view.undated} heading="No date" />}
         </>
       ) : (

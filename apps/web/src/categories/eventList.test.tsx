@@ -48,6 +48,8 @@ function view(
   return {
     kind: "event-list",
     months,
+    years: [],
+    showYears: false,
     undated,
     total,
     hasTimestamps: months.length > 0,
@@ -139,6 +141,8 @@ describe("event list — day pagination", () => {
     const data: EventListViewData = {
       kind: "event-list",
       months: [],
+      years: [],
+      showYears: false,
       undated: entries,
       total: entries.length,
       hasTimestamps: false,
@@ -217,6 +221,8 @@ describe("event list — no timestamps and empty", () => {
     const data: EventListViewData = {
       kind: "event-list",
       months: [],
+      years: [],
+      showYears: false,
       undated: [entry(1, null, "undated row")],
       total: 1,
       hasTimestamps: false,
@@ -232,5 +238,125 @@ describe("event list — no timestamps and empty", () => {
     render(<EventListView view={view([])} raw={[]} />);
     expect(screen.getByText("0 entries")).toBeDefined();
     expect(screen.getByText(/holds no entries/)).toBeDefined();
+  });
+});
+
+describe("event list — the year level", () => {
+  /** Two years of months, enough to engage the fold (span > 24 in the real data). */
+  function yearView(): EventListViewData {
+    const months = [
+      month("2026-10", "October 2026", [
+        day("2026-10-15", "15 October 2026", [entry(1, at("2026-10-15T12:00:00Z"), "oct-2026")]),
+      ]),
+      month("2025-06", "June 2025", [
+        day("2025-06-15", "15 June 2025", [
+          entry(2, at("2025-06-15T12:00:00Z"), "jun-2025"),
+          entry(3, at("2025-06-16T12:00:00Z"), "jun-2025-b"),
+        ]),
+      ]),
+      month("2024-01", "January 2024", [
+        day("2024-01-15", "15 January 2024", [entry(4, at("2024-01-15T12:00:00Z"), "jan-2024")]),
+      ]),
+    ];
+    return {
+      kind: "event-list",
+      months,
+      years: [
+        { key: "2026", label: "2026", months: [months[0]!], monthCount: 1, entryCount: 1 },
+        { key: "2025", label: "2025", months: [months[1]!], monthCount: 1, entryCount: 2 },
+        { key: "2024", label: "2024", months: [months[2]!], monthCount: 1, entryCount: 1 },
+      ],
+      showYears: true,
+      undated: [],
+      total: 4,
+      hasTimestamps: true,
+    };
+  }
+
+  it("opens the newest year and leaves the older ones closed", () => {
+    render(<EventListView view={yearView()} raw={[]} />);
+
+    const years = screen.getAllByRole("button", { name: /^(2026|2025|2024)/ });
+    expect(years[0]?.getAttribute("aria-expanded")).toBe("true");
+    expect(years[1]?.getAttribute("aria-expanded")).toBe("false");
+    expect(years[2]?.getAttribute("aria-expanded")).toBe("false");
+  });
+
+  it("opening a year does not open a month", async () => {
+    const user = userEvent.setup();
+    render(<EventListView view={yearView()} raw={[]} />);
+
+    // The newest year is open, but its month is not: no day headings, no rows.
+    expect(screen.queryAllByRole("heading", { level: 3 })).toHaveLength(0);
+    expect(document.querySelectorAll(".event-row")).toHaveLength(0);
+
+    const years = document.querySelectorAll(".event-year-button");
+    await user.click(years[1] as Element);
+
+    const months = document.querySelectorAll(".event-month-button");
+    expect(months).toHaveLength(2);
+    for (const monthButton of months) {
+      expect(monthButton.getAttribute("aria-expanded")).toBe("false");
+    }
+    expect(screen.queryByText("jun-2025")).toBeNull();
+    expect(screen.getByRole("button", { name: /June 2025/ })).toBeDefined();
+  });
+
+  it("collapsing a year hides its months", async () => {
+    const user = userEvent.setup();
+    render(<EventListView view={yearView()} raw={[]} />);
+
+    const year2026 = document.querySelector(".event-year-button") as Element;
+    expect(screen.getByRole("button", { name: /October 2026/ })).toBeDefined();
+
+    await user.click(year2026);
+
+    expect(year2026.getAttribute("aria-expanded")).toBe("false");
+    expect(screen.queryByRole("button", { name: /October 2026/ })).toBeNull();
+  });
+
+  it("keeps the seven-day cap inside an open month under a year", async () => {
+    const user = userEvent.setup();
+    const data = yearView();
+    const bigMonth = month(
+      "2025-06",
+      "June 2025",
+      Array.from({ length: 9 }, (_, index) =>
+        day(`2025-06-${String(index + 1).padStart(2, "0")}`, `${index + 1} June 2025`, [
+          entry(index + 1, at("2025-06-01T12:00:00Z"), `day ${index + 1}`),
+        ]),
+      ),
+    );
+    const withBigMonth: EventListViewData = {
+      ...data,
+      months: data.months.map((value) => (value.key === "2025-06" ? bigMonth : value)),
+      years: data.years.map((year) =>
+        year.key === "2025" ? { ...year, months: [bigMonth], monthCount: 1, entryCount: 9 } : year,
+      ),
+    };
+    render(<EventListView view={withBigMonth} raw={[]} />);
+
+    await user.click(document.querySelectorAll(".event-year-button")[1] as Element);
+    await user.click(screen.getByRole("button", { name: /June 2025/ }));
+
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(7);
+    await user.click(screen.getByRole("button", { name: "Show 2 more days" }));
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(9);
+  });
+
+  it("renders no year fold when the view says the span is short", () => {
+    render(
+      <EventListView
+        view={view([
+          month("2026-10", "October 2026", [
+            day("2026-10-15", "15 October 2026", [entry(1, at("2026-10-15T12:00:00Z"), "only")]),
+          ]),
+        ])}
+        raw={[]}
+      />,
+    );
+
+    expect(document.querySelector(".event-year-button")).toBeNull();
+    expect(screen.getByText("only")).toBeDefined();
   });
 });

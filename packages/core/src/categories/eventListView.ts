@@ -44,13 +44,34 @@ export interface EventMonth {
   readonly entryCount: number;
 }
 
+/** A fold above the month, used only for long spans (ADR 0015). */
+export interface EventYear {
+  /** `YYYY`; also the sort key. */
+  readonly key: string;
+  readonly label: string;
+  readonly months: readonly EventMonth[];
+  readonly monthCount: number;
+  readonly entryCount: number;
+}
+
 export interface EventListView {
   readonly kind: "event-list";
+  /** Every dated month, newest first. The renderer's only list when `showYears` is false. */
   readonly months: readonly EventMonth[];
+  /** Populated only when `showYears`: an empty array means the year level is off. */
+  readonly years: readonly EventYear[];
+  readonly showYears: boolean;
   readonly undated: readonly EventEntry[];
   readonly total: number;
   readonly hasTimestamps: boolean;
 }
+
+/**
+ * The measured span that turns the year level on (ADR 0015). Below 25 months the
+ * extra level costs a click and buys nothing: the month list is already short
+ * enough to scan.
+ */
+export const YEAR_LEVEL_MIN_MONTHS = 25;
 
 /** The measured hero priority; `Type` is deliberately absent (docs/T2-DESIGN.md §3). */
 const HERO_PRIORITY = ["Caption", "Title", "Name", "Search", "Changed", "Activation Type"];
@@ -237,6 +258,64 @@ function groupByMonth(entries: readonly EventEntry[]): readonly EventMonth[] {
     }));
 }
 
+export interface EventGrouping {
+  /** Newest first; the year level's input and the flat list both read this. */
+  readonly months: readonly EventMonth[];
+  /** Empty unless `showYears`. */
+  readonly years: readonly EventYear[];
+  /** Inclusive months between the oldest and newest entry; 0 when undated. */
+  readonly spanMonths: number;
+  readonly showYears: boolean;
+}
+
+/** Month index arithmetic on `YYYY-MM`, so no Date object decides the span. */
+function monthsBetween(oldest: string, newest: string): number {
+  const year = (key: string): number => Number(key.slice(0, 4));
+  const month = (key: string): number => Number(key.slice(5, 7));
+  return (year(newest) - year(oldest)) * 12 + (month(newest) - month(oldest)) + 1;
+}
+
+/**
+ * Year → month → day, from the dated entries.
+ *
+ * The fold above the month is a response to measured span, not to entry count
+ * (ADR 0015): 42,197 entries across 121 months is the case that needs it, while
+ * 7,849 entries in one month does not. `spanMonths` counts empty months inside the
+ * range — a person scrolling from 2015 to 2026 wants the years, not a count of
+ * months that happen to hold an entry.
+ */
+export function groupByMonthAndYear(entries: readonly EventEntry[]): EventGrouping {
+  const months = groupByMonth(entries);
+  const oldest = months[months.length - 1];
+  const newest = months[0];
+  const spanMonths =
+    oldest === undefined || newest === undefined ? 0 : monthsBetween(oldest.key, newest.key);
+
+  if (spanMonths < YEAR_LEVEL_MIN_MONTHS) {
+    return { months, years: [], spanMonths, showYears: false };
+  }
+
+  const byYear = new Map<string, EventMonth[]>();
+  for (const month of months) {
+    const key = month.key.slice(0, 4);
+    const list = byYear.get(key) ?? [];
+    list.push(month);
+    byYear.set(key, list);
+  }
+
+  const years = [...byYear.entries()]
+    .sort(([a], [b]) => b.localeCompare(a))
+    .map(([key, yearMonths]) => ({
+      key,
+      label: key,
+      months: yearMonths,
+      monthCount: yearMonths.length,
+      entryCount: yearMonths.reduce((sum, month) => sum + month.entryCount, 0),
+    }));
+
+  return { months, years, spanMonths, showYears: true };
+}
+
 export function toEventListView(record: {
   readonly data: unknown;
   readonly sources?: readonly CategorySource[];
@@ -255,9 +334,12 @@ export function toEventListView(record: {
   }
 
   const dated = entries.filter((entry) => entry.timestamp !== null);
+  const grouping = groupByMonthAndYear(dated);
   return {
     kind: "event-list",
-    months: groupByMonth(dated),
+    months: grouping.months,
+    years: grouping.years,
+    showYears: grouping.showYears,
     undated: entries.filter((entry) => entry.timestamp === null),
     total: entries.length,
     hasTimestamps: dated.length > 0,

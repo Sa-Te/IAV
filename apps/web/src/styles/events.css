@@ -8,10 +8,55 @@
 }
 
 .event-months,
+.event-years,
 .event-rows {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* The year fold is a quieter row than a month: it is a jump target, not content. */
+.event-year {
+  border-bottom: 1px solid var(--token-color-border);
+}
+
+.event-year:first-child {
+  border-top: 1px solid var(--token-color-border);
+}
+
+.event-year-button {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--token-space-3);
+  width: 100%;
+  padding: var(--token-space-4) var(--token-space-2);
+  border: 0;
+  border-radius: var(--token-radius-sm);
+  background: none;
+  color: var(--token-color-text);
+  font: inherit;
+  font-size: var(--token-text-18);
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.event-year-button:hover {
+  background: var(--token-color-raised);
+}
+
+.event-year-meta {
+  flex: none;
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-12);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.event-year-panel {
+  padding: 0 var(--token-space-2) var(--token-space-4) var(--token-space-4);
 }
 
 .event-month {

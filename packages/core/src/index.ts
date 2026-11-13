@@ -87,12 +87,19 @@ export type {
   SettingsView,
   SettingValue,
 } from "./categories/settingsView.js";
-export { shortcodeOf, toEventListView } from "./categories/eventListView.js";
+export {
+  groupByMonthAndYear,
+  shortcodeOf,
+  toEventListView,
+  YEAR_LEVEL_MIN_MONTHS,
+} from "./categories/eventListView.js";
 export type {
   EventDay,
   EventEntry,
+  EventGrouping,
   EventListView,
   EventMonth,
+  EventYear,
 } from "./categories/eventListView.js";
 export { toNameListView } from "./categories/nameListView.js";
 export type { NameListView, NameListSection } from "./categories/nameListView.js";
