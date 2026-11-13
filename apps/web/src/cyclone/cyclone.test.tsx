@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { IDLE_VELOCITY, MAX_SPIN, TILT_LIMIT, type CategoryRecord } from "@instavault/core";
 import type { ArchiveRepository } from "@instavault/storage";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -262,6 +262,11 @@ function phases(instance: ReturnType<typeof handle>): number[] {
   return instance.setPhase.mock.calls.map(([value]) => value as number);
 }
 
+/** Wait for the effect that attaches the canvas listeners (it calls start first). */
+async function started(): Promise<void> {
+  await waitFor(() => expect(startMock).toHaveBeenCalled());
+}
+
 describe("cyclone interactions", () => {
   it("moves the phase on a wheel, bounded, and stops the page scrolling", async () => {
     const frames = stubFrames();
@@ -276,21 +281,24 @@ describe("cyclone interactions", () => {
     );
     await screen.findByRole("list", { name: "All media, in cyclone order" });
     const canvas = sizedCanvas(container);
-
+    await started();
     // fireEvent returns false when the handler called preventDefault.
     expect(fireEvent.wheel(canvas, { deltaY: 1000 })).toBe(false);
 
     let now = performance.now();
+    // Align the tick's clock; the effect-to-test gap is not one of the five frames.
+    frames(now);
+    const beforeForward = phases(instance).at(-1) ?? 0;
     for (let frame = 0; frame < 5; frame += 1) frames((now += 16));
-    const forward = phases(instance).at(-1) ?? 0;
+    const forward = (phases(instance).at(-1) ?? 0) - beforeForward;
     expect(forward).toBeGreaterThan(0);
     // A hard flick cannot outrun idle plus the spin ceiling.
     expect(forward).toBeLessThan((IDLE_VELOCITY + MAX_SPIN) * 5 * 16 + 0.01);
-
     expect(fireEvent.wheel(canvas, { deltaY: -1000 })).toBe(false);
+    const beforeBackward = phases(instance).at(-1) ?? 0;
     for (let frame = 0; frame < 5; frame += 1) frames((now += 16));
-    const backward = phases(instance).at(-1) ?? 0;
-    expect(backward).toBeLessThan(forward);
+    const backward = (phases(instance).at(-1) ?? 0) - beforeBackward;
+    expect(backward).toBeLessThan(0);
   });
 
   it("leans by the pointer, clamped at its limit", async () => {
@@ -306,7 +314,7 @@ describe("cyclone interactions", () => {
     );
     await screen.findByRole("list", { name: "All media, in cyclone order" });
     const canvas = sizedCanvas(container);
-
+    await started();
     // Far above and to the right of the canvas: the pointer cannot over-lean it.
     fireEvent.pointerMove(canvas, { clientX: 5000, clientY: -5000 });
     let now = performance.now();
@@ -334,7 +342,7 @@ describe("cyclone interactions", () => {
     );
     await screen.findByRole("list", { name: "All media, in cyclone order" });
     const canvas = sizedCanvas(container);
-
+    await started();
     fireEvent.pointerDown(canvas, { clientY: 500, pointerId: 1 });
     fireEvent.pointerMove(canvas, { clientY: 400, pointerId: 1 });
     fireEvent.pointerUp(canvas, { clientY: 400, pointerId: 1 });
@@ -371,7 +379,7 @@ describe("cyclone interactions", () => {
 
     await user.click(await screen.findByRole("button", { name: "Start motion" }));
     const canvas = sizedCanvas(container);
-
+    await started();
     fireEvent.wheel(canvas, { deltaY: 4000 });
     fireEvent.pointerMove(canvas, { clientX: 5000, clientY: -5000 });
     fireEvent.pointerDown(canvas, { clientY: 500, pointerId: 1 });
