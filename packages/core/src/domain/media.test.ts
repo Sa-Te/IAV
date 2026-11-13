@@ -34,3 +34,52 @@ describe("toMediaItems — messages merged from several files", () => {
     expect(toMediaItems("messages_inbox", [{ nope: true }, 42, null])).toEqual([]);
   });
 });
+
+/**
+ * M22: one export can carry the same posts twice, as legacy groups and as
+ * label/value envelopes. The gallery must show the posts, not the files.
+ */
+describe("toMediaItems — posts measured in two shapes at once", () => {
+  const legacy = {
+    media: [{ uri: "media/posts/old.jpg", creation_timestamp: 1434299102, title: "old" }],
+  };
+  const envelope = {
+    timestamp: 1707395625,
+    label_values: [
+      {
+        label: "Media",
+        media: [{ uri: "media/posts/old.jpg", creation_timestamp: 1434299102, title: "" }],
+      },
+      { label: "Caption", value: "old" },
+    ],
+  };
+
+  it("counts a post once when both shapes describe it", () => {
+    const items = toMediaItems("posts", [legacy, envelope]);
+
+    expect(items.map((item) => item.id)).toEqual(["media/posts/old.jpg"]);
+  });
+
+  it("reads a label/value envelope whose media is nested under the Media label", () => {
+    const items = toMediaItems("posts", [
+      {
+        timestamp: 1707395625,
+        label_values: [
+          {
+            label: "Media",
+            media: [{ uri: "media/posts/new.jpg", creation_timestamp: 1707395625 }],
+          },
+          { label: "Caption", value: "newer" },
+        ],
+      },
+    ]);
+
+    expect(items).toEqual([
+      { id: "media/posts/new.jpg", caption: "newer", takenAt: 1707395625, category: "posts" },
+    ]);
+  });
+
+  it("returns nothing for a payload that is not an array of posts", () => {
+    expect(toMediaItems("posts", { media: [] })).toEqual([]);
+  });
+});

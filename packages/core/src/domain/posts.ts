@@ -1,9 +1,14 @@
+import { parsePosts } from "../parsers/posts.js";
+
 /**
  * Posts → the domain shape the gallery renders.
  *
- * The archive speaks `{ media: [{ uri, title, creation_timestamp }] }`; the UI
- * speaks `PostEntry`. Translation happens once, here (AGENTS.md §3, "different
- * layer, different abstraction").
+ * The archive speaks two shapes (legacy `{ media: [...] }` groups and label/value
+ * envelopes); the UI speaks `PostEntry`. Translation happens once, in
+ * `parsers/posts.ts` (AGENTS.md §3, "different layer, different abstraction").
+ *
+ * The gallery contract is a list, never a failure: an unreadable record renders as
+ * no items here and stays reachable through the raw JSON.
  */
 
 export interface PostEntry {
@@ -14,24 +19,7 @@ export interface PostEntry {
   readonly takenAt: number;
 }
 
-function isObject(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
 export function toPostEntries(data: unknown): readonly PostEntry[] {
-  if (!Array.isArray(data)) return [];
-
-  const entries: PostEntry[] = [];
-  for (const group of data) {
-    if (!isObject(group) || !Array.isArray(group.media)) continue;
-    for (const media of group.media) {
-      if (!isObject(media) || typeof media.uri !== "string") continue;
-      entries.push({
-        id: media.uri,
-        caption: typeof media.title === "string" ? media.title : "",
-        takenAt: typeof media.creation_timestamp === "number" ? media.creation_timestamp : 0,
-      });
-    }
-  }
-  return entries;
+  const parsed = parsePosts(data);
+  return parsed.ok ? parsed.data : [];
 }

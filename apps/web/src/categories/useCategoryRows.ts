@@ -1,4 +1,10 @@
-import { CATEGORIES, toMediaItems, toTableView, type CategoryViewData } from "@instavault/core";
+import {
+  CATEGORIES,
+  entryCountForView,
+  toMediaItems,
+  toTableView,
+  type CategoryViewData,
+} from "@instavault/core";
 import { useEffect, useState } from "react";
 
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
@@ -96,8 +102,9 @@ export function useCategoryRows(): CategoryRows {
               tier: category.privacyTier,
               present: true,
               // A single-envelope object counts as one row in the view even when the
-              // stored entryCount is 0, so show what the viewer will see.
-              entries: view.kind === "table" ? view.total : record.entryCount,
+              // stored entryCount is 0, and posts can arrive twice in one export, so
+              // show what the viewer will see (see `entryCountForView`).
+              entries: view.kind === "table" ? view.total : entryCountForView(category.id, record),
               media,
               href: DEDICATED[category.id] ?? `/categories/${encodeURIComponent(category.id)}`,
             };

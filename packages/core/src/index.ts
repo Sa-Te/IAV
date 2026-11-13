@@ -7,9 +7,11 @@ export { parseArchivedPosts } from "./parsers/archivedPosts.js";
 export type { ArchivedPostEntry } from "./parsers/archivedPosts.js";
 export { parseStories } from "./parsers/stories.js";
 export type { StoryEntry } from "./parsers/stories.js";
+export { parsePosts } from "./parsers/posts.js";
 export { toMediaItems } from "./domain/media.js";
 export type { MediaItemView } from "./domain/media.js";
 export { toPostEntries } from "./domain/posts.js";
+export { entryCountForView } from "./categories/entryCount.js";
 export type { PostEntry } from "./domain/posts.js";
 export {
   createMediaCache,

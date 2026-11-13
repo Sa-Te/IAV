@@ -82,6 +82,17 @@ describe("resolveCategory — tier 2 (structure)", () => {
     });
   });
 
+  it("does not fold a label/value array into posts on a bare `media` key", () => {
+    // Measured in M22: `note_and_repost_interactions.json` is an array of
+    // {fbid, label_values, media} envelopes and was resolving to `posts`,
+    // adding two records that are not posts (docs/T3-DESIGN.md §2).
+    const sample = [{ fbid: "1", label_values: [], media: [] }];
+
+    const result = resolveCategory({ path: "note_and_repost_interactions.json", sample });
+
+    expect(result).toMatchObject({ ok: false, reason: "unrecognised" });
+  });
+
   it("reports ambiguity instead of guessing when two rows fit", () => {
     // `interest_categories` and `link_history` were both root arrays with
     // {fbid, label_values, media, timestamp} in the first export. After M7b the

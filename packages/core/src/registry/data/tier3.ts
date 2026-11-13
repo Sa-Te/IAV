@@ -93,7 +93,14 @@ export const TIER_3: readonly Category[] = [
     privacyTier: 3,
     variantRisk: "medium",
     match: { basenames: [/^posts(?:_\d+)?\.json$/i] },
-    signatures: [{ kind: "array", requiredKeys: ["media"] }],
+    // `media` alone is not enough to identify a posts file: measured in M22,
+    // `note_and_repost_interactions.json` is an array of `{fbid, label_values,
+    // media}` envelopes and was being folded into posts, adding 2 records that
+    // are not posts (docs/T3-DESIGN.md §2). The legacy posts file carries one key
+    // per entry (`media`); the newer label/value shape is name-resolved anyway.
+    signatures: [
+      { kind: "array", requiredKeys: ["media"], absentKeys: ["fbid", "label_values", "timestamp"] },
+    ],
     mediaPath: "root-relative",
   },
   {

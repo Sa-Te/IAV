@@ -246,8 +246,20 @@ main list of the category (all files summed).
 
 ### 2.1 `posts`
 
-- **File:** `your_instagram_activity/media/posts_1.json` · 1 file · 29,570 B · ASCII
+**Two shapes exist in `archive-2/` at once** (measured M22, `docs/T3-DESIGN.md` §2).
+The legacy shape below was the whole story at M2; the newer label/value envelope is
+what `posts.json` now writes, and its 78 entries contain all 51 legacy media
+records plus 27 the legacy file does not have.
+
+- **File (legacy):** `your_instagram_activity/media/posts_1.json` · 1 file · 29,570 B · ASCII
 - **Top level:** `array[51]` — shape C, one object per post
+- **File (newer):** `your_instagram_activity/media/posts.json` · 1 file · `array[78]`
+  of `{fbid, label_values, media, timestamp}`, with `media: []` at the top level
+  and the one media record inside the label `Media`; caption in `Caption`,
+  creation date in `timestamp`
+- **Identity across both files:** the media `uri` — the newer file is a superset of
+  the legacy one (51 of 78 URIs shared, no URI repeated inside either file). The
+  parser counts a URI once (`packages/core/src/parsers/posts.ts`).
 - **Fields:**
 
 | field | type | null | notes |
@@ -727,7 +739,7 @@ that did **not** fit a clean model and must not be silently dropped.
 | # | What | Where | Why it is odd |
 | --- | --- | --- | --- |
 | 1 | 4 media files with **no extension** | message thread `photos/` folders | All are JPEG. They are exactly the 4 `photos[]` entries whose `creation_timestamp` is missing. Extension-based typing and extension-based MIME guessing both fail here. |
-| 2 | `post_comments[].media_list_data[0].uri` is always `""` | `post_comments_1.json`, all 668 entries | An array that exists solely to carry an empty string. Not a media reference. |
+| 2 | `post_comments[].media_list_data[0].uri` is almost always `""` | `post_comments_1.json`, 851 of 853 entries (2 carry a real URI, and both files exist) | An array that exists to carry an empty string; the two non-empty cases are the only observed media reference from a comment. |
 | 3 | `avatar_items[].item` is a 357-character opaque string | `avatars_store/avatar_items.json` | Not JSON, not a path, not a URL. Content unknown, preserved in `raw`. |
 | 4 | `secret_conversations` holds device records, not conversations | `messages/secret_conversations.json` | Keys are `armadillo_devices` and `calls`; `calls` is empty. Contains IP addresses. |
 | 5 | `media/other/` contains the profile photo | `media/other/` | The folder name suggests "miscellaneous"; in fact it holds the one profile image, referenced twice. |
@@ -887,3 +899,22 @@ them — never by inference alone (AGENTS.md §6).
 - **Confidence:** distribution certain for both exports. **Meaning unresolved:** there is no
   element shape to inspect.
 - **Decision:** stored verbatim as an opaque array; no parser reads it.
+
+### Q18 — is a saved post linked to a saved collection?
+
+- **Probe:** read both `your_instagram_activity/saved/saved_collections.json` (8 records)
+  and `saved_posts.json` (1,065 records); collected every string value at any depth in
+  each file; tested each collection's `fbid` and each collection's `Name` against the
+  saved-post strings, each saved post's `fbid` against the collection strings, and the
+  intersection of the two `fbid` sets. Also compared the two label sets for a membership
+  key. Re-runnable as a one-pass `JSON.parse` over the two files; not part of
+  `pnpm verify` (AGENTS.md §9).
+- **Measured:** 0 of 8 collection `fbid`s and 0 of 8 `Name` values occur anywhere in
+  `saved_posts`; 0 of 1,065 saved-post `fbid`s occur in `saved_collections`; no `fbid`
+  is shared. Label sets: collections carry `Name`, `Type`, `Privacy`, `Update time`;
+  saved posts carry `URL`, `Caption`, `Title` plus `Hashtags`/`Owner`/`Brand partner`
+  containers. Neither file carries a collection id, a membership list or a count.
+- **Confidence:** certain for this export — every string in both files was compared.
+- **Decision:** two separate lists. No collection grouping is built, and the UI does not
+  pretend there is one. If a future export writes a membership key, it will be a new
+  measurement, not a reinterpretation of this one.

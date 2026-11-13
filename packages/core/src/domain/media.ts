@@ -1,5 +1,6 @@
 import { parseArchivedPosts } from "../parsers/archivedPosts.js";
 import { parseStories } from "../parsers/stories.js";
+import { toPostEntries } from "./posts.js";
 
 /**
  * Category data → the one shape every view renders.
@@ -32,17 +33,6 @@ function fromMediaRecords(value: unknown, category: string): MediaItemView[] {
       takenAt: typeof record.creation_timestamp === "number" ? record.creation_timestamp : 0,
       category,
     });
-  }
-  return items;
-}
-
-/** Posts and archived posts are an array of groups, each holding a `media` array. */
-function fromPostGroups(data: unknown, category: string): MediaItemView[] {
-  if (!Array.isArray(data)) return [];
-  const items: MediaItemView[] = [];
-  for (const group of data) {
-    if (!isObject(group) || !Array.isArray(group.media)) continue;
-    items.push(...fromMediaRecords(group.media, category));
   }
   return items;
 }
@@ -96,11 +86,11 @@ export function toMediaItems(categoryId: string, data: unknown): readonly MediaI
         }))
       : [];
   }
+  if (categoryId === "posts") {
+    return toPostEntries(data).map((post) => ({ ...post, category: "posts" }));
+  }
 
   switch (categoryId) {
-    case "posts":
-    case "archived_posts":
-      return fromPostGroups(data, categoryId);
     case "stories":
       return fromWrapper(data, "ig_stories", categoryId);
     case "profile_photos":

@@ -1,0 +1,220 @@
+# T3 — what the eighteen present categories actually contain
+
+Measured from `archive-2/` on 2026-11-13 (M22), before any T3 screen was
+designed. This document is the evidence for the grouping, the hero/date mapping
+and the screen assignment. It contains key names, label strings, types, counts
+and shapes only: no personal value is reproduced.
+
+The probe ran the same resolve path the app's ingest runs over all 742 files,
+then read every T3 category's entries, the key set of a representative entry,
+every label name inside `label_values`, `string_map_data` or `string_list_data`,
+the key that carries the date, and whether any entry carries media or a URL.
+Counts are the app's own entry counts, not a second opinion.
+
+## 1. The eighteen present rows, plus the one absent
+
+| Category | Display name | Entries | Present |
+| --- | --- | ---: | --- |
+| `profile_photos` | Profile photos | 1 | yes |
+| `story_reaction_sticker_reactions` | Story reaction stickers | 1 | yes |
+| `reels_comments` | Reels comments | 12 | yes |
+| `questions` | Story questions | 12 | yes |
+| `emoji_sliders` | Emoji sliders | 20 | yes |
+| `archived_posts` | Archived posts | 27 | yes |
+| `quizzes` | Story quizzes | 44 | yes |
+| `posts` | Posts | 78 after the merge fix (§2); 129 raw entries in 2 files | yes |
+| `story_likes` | Story likes | 311 | yes |
+| `liked_comments` | Liked comments | 156 | yes |
+| `stories` | Stories | 209 | yes |
+| `saved_collections` | Saved collections | 8 | yes |
+| `post_comments` | Comments | 853 | yes |
+| `polls` | Story polls | 957 | yes |
+| `saved_posts` | Saved posts | 1,065 | yes |
+| `liked_posts` | Liked posts | 42,197 | yes |
+| `instants_interactions` | Instants interactions | 2 | yes |
+| `other_content` | Other content | 5 | yes |
+| `reels` | Reels | — | **no** — registered unmeasured, `signatures: []` (ADR 0008) |
+
+The old drift report's wrapper-key names for several of these rows
+(`story_activities_*`, `likes_media_likes`, `saved_saved_media`, …) no longer
+describe `archive-2/`: the export now writes root arrays of label/value envelopes
+(`fmt-b1cb31`). The name rules are what resolve them; the stale signatures are
+the drift document's problem, not this one.
+
+## 2. The Posts anomaly — the merge was wrong in two ways
+
+### What the row merged
+
+`posts` resolved **three** files:
+
+| File | Raw entries | What it is |
+| --- | ---: | --- |
+| `your_instagram_activity/media/posts.json` | 78 | posts, newer shape: `{fbid, label_values, media, timestamp}`, media nested under the label `Media` |
+| `your_instagram_activity/media/posts_1.json` | 51 | posts, legacy shape: `{media: [record]}`, media at the top level |
+| `personal_information/personal_information/note_and_repost_interactions.json` | 2 | **not posts**: `{fbid, label_values, media}`, each entry holding one label-less `Author` container and nothing else |
+
+`78 + 51 + 2 = 131`, the count the row reported. Of those 131 entries:
+
+- **51** carry a top-level `media` array with a non-empty `uri` (the legacy file);
+- **78** carry `media: []` at the top level and their one media record inside the
+  `Media` label (the newer file);
+- **2** carry no media at all (`media: []`, no `Media` label).
+
+So "131 entries, 51 media" was two defects at once: a file that is not posts was
+folded in, and the media reader only looked at the top level, so it saw the
+legacy 51 and none of the newer 78.
+
+### Why the 2 arrived
+
+`posts` was registered with a single structural signature, `{kind: "array",
+requiredKeys: ["media"]}`. `note_and_repost_interactions.json` matches no
+basename rule, so it fell to tier 2, and every one of its entries has a `media`
+key. It was therefore accepted as posts. The non-posts file was also defining
+`posts`' fingerprint (`{fbid, label_values, media}`, the note file's key set),
+which is why the archive fingerprint moved from `fmt-46b755` to `fmt-b1cb31`
+after the fix.
+
+### Why the 51 were double-counted
+
+The two posts files describe the same posts, not two halves of one list:
+
+- the 51 legacy media URIs are all present among the newer file's 78, one for one;
+- the newer file adds **27** URIs the legacy file never had (2016–2021 posts);
+- no URI appears twice inside either file.
+
+An additive merge is the right rule for a category Instagram splits into
+`posts_1.json` + `posts_2.json`; it is the wrong rule for one content set written
+twice in two formats. Media URI is the identity: 78 posts, 78 media items.
+
+### The fix (this commit)
+
+- `posts`' signature now requires the legacy shape to *not* carry `fbid`,
+  `label_values` or `timestamp`. A label/value array is no longer posts; the
+  note file falls to the unrecognised bucket, where an unmapped file belongs
+  (ADR 0002), and registering it is a separate decision (§7).
+- `packages/core/src/parsers/posts.ts` reads both measured shapes and counts a
+  media URI once, keeping the richer caption when a duplicate record supplies
+  one. It is the only reader of both shapes.
+- `entryCountForView` (core) reports the 78 the gallery shows instead of the 129
+  the files hold. The stored count stays raw on purpose: drift reports describe
+  files, not screens.
+
+**Verdict:** the merge was wrong. A non-posts file was folded in, and the same 51
+posts were counted twice. Both are fixed and tested.
+
+## 3. The eighteen rows in detail
+
+`Labels` are the exact display strings the export uses. "Container" means a
+label-less item (`{"title": …, "dict": […]}`) — it is not a label, so it never
+becomes a field on a row and stays in the raw JSON. `string_map_data.X.timestamp`
+means the label object has no `value` and a numeric `timestamp` beside it.
+
+| Category | Representative entry keys | Labels (verbatim) | Hero | Date | URL | Media |
+| --- | --- | --- | --- | --- | --- | --- |
+| `profile_photos` | `creation_timestamp`, `cross_post_source`, `media_metadata`, `title`, `uri` | none — media record under `ig_profile_picture` | `title` (gallery caption) | `creation_timestamp` | no | 1 |
+| `story_reaction_sticker_reactions` | `fbid`, `label_values`, `media`, `timestamp` | `Emoji`; container `Owner` | none | entry `timestamp` | no | no |
+| `reels_comments` | `string_map_data` | `Comment`, `Media Owner`, `Time` | `Comment` (§5) | `Time.timestamp` | no | no |
+| `questions` | `fbid`, `label_values`, `media`, `timestamp` | `Question`, `Answer`, `Update time` (`timestamp_value`); container `Media` | `Question` (§5) | entry `timestamp` | no | no |
+| `emoji_sliders` | `fbid`, `label_values`, `media`, `timestamp` | `Question`, `Emoji`, `Text colour`, `Background colour`, `URL`, `Caption`, `Title`; containers `Hashtags`, `Owner`, `Brand partner` | `Caption`, else `Question` | entry `timestamp` | yes (20) | no |
+| `archived_posts` | `media` (group) → `uri`, `creation_timestamp`, `title`, `cross_post_source`, `media_metadata` | none — media record under `ig_archived_post_media` | `title` (gallery caption) | `creation_timestamp` | no | 27 |
+| `quizzes` | `fbid`, `label_values`, `media`, `timestamp` | `Question`; container `Media` | `Question` (§5) | entry `timestamp` | no | no |
+| `posts` | newer: `fbid`, `label_values`, `media`, `timestamp`; legacy: `media` | newer: `Caption`, `Title`, `Media`, `Published`, `Draft`, `Visibility`, `Expiry time`, `Creation time`, `Update time`, `Subtype`, `Story type`, `Latitude`, `Longitude`, `Amount raised`, `Upload identifier`, `Marked as AI generated`, `Paid partnership`, `Hide like and view counts`, `Who can reply to your post`, `Metadata`, `File size in bytes`, `Draft identifier`, `Hidden from profile, but shown in feed`, `Original width`, `Original height`, `Is an advertisement`, `Reply approval required`, `Visual reply using existing media`, `Publish mode`, `How you opened the camera`, `Created from draft`, `Is audio muted`, `Folders on device`, `Device name`, `How you opened the camera from the browser` | `Caption` (gallery caption) | `creation_timestamp`, else entry `timestamp` | no | 78 |
+| `story_likes` | `fbid`, `label_values`, `media`, `timestamp` | `URL`, `Caption`, `Title`; containers `Hashtags`, `Owner`, `Brand partner` | `Caption` (127), else none | entry `timestamp` | yes (311) | no |
+| `liked_comments` | `title`, `string_list_data` → `href`, `timestamp`, `value` | none — `title` + `string_list_data` | `title` (the account) | `string_list_data[0].timestamp` | `href` (156) | no |
+| `stories` | `creation_timestamp`, `cross_post_source`, `dubbing_info`, `media_metadata`, `media_variants`, `title`, `uri` | none — media record under `ig_stories` | `title` (gallery caption) | `creation_timestamp` | no | 209 |
+| `saved_collections` | `fbid`, `label_values`, `media`, `timestamp` | `Name`, `Type`, `Privacy`, `Update time` (`timestamp_value`); container with empty `dict` | `Name` | entry `timestamp` | no | no |
+| `post_comments` | `media_list_data`, `string_map_data` | `Comment` (851), `Media Owner` (623), `Time` (853) | `Comment` (§5) | `Time.timestamp` | no | effectively none — `media_list_data[0].uri` is `""` on 851 of 853 |
+| `polls` | `fbid`, `label_values`, `media`, `timestamp` | `Question`, `Option 1`…`Option 4`, `Option 1 font size`…`Option 4 font size`, `Colour`, `Anonymous poll`, `Type`, `Expiry time` (`timestamp_value`), `URL` (781), `Caption` (184), `Title` (184); containers `Hashtags`, `Owner`, `Brand partner` | `Caption`, else `Question` | entry `timestamp` | yes (781) | no |
+| `saved_posts` | `fbid`, `label_values`, `media`, `timestamp` | `URL` (1,065), `Caption` (1,039), `Title` (1,039); containers `Hashtags`, `Owner`, `Brand partner` | `Caption`, else `Title` | entry `timestamp` | yes (1,065) | no |
+| `liked_posts` | `fbid`, `label_values`, `media`, `timestamp` | `URL` (42,197), `Caption` (38,039 non-empty), `Title` (785 non-empty); containers `Hashtags`, `Owner`, `Brand partner` | `Caption`, else `Title` | entry `timestamp` | yes (42,194 `href`) | no |
+| `instants_interactions` | `fbid`, `label_values`, `media`, `timestamp` | `Media` (empty arrays), `URL`, `Emoji`; container `Metadata` | none | entry `timestamp` | yes (2) | 0 (the `Media` arrays are empty) |
+| `other_content` | `fbid`, `label_values`, `media`, `timestamp` | the same 27 labels as `posts`' newer shape, plus containers `Media`, `Metadata`, `Place`, `Reel metadata`, `Repost`, `Hashtags` | none | entry `timestamp` | no | 1 of 5 entries has a non-empty `uri` |
+
+### The timestamp-in-string-map finding, again
+
+`post_comments` and `reels_comments` put the date in `string_map_data.Time`, which
+has **no `value`** and a numeric `timestamp` beside it — the same shape the T2
+design found in `login_activity`, `logout_activity`, `profile_changes` and
+`signup_details`. No other T3 category has that shape: everything else carries a
+top-level `timestamp`, and `liked_comments` carries its date in
+`string_list_data[0].timestamp`. Both of those paths already exist in
+`eventListView.ts`; no new date code is needed for T3.
+
+### What the rows carry that the screen will not show
+
+The label-less containers (`Owner`, `Hashtags`, `Brand partner`, `Media`,
+`Metadata`, `Place`, `Reel metadata`, `Repost`) hold nested labelled records — for
+example `Owner` holds `Name`, `Username` and the owner's profile `URL`. They are
+not labels, so the event row does not render them; they stay in the raw JSON,
+which is the rule for anything the row does not interpret (AGENTS §6). Making
+them a field would be a different decision and is not taken in M22.
+
+## 4. Q18 — is a saved post linked to a saved collection?
+
+**No link exists in this export.** Measured:
+
+| Check | Result |
+| --- | --- |
+| Collection records (`saved_collections`) | 8, each with `fbid`, `label_values[Name, Type, Privacy, Update time]` |
+| Saved-post records (`saved_posts`) | 1,065, each with `fbid`, `label_values[URL, Caption, Title]` |
+| Collection `fbid`s appearing anywhere in `saved_posts` (all strings, any depth) | **0 of 8** |
+| Collection `Name` values appearing anywhere in `saved_posts` | **0 of 8** |
+| Saved-post `fbid`s appearing anywhere in `saved_collections` | **0 of 1,065** |
+| Shared `fbid` between the two files | **0** |
+| A membership key on either side | none — the two label sets are disjoint apart from `Update time`/`Title`, which are not references |
+
+**Finding:** the honest screen is two separate lists, and no "collection" grouping
+can be invented from this data. That is a finding, not a failure. It is recorded
+in `docs/archive-manifest.md` §11.
+
+## 5. Grouping, honestly
+
+| Group | Categories | Count | What it needs |
+| --- | --- | ---: | --- |
+| Event/activity lists | `story_reaction_sticker_reactions`, `questions`, `emoji_sliders`, `quizzes`, `story_likes`, `saved_collections`, `polls`, `saved_posts`, `liked_posts`, `instants_interactions`, `other_content` | 11 | the T2 event list |
+| Comment lists (same screen, gated) | `post_comments`, `reels_comments`, `liked_comments` | 3 | the T2 event list behind the reveal gate |
+| Media galleries | `profile_photos`, `archived_posts`, `posts`, `stories` | 4 | the existing gallery routes (D4 — never duplicated onto the event list) |
+| Fits neither | — | 0 | — |
+
+**Covered by the T2 screen unchanged (10):**
+`story_reaction_sticker_reactions`, `story_likes`, `saved_collections`,
+`saved_posts`, `liked_posts`, `instants_interactions`, `other_content`,
+`liked_comments` (title/`string_list_data` is the measured T2 shape) — plus the
+date handling for both comment categories, which is the same
+`string_map_data.Time.timestamp` path T2 already reads.
+
+**Need only a hero mapping (5):** `questions` and `quizzes` use `Question`;
+`polls` and `emoji_sliders` use `Question` when there is no `Caption`;
+`post_comments` and `reels_comments` use `Comment`. Those two label names are not
+in the T2 priority list, which was measured on T2's labels only. Extending the
+priority with `Question` and `Comment` is the whole change: no new screen, no new
+date path.
+
+**Need something new (0).** Every one of the 14 dated T3 categories is a
+label/value list the T2 screen already renders. The four media categories do not
+need the event list at all.
+
+## 6. Screen assignment
+
+| Screen | Categories | Count |
+| --- | --- | ---: |
+| Event list (month → year → day → row, §ADR 0013/0015) | the 11 event lists + the 3 comment lists | 14 |
+| Gallery (existing routes) | `posts`, `stories`, `archived_posts`, `profile_photos` | 4 |
+
+No T3 category is left on the generic table or tree.
+
+## 7. What this measurement leaves open
+
+- `note_and_repost_interactions.json` is now in the unrecognised bucket. It is a
+  real, unregistered category: 2 entries, one label-less `Author` container each,
+  no timestamp and no media. Registering it needs a name rule and a privacy tier,
+  and that is a decision, not a measurement. It must not be folded into `posts`
+  again (it was measured doing exactly that since M8).
+- `post_comments[].media_list_data[0].uri` is empty on 851 of 853 entries and
+  non-empty on **2**. The manifest's claim that it is *always* empty is no longer
+  true, and the two real URIs resolve to files present in the ZIP. Whether the
+  commented-on media should be shown is a product question; the event row does
+  not show it in M22.
+- `liked_comments[].string_list_data[0].value` is the same four-character string
+  on all 156 entries. It is not the comment text and carries no per-entry
+  information; the screen uses `title` (the account) and `href` only.
