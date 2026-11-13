@@ -42,6 +42,7 @@ export type {
 } from "./messages/threads.js";
 export {
   BASE_RADIUS,
+  focusedIndex,
   GOLDEN_ANGLE,
   totalHeightOf,
   vortexLayout,

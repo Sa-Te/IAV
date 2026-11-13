@@ -76,6 +76,23 @@ export function vortexLayout(
 }
 
 /** One full turn of the spiral; advancing phase by this is a no-op visually. */
+/**
+ * The card currently nearest the camera.
+ *
+ * The layout wraps `index * VERTICAL_SPACING - phase` into a band of length
+ * `count * VERTICAL_SPACING`, so the card crossing `y = 0` is the one whose
+ * unwrapped position is half a band behind the top. Sizing the texture window
+ * from `floor(phase)` instead — a world-unit number used as an index — put all 96
+ * resident textures on cards hundreds of units below the frustum while the eight
+ * cards on screen had none: a black canvas with 96 textures resident (M17).
+ */
+export function focusedIndex(count: number, phase: number): number {
+  if (count <= 0) return 0;
+  const total = totalHeightOf(count);
+  const raw = Math.round((phase + total / 2) / VERTICAL_SPACING);
+  return ((raw % count) + count) % count;
+}
+
 export function totalHeightOf(count: number): number {
   return Math.max(0, count) * VERTICAL_SPACING;
 }

@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { GOLDEN_ANGLE, totalHeightOf, vortexLayout, VERTICAL_SPACING } from "./layout.js";
+import {
+  focusedIndex,
+  GOLDEN_ANGLE,
+  totalHeightOf,
+  vortexLayout,
+  VERTICAL_SPACING,
+} from "./layout.js";
+import { projectCards } from "./projection.js";
+import { residentWindow } from "./window.js";
 
 const OPTS = { cardAspect: 1 } as const;
 
@@ -55,5 +63,39 @@ describe("vortexLayout", () => {
       expect(card.radius).toBeGreaterThan(2.5);
       expect(card.radius).toBeLessThan(4);
     }
+  });
+});
+
+describe("focusedIndex", () => {
+  it("names the card the camera is looking at, not a world-unit number", () => {
+    const height = 614;
+    for (const count of [16, 96, 392]) {
+      for (const phase of [0, 1.55, 17, 300, -4.2]) {
+        const layout = vortexLayout(count, phase, { cardAspect: 0.75 });
+        const screen = projectCards(layout, {
+          yaw: 0,
+          pitch: 0,
+          distance: 9,
+          fovY: Math.PI / 3,
+          viewport: { width: 1104, height },
+        });
+        const focus = focusedIndex(count, phase);
+        const card = screen.find((entry) => entry.index === focus);
+        // Within one card's height of the vertical centre — and inside the window.
+        expect(Math.abs((card?.y ?? Number.POSITIVE_INFINITY) - height / 2)).toBeLessThan(
+          height / 2,
+        );
+        expect(residentWindow(count, focus, Math.min(96, count))).toContain(focus);
+      }
+    }
+  });
+
+  it("has nothing to focus in an empty archive", () => {
+    expect(focusedIndex(0, 12)).toBe(0);
+  });
+
+  it("walks to the next card when the phase advances by one step", () => {
+    expect(focusedIndex(392, 0)).toBe(196);
+    expect(focusedIndex(392, VERTICAL_SPACING)).toBe(197);
   });
 });

@@ -118,7 +118,37 @@ describe("texture window", () => {
 
     await window.setWindow([1, 2]);
 
-    expect(window.stats()).toEqual({ resident: 2, bytes: 2 * 128 * 128 * 4, pending: 0 });
+    expect(window.stats()).toEqual({
+      resident: 2,
+      bytes: 2 * 128 * 128 * 4,
+      pending: 0,
+      failed: 0,
+    });
+  });
+
+  it("spends a request, not a layer, when a bitmap cannot be produced", async () => {
+    // The M17 failure in miniature: 96 impossible bitmaps must not consume the
+    // budget, or the next window can never draw anything.
+    const source = { request: vi.fn(async (index: number) => (index < 96 ? null : bitmap())) };
+    const window = createTextureWindow(sink(), source);
+
+    await window.setWindow(Array.from({ length: 96 }, (_, index) => index));
+    expect(window.stats()).toEqual({ resident: 0, bytes: 0, pending: 0, failed: 96 });
+
+    await window.setWindow(Array.from({ length: 96 }, (_, index) => 96 + index));
+    expect(window.stats().resident).toBe(96);
+  });
+
+  it("asks once for an index it cannot produce, never once per frame", async () => {
+    const source = { request: vi.fn(async () => null) };
+    const window = createTextureWindow(sink(), source);
+
+    await window.setWindow([4, 5]);
+    await window.setWindow([4, 5]);
+    await window.setWindow([4, 5]);
+
+    expect(source.request).toHaveBeenCalledTimes(2);
+    expect(window.stats().failed).toBe(2);
   });
 
   it("refuses a sink with fewer layers than the budget", () => {

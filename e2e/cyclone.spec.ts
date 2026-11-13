@@ -94,6 +94,30 @@ test("a device with 64 texture-array layers gets the grid and the reason", async
   await expect(page.locator("img")).not.toHaveCount(0);
 });
 
+test("a window larger than 96 cards fills, and the vortex draws", async ({ page }) => {
+  await importFixture(page);
+  const found = await caps(page);
+  test.skip(
+    !(found.webgl2 && found.maxArrayTextureLayers >= CAPABLE),
+    "no WebGL2 with 96 layers here",
+  );
+
+  // The M17 regression, read from the same overlay a person reads: a real archive
+  // gave "draw calls: 0 · resident textures: 0" on a black canvas, because every
+  // failed thumbnail kept its layer and the window was anchored to the wrong card.
+  await page.goto("/dev/cyclone-stats");
+  const summary = page.locator("p.summary").first();
+  await expect(summary).not.toContainText("draw calls: 0", { timeout: 30_000 });
+
+  const text = await summary.innerText();
+  const resident = Number(/resident textures: (\d+)/.exec(text)?.[1] ?? "0");
+  const drawCalls = Number(/draw calls: (\d+)/.exec(text)?.[1] ?? "0");
+
+  expect(drawCalls).toBeGreaterThanOrEqual(1);
+  // 124 fixture items, 5 of them videos with no bitmap: the window holds the rest.
+  expect(resident).toBeGreaterThanOrEqual(90);
+});
+
 test("when the canvas starts, the texture window reports real resident pixels", async ({
   page,
 }) => {

@@ -7,6 +7,7 @@ import { useMediaList } from "../media/useMediaList.js";
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
 import { State } from "../ui/State.js";
 import { usePrefersReducedMotion } from "../ui/usePrefersReducedMotion.js";
+import { cycloneBitmapSource } from "./bitmapSource.js";
 import { CycloneStage } from "./CycloneStage.js";
 import { TextureBudgetError } from "./gl/textures.js";
 import { startCyclone } from "./startCyclone.js";
@@ -29,6 +30,7 @@ export function CyclonePage(): JSX.Element {
   const [opened, setOpened] = useState<MediaItemView | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [budgetRefused, setBudgetRefused] = useState(false);
+  const [noImages, setNoImages] = useState(false);
 
   useEffect(() => {
     const onOpen = (event: Event) => {
@@ -98,6 +100,12 @@ export function CyclonePage(): JSX.Element {
     );
   }
 
+  if (noImages) {
+    return gridFallback(
+      "The 3D view could not prepare any of these images on this device, so the grid is shown instead.",
+    );
+  }
+
   if (unavailable) {
     return gridFallback(
       "This browser cannot start the 3D view: it needs WebGL2 with at least 96 texture-array layers.",
@@ -117,28 +125,12 @@ export function CyclonePage(): JSX.Element {
         items={items}
         reducedMotion={reducedMotion}
         onUnavailable={() => setUnavailable(true)}
+        onEmpty={() => setNoImages(true)}
         start={(canvas, media) => {
           try {
             return startCyclone({
               canvas,
-              items: media.map((item, index) => ({
-                index,
-                bitmap: async () => {
-                  // 256px, not the grid's 512px (D3): the cards are small, and the
-                  // window is what bounds memory.
-                  const blob = await repository.getMediaBlob(item.id);
-                  if (blob === null) return null;
-                  try {
-                    return await createImageBitmap(blob, {
-                      resizeWidth: 256,
-                      resizeHeight: 256,
-                      resizeQuality: "medium",
-                    });
-                  } catch {
-                    return null;
-                  }
-                },
-              })),
+              items: cycloneBitmapSource(repository, media),
               reducedMotion,
             });
           } catch (error) {

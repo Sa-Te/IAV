@@ -17,6 +17,9 @@ import type { CycloneHandle } from "./startCyclone.js";
 /** A pointer that travelled further than this between press and release is a drag, not a click. */
 const CLICK_SLOP_PX = 8;
 
+/** If nothing has a texture this long after starting, say so instead of showing black. */
+const EMPTY_SCENE_DEADLINE_MS = 4000;
+
 /**
  * The canvas, the hidden keyboard list, and the decisions about motion.
  *
@@ -36,11 +39,14 @@ export function CycloneStage({
   start,
   reducedMotion,
   onUnavailable,
+  onEmpty,
 }: {
   items: readonly MediaItemView[];
   start: (canvas: HTMLCanvasElement, items: readonly MediaItemView[]) => CycloneHandle | null;
   reducedMotion: boolean;
   onUnavailable?: () => void;
+  /** The window settled with no texture at all: the route shows the grid instead. */
+  onEmpty?: () => void;
 }): JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const handleRef = useRef<CycloneHandle | null>(null);
@@ -48,6 +54,13 @@ export function CycloneStage({
   const tiltRef = useRef<Tilt>(NO_TILT);
   const tiltTargetRef = useRef<Tilt>(NO_TILT);
   const dragRef = useRef<{ y: number; at: number } | null>(null);
+  // Callbacks are read through refs so a caller's inline arrow cannot restart the
+  // scene. It did: every parent render (the stats overlay ticks twice a second)
+  // re-created the handle, re-requested 96 textures and threw away the pixels
+  // that were in flight — 16 GL contexts in nine seconds on a real archive.
+  const startRef = useRef(start);
+  const onUnavailableRef = useRef(onUnavailable);
+  const onEmptyRef = useRef(onEmpty);
   // Survives the release: the click that follows a drag must not open a card.
   const dragMovedRef = useRef(0);
   const pausedRef = useRef(false);
@@ -63,14 +76,20 @@ export function CycloneStage({
   const animate = !reducedMotion || motionOptIn;
 
   useEffect(() => {
+    startRef.current = start;
+    onUnavailableRef.current = onUnavailable;
+    onEmptyRef.current = onEmpty;
+  });
+
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (canvas === null || !animate) return;
 
-    const handle = start(canvas, items);
+    const handle = startRef.current(canvas, items);
     handleRef.current = handle;
     if (handle === null) {
       setAvailable(false);
-      onUnavailable?.();
+      onUnavailableRef.current?.();
       return;
     }
 
@@ -140,6 +159,8 @@ export function CycloneStage({
 
     let frame = 0;
     let last = performance.now();
+    const startedAt = last;
+    let reportedEmpty = false;
     const tick = (now: number) => {
       const dt = Math.min(64, now - last);
       last = now;
@@ -156,6 +177,13 @@ export function CycloneStage({
         handle.setPhase(motionRef.current.phase);
       }
       handle.frame(dt);
+
+      // A deadline, not a hope: a black canvas is not an answer (AGENTS.md §7).
+      if (!reportedEmpty && now - startedAt > EMPTY_SCENE_DEADLINE_MS) {
+        reportedEmpty = true;
+        if (handle.stats().resident === 0) onEmptyRef.current?.();
+      }
+
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -171,7 +199,7 @@ export function CycloneStage({
       handle.stop();
       handleRef.current = null;
     };
-  }, [animate, items, start, onUnavailable, reducedMotion]);
+  }, [animate, items, reducedMotion]);
 
   useEffect(() => {
     pausedRef.current = paused;

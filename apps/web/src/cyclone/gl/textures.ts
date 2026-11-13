@@ -46,6 +46,8 @@ export interface TextureStats {
   readonly bytes: number;
   /** Indices currently waiting for a bitmap. */
   readonly pending: number;
+  /** Indices asked once and found impossible (a video, an undecodable file). */
+  readonly failed: number;
 }
 
 export interface TextureWindow {
@@ -76,6 +78,10 @@ export function createTextureWindow(
   for (let layer = sink.layerCount - 1; layer >= 0; layer -= 1) free.push(layer);
   const pending = new Map<number, Promise<void>>();
   const wanted = new Set<number>();
+  // Indices whose bitmap could not be produced. Asked once and remembered: a
+  // video has no still frame at 256px, and re-asking every frame is the request
+  // storm that starved the window on a real archive (M17).
+  const failed = new Set<number>();
   let closed = false;
 
   const takeLayer = (): number => {
@@ -96,21 +102,29 @@ export function createTextureWindow(
     free.push(entry.layer);
   };
 
-  const request = (index: number, layer: number): Promise<void> => {
+  const request = (index: number): Promise<void> => {
     const work = (async () => {
       const bitmap = await source.request(index, THUMBNAIL_SIZE);
+      if (bitmap === null) {
+        failed.add(index);
+        return;
+      }
       // The window may have moved while we waited: close the pixels rather than
-      // uploading a card nobody will draw.
-      if (bitmap === null) return;
+      // uploading a card nobody will draw. No layer was taken, so none is lost.
       if (closed || !wanted.has(index) || resident.has(index)) {
         bitmap.close();
         return;
       }
-      sink.upload(layer, bitmap, index);
       // Read the size *before* close: an ImageBitmap reports 0x0 once closed, so
       // measuring afterwards kept the resident-byte total at 0 with 16 textures
       // resident (seen in the M16 browser run).
       const { width, height } = bitmap;
+      // The layer is taken at the moment of upload, never at the moment of asking.
+      // Pinning one per request meant every null or late bitmap kept a layer for
+      // good: 96 of them exhausted the budget, `setWindow` threw on every frame,
+      // and the scene went black on a real 392-item archive.
+      const layer = takeLayer();
+      sink.upload(layer, bitmap, index);
       bitmap.close();
       resident.set(index, {
         layer,
@@ -133,13 +147,13 @@ export function createTextureWindow(
 
       const requests: Promise<void>[] = [];
       for (const index of indices) {
-        if (resident.has(index)) continue;
+        if (resident.has(index) || failed.has(index)) continue;
         const inFlight = pending.get(index);
         if (inFlight !== undefined) {
           requests.push(inFlight);
           continue;
         }
-        requests.push(request(index, takeLayer()));
+        requests.push(request(index));
       }
 
       await Promise.all(requests);
@@ -155,7 +169,7 @@ export function createTextureWindow(
     stats() {
       let bytes = 0;
       for (const entry of resident.values()) bytes += entry.bytes;
-      return { resident: resident.size, bytes, pending: pending.size };
+      return { resident: resident.size, bytes, pending: pending.size, failed: failed.size };
     },
   };
 }

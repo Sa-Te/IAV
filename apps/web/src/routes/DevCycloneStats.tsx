@@ -1,6 +1,7 @@
 import type { MediaItemView } from "@instavault/core";
 import { useEffect, useRef, useState, type JSX } from "react";
 
+import { cycloneBitmapSource } from "../cyclone/bitmapSource.js";
 import { CycloneStage } from "../cyclone/CycloneStage.js";
 import { startCyclone, type CycloneHandle } from "../cyclone/startCyclone.js";
 import { useMediaList } from "../media/useMediaList.js";
@@ -80,22 +81,7 @@ export function DevCycloneStats(): JSX.Element {
           const handle = startCyclone({
             canvas,
             reducedMotion: false,
-            items: media.map((item, index) => ({
-              index,
-              bitmap: async () => {
-                const blob = await repository.getMediaBlob(item.id);
-                if (blob === null) return null;
-                try {
-                  return await createImageBitmap(blob, {
-                    resizeWidth: 256,
-                    resizeHeight: 256,
-                    resizeQuality: "medium",
-                  });
-                } catch {
-                  return null;
-                }
-              },
-            })),
+            items: cycloneBitmapSource(repository, media),
           });
           if (handle === null) return null;
 

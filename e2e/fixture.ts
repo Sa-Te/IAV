@@ -28,8 +28,12 @@ export interface Fixture {
   };
 }
 
-const POSTS = 12;
+// More than the cyclone's 96-layer window: a 16-card fixture fits entirely in the
+// window, so it could never exercise the window at all (M17).
+const POSTS = 120;
 const STORIES = 4;
+/** Every thirtieth post is a video, which has no bitmap at any size. */
+const VIDEO_EVERY = 30;
 const PARTICIPANTS = 2;
 const INBOX_MESSAGES = 3;
 const REQUESTS_MESSAGES = 1;
@@ -88,8 +92,12 @@ export function buildFixture(): Fixture {
   const encode = (value: unknown): Uint8Array => new TextEncoder().encode(JSON.stringify(value));
 
   const posts = Array.from({ length: POSTS }, (_, index) => {
-    const path = `media/posts/202401/fixture-${index + 1}.png`;
-    files[path] = cardPng((index * 20) % 256);
+    const video = index % VIDEO_EVERY === 0;
+    const path = `media/posts/202401/fixture-${index + 1}.${video ? "mp4" : "png"}`;
+    // A video is not a decodable image: the cyclone must survive it, not stall on it.
+    files[path] = video
+      ? new TextEncoder().encode("ftyp-not-really-mp4")
+      : cardPng((index * 7) % 256);
     return {
       media: [{ uri: path, creation_timestamp: 1700000000 + index, title: `post ${index + 1}` }],
     };

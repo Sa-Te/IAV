@@ -1,4 +1,10 @@
-import { NO_TILT, residentWindow, type CardTransform, type Tilt } from "@instavault/core";
+import {
+  focusedIndex,
+  NO_TILT,
+  residentWindow,
+  type CardTransform,
+  type Tilt,
+} from "@instavault/core";
 
 import { createContext, type GlContext } from "./gl/context.js";
 import { createProgram } from "./gl/program.js";
@@ -167,7 +173,7 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
     setPhase(next) {
       phase = next;
       void textures
-        .setWindow(residentWindow(options.items.length, Math.floor(phase)))
+        .setWindow(residentWindow(options.items.length, focusedIndex(options.items.length, phase)))
         .then(() => draw());
     },
     setTilt(next) {
