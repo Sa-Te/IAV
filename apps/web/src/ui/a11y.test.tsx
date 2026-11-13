@@ -19,11 +19,11 @@ afterEach(() => {
 });
 
 const RECORD: CategoryRecord = {
-  id: "saved_posts",
+  id: "restricted_profiles",
   resolvedTier: 1,
   entryCount: 1,
-  data: [{ fbid: "1", media: [], label_values: [{ label: "Saved on", value: "a date" }] }],
-  sources: [{ path: "saved_posts.json", entryCount: 1, kind: "array" }],
+  data: [{ fbid: "1", media: [], label_values: [{ label: "Name", value: "a name" }] }],
+  sources: [{ path: "restricted_profiles.json", entryCount: 1, kind: "array" }],
   warnings: [],
 };
 
@@ -48,7 +48,7 @@ describe("landmark and heading walk", () => {
       <MemoryRouter>
         <RepositoryProvider repository={repository()}>
           <AppShell>
-            <CategoryView id="saved_posts" />
+            <CategoryView id="restricted_profiles" />
           </AppShell>
         </RepositoryProvider>
       </MemoryRouter>,
@@ -80,16 +80,14 @@ describe("landmark and heading walk", () => {
       <MemoryRouter>
         <RepositoryProvider repository={repository()}>
           <AppShell>
-            <CategoryView id="saved_posts" />
+            <CategoryView id="restricted_profiles" />
           </AppShell>
         </RepositoryProvider>
       </MemoryRouter>,
     );
 
-    expect(await screen.findByRole("table", { name: /Saved posts/ })).toBeDefined();
-    expect(screen.getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual([
-      "Saved on",
-    ]);
+    expect(await screen.findByRole("table", { name: /Restricted profiles/ })).toBeDefined();
+    expect(screen.getAllByRole("columnheader").map((cell) => cell.textContent)).toEqual(["Name"]);
   });
 });
 

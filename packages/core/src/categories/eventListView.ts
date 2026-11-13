@@ -73,8 +73,23 @@ export interface EventListView {
  */
 export const YEAR_LEVEL_MIN_MONTHS = 25;
 
-/** The measured hero priority; `Type` is deliberately absent (docs/T2-DESIGN.md §3). */
-const HERO_PRIORITY = ["Caption", "Title", "Name", "Search", "Changed", "Activation Type"];
+/**
+ * The measured hero priority. `Question` and `Comment` joined it in M22 after T3
+ * was measured: a question's text and a comment's text are the row's subject in
+ * exactly the way a caption is, and nothing else in those categories says what the
+ * row is about (docs/T3-DESIGN.md §3). `Type` stays absent — it names the kind of
+ * event, not the event, and using it would be an interpretation.
+ */
+const HERO_PRIORITY = [
+  "Caption",
+  "Title",
+  "Question",
+  "Comment",
+  "Name",
+  "Search",
+  "Changed",
+  "Activation Type",
+];
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);

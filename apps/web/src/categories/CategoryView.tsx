@@ -61,6 +61,29 @@ const EVENT_CATEGORIES = new Set([
   "your_ownership_of_digital_items",
 ]);
 
+/**
+ * The T3 categories the measurement assigned to the event/activity screen
+ * (docs/T3-DESIGN.md §6): eleven activity lists plus the three comment lists, which
+ * use the same screen and are gated by the registry flag (ADR 0014). The four
+ * media categories keep their gallery routes and are deliberately absent (D4).
+ */
+const EVENT_T3 = new Set([
+  "story_reaction_sticker_reactions",
+  "reels_comments",
+  "questions",
+  "emoji_sliders",
+  "quizzes",
+  "story_likes",
+  "liked_comments",
+  "saved_collections",
+  "post_comments",
+  "polls",
+  "saved_posts",
+  "liked_posts",
+  "instants_interactions",
+  "other_content",
+]);
+
 /** T2 categories the measurement assigned to the existing settings screen. */
 const SETTINGS_T2 = new Set([
   "signup_details",
@@ -132,6 +155,11 @@ function screenOf(id: string, record: CategoryRecord): Screen {
   }
 
   if (findCategory(id)?.privacyTier === 2 && EVENT_CATEGORIES.has(id)) {
+    const event = toEventListView(record);
+    if (event !== null) return { kind: "event", view: event };
+  }
+
+  if (findCategory(id)?.privacyTier === 3 && EVENT_T3.has(id)) {
     const event = toEventListView(record);
     if (event !== null) return { kind: "event", view: event };
   }

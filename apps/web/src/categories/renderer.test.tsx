@@ -105,13 +105,14 @@ describe("CategoryTree", () => {
 });
 
 describe("CategoryView", () => {
+  // A tier-4 list with no bespoke screen: the generic table still needs a route.
   const record: CategoryRecord = {
-    id: "saved_posts",
+    id: "restricted_profiles",
     resolvedTier: 1,
     entryCount: 2,
     data: [
-      { fbid: "1", media: [], label_values: [{ label: "Saved on", value: "a" }] },
-      { fbid: "2", media: [], label_values: [{ label: "Saved on", value: "b" }] },
+      { fbid: "1", media: [], label_values: [{ label: "Name", value: "a" }] },
+      { fbid: "2", media: [], label_values: [{ label: "Name", value: "b" }] },
     ],
     warnings: [],
   };
@@ -119,16 +120,16 @@ describe("CategoryView", () => {
   function viewFor(repository: ArchiveRepository): JSX.Element {
     return (
       <RepositoryProvider repository={repository}>
-        <CategoryView id="saved_posts" />
+        <CategoryView id="restricted_profiles" />
       </RepositoryProvider>
     );
   }
 
   it("renders a table from a synthetic envelope fixture", async () => {
-    render(viewFor(fakeRepository({ saved_posts: record })));
+    render(viewFor(fakeRepository({ restricted_profiles: record })));
 
     expect(await screen.findByRole("table")).toBeDefined();
-    expect(screen.getByRole("columnheader", { name: "Saved on" })).toBeDefined();
+    expect(screen.getByRole("columnheader", { name: "Name" })).toBeDefined();
     expect(screen.getAllByRole("row")).toHaveLength(3);
   });
 
@@ -136,7 +137,7 @@ describe("CategoryView", () => {
     render(
       viewFor(
         fakeRepository({
-          saved_posts: { ...record, data: [{ title: "no labels here" }] },
+          restricted_profiles: { ...record, data: [{ title: "no labels here" }] },
         }),
       ),
     );
@@ -150,7 +151,9 @@ describe("CategoryView", () => {
     expect(await screen.findByText("This category is not in this export.")).toBeDefined();
     cleanup();
 
-    render(viewFor(fakeRepository({ saved_posts: { ...record, entryCount: 0, data: [] } })));
+    render(
+      viewFor(fakeRepository({ restricted_profiles: { ...record, entryCount: 0, data: [] } })),
+    );
 
     expect(
       await screen.findByText("This category is in this export but holds no entries."),
@@ -179,7 +182,7 @@ describe("CategoryView — one category per privacy tier", () => {
     {
       id: "saved_posts",
       tier: "T3",
-      data: [{ fbid: "1", media: [], label_values: [{ label: "Saved on", value: "a date" }] }],
+      data: [{ fbid: "1", media: [], label_values: [{ label: "Caption", value: "a post" }] }],
     },
     {
       id: "threads_viewed",
@@ -219,6 +222,10 @@ describe("CategoryView — one category per privacy tier", () => {
         expect((await screen.findByText("Ads")).tagName).toBe("DT");
         expect(screen.getByText("personalised").tagName).toBe("DD");
         expect(screen.queryByRole("table")).toBeNull();
+      } else if (fixture.tier === "T3") {
+        // The T3 activity lists use the event screen (docs/T3-DESIGN.md §6).
+        expect((await screen.findByText("a post")).tagName).toBe("P");
+        expect(document.querySelector(".event-view")).not.toBeNull();
       } else {
         expect(await screen.findByRole("table")).toBeDefined();
         expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0);
