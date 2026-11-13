@@ -229,7 +229,8 @@ uncollected remainder. The earlier "two separate lists" conclusion is withdrawn.
 | Event/activity lists | `story_reaction_sticker_reactions`, `questions`, `emoji_sliders`, `quizzes`, `story_likes`, `polls`, `liked_posts`, `instants_interactions`, `other_content` | 9 | the T2 event list |
 | Saved folders | `saved_collections`, `saved_posts` | 2 | collections with their posts; the flat list joined by URL |
 | Comment lists (same screen, gated) | `post_comments`, `reels_comments`, `liked_comments` | 3 | the T2 event list behind the reveal gate |
-| Media galleries | `profile_photos`, `archived_posts`, `posts`, `stories` | 4 | the existing gallery routes (D4 — never duplicated onto the event list) |
+| Media | `archived_posts`, `posts`, `stories` | 3 | the existing gallery routes (D4 — never duplicated onto the event list) |
+| Photo | `profile_photos` | 1 | its own screen since the M22 follow-up; the gallery routes do not include it |
 | Fits neither | — | 0 | — |
 
 **Covered by the T2 screen unchanged (6):**
