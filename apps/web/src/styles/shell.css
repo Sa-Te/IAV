@@ -1,9 +1,48 @@
 /* The shell: one persistent sidebar, one content column. The sidebar is the app's
    navigation on every route (M18 D1); under 900px it becomes a modal sheet. */
 .app-shell {
+  /* One variable, read by the shell and by any full-bleed route underneath it. */
+  --shell-sidebar: var(--token-layout-sidebar);
   display: grid;
-  grid-template-columns: var(--token-layout-sidebar) minmax(0, 1fr);
+  grid-template-columns: var(--shell-sidebar) minmax(0, 1fr);
   min-height: 100dvh;
+}
+
+/* Collapsed: the sidebar is gone and the content (including the cyclone's fixed
+   canvas) takes the whole width. */
+.app-shell[data-sidebar="closed"] {
+  --shell-sidebar: 0px;
+}
+
+.app-shell[data-sidebar="closed"] > .sidebar {
+  display: none;
+}
+
+.sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--token-space-2);
+}
+
+.sidebar-collapse,
+.sidebar-open {
+  flex: none;
+}
+
+.sidebar-collapse {
+  padding: 0 var(--token-space-2);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-sm);
+  background: none;
+  color: var(--token-color-text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.app-tools {
+  gap: var(--token-space-3);
+  align-items: center;
 }
 
 .sidebar {
@@ -188,8 +227,19 @@
 }
 
 @media (max-width: 899px) {
-  .app-shell {
+  .app-shell,
+  .app-shell[data-sidebar="closed"] {
+    --shell-sidebar: 0px;
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* The sheet is the navigation here, so the collapse control does not apply. */
+  .app-shell[data-sidebar="closed"] > .sidebar {
+    display: flex;
+  }
+
+  .sidebar-open {
+    display: none;
   }
 
   .sidebar-toggle {

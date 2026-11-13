@@ -18,6 +18,27 @@ export const POSTER_TIMEOUT_MS = 10_000;
 
 const generated = new Map<string, Promise<Blob | null>>();
 
+/**
+ * Four decodes at a time. The cyclone asks for a whole window at once, and a
+ * hundred hidden <video> elements is a worse stall than a late poster.
+ */
+const MAX_IN_FLIGHT = 4;
+let inFlight = 0;
+const waiting: (() => void)[] = [];
+
+async function withSlot<T>(work: () => Promise<T>): Promise<T> {
+  if (inFlight >= MAX_IN_FLIGHT) {
+    await new Promise<void>((resolve) => waiting.push(resolve));
+  }
+  inFlight += 1;
+  try {
+    return await work();
+  } finally {
+    inFlight -= 1;
+    waiting.shift()?.();
+  }
+}
+
 /** A hidden video, seeked just past the first frame, drawn once. */
 async function drawPoster(blob: Blob, signal: AbortSignal): Promise<Blob | null> {
   const url = URL.createObjectURL(blob);
@@ -91,7 +112,7 @@ export function requestPoster(path: string, blob: Blob, store: PosterStore): Pro
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), POSTER_TIMEOUT_MS);
     try {
-      const poster = await drawPoster(blob, controller.signal);
+      const poster = await withSlot(() => drawPoster(blob, controller.signal));
       if (poster !== null) await store.put(key, poster);
       return poster;
     } catch {

@@ -88,6 +88,23 @@ describe("sidebar", () => {
     expect(button.getAttribute("aria-expanded")).toBe("true");
   });
 
+  it("collapses to a zero-width column and comes back, remembering the choice", async () => {
+    const user = userEvent.setup();
+    renderShell();
+    const collapse = await screen.findByRole("button", { name: "Hide the sidebar" });
+
+    expect(collapse.getAttribute("aria-expanded")).toBe("true");
+    await user.click(collapse);
+
+    // The shell carries the state; CSS derives both the column width and the
+    // cyclone's inset from it, so the canvas follows without a re-render.
+    expect(document.querySelector(".app-shell")?.getAttribute("data-sidebar")).toBe("closed");
+    expect(window.localStorage.getItem("instavault-sidebar")).toBe("closed");
+
+    await user.click(screen.getByRole("button", { name: "Show sidebar" }));
+    expect(document.querySelector(".app-shell")?.getAttribute("data-sidebar")).toBe("open");
+  });
+
   it("marks the current route with aria-current and only once", async () => {
     renderShell("/posts");
     const galleries = await screen.findByRole("navigation", { name: "Galleries" });

@@ -14,6 +14,9 @@ export interface Instance {
   /** Normalised half-width and half-height: a card keeps its own picture's shape. */
   readonly scaleX: number;
   readonly scaleY: number;
+  /** The part of the 256px layer the picture fills (a portrait does not fill it). */
+  readonly uvX: number;
+  readonly uvY: number;
   /** Layer in the texture array, or -1 when no texture is resident yet. */
   readonly layer: number;
   readonly alpha: number;
@@ -33,7 +36,7 @@ export interface Renderer {
 
 const QUAD = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
 const INDICES = new Uint16Array([0, 1, 2, 2, 1, 3]);
-const FLOATS_PER_INSTANCE = 6;
+const FLOATS_PER_INSTANCE = 8;
 
 export function createRenderer(gl: WebGL2RenderingContext, program: WebGLProgram): Renderer {
   const vao = gl.createVertexArray();
@@ -62,6 +65,7 @@ export function createRenderer(gl: WebGL2RenderingContext, program: WebGLProgram
     ["aOffset", 2, 0],
     ["aScale", 2, 2],
     ["aLayer", 1, 4],
+    ["aUv", 2, 6],
   ] as const) {
     const location = gl.getAttribLocation(program, name);
     gl.enableVertexAttribArray(location);
@@ -111,6 +115,8 @@ export function createRenderer(gl: WebGL2RenderingContext, program: WebGLProgram
         instanceData[at + 3] = instance.scaleY;
         instanceData[at + 4] = instance.layer;
         instanceData[at + 5] = instance.alpha;
+        instanceData[at + 6] = instance.uvX;
+        instanceData[at + 7] = instance.uvY;
       });
 
       gl.bindBuffer(gl.ARRAY_BUFFER, instanceBuffer);

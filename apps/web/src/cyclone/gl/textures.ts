@@ -32,7 +32,12 @@ export const BYTES_PER_PIXEL = 4;
 
 export interface LayerSink {
   readonly layerCount: number;
-  upload(layer: number, bitmap: ImageBitmap, index: number): void;
+  upload(
+    layer: number,
+    bitmap: ImageBitmap,
+    index: number,
+    size: { width: number; height: number },
+  ): void;
   clear(layer: number): void;
 }
 
@@ -124,7 +129,7 @@ export function createTextureWindow(
       // good: 96 of them exhausted the budget, `setWindow` threw on every frame,
       // and the scene went black on a real 392-item archive.
       const layer = takeLayer();
-      sink.upload(layer, bitmap, index);
+      sink.upload(layer, bitmap, index, { width, height });
       bitmap.close();
       resident.set(index, {
         layer,

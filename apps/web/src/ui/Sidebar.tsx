@@ -27,7 +27,13 @@ const GALLERIES: readonly {
 const FOCUSABLE =
   'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
-export function Sidebar(): JSX.Element {
+export function Sidebar({
+  collapsed = false,
+  onCollapse,
+}: {
+  collapsed?: boolean;
+  onCollapse?: () => void;
+} = {}): JSX.Element {
   const rows = useCategoryRows();
   const compact = useMediaQuery("(max-width: 899px)");
   const location = useLocation();
@@ -128,9 +134,22 @@ export function Sidebar(): JSX.Element {
         aria-modal={compact ? (open ? "true" : undefined) : undefined}
         inert={compact && !open ? true : undefined}
       >
-        <NavLink to="/" end className="wordmark sidebar-wordmark">
-          InstaVault
-        </NavLink>
+        <div className="sidebar-top">
+          <NavLink to="/" end className="wordmark sidebar-wordmark">
+            InstaVault
+          </NavLink>
+          {onCollapse !== undefined && !compact && (
+            <button
+              type="button"
+              className="sidebar-collapse"
+              aria-label="Hide the sidebar"
+              aria-expanded={!collapsed}
+              onClick={onCollapse}
+            >
+              ‹
+            </button>
+          )}
+        </div>
 
         <nav aria-label="Galleries" className="sidebar-group">
           <h2 className="sidebar-heading">Galleries</h2>

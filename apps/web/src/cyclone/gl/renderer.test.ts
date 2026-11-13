@@ -67,6 +67,8 @@ describe("renderer", () => {
         y: 0.5,
         scaleX: 0.05,
         scaleY: 0.05,
+        uvX: 1,
+        uvY: 1,
         layer: index,
         alpha: 0.8,
       })),

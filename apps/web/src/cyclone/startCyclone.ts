@@ -75,6 +75,7 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
   // Each card keeps its picture's own shape. A fixed quad stretched every landscape
   // photo to portrait and back (M17 point 1).
   const aspects = new Map<number, number>();
+  const uvExtents = new Map<number, { x: number; y: number }>();
   const textureObject = gl.createTexture();
   if (textureObject === null) return null;
   gl.bindTexture(gl.TEXTURE_2D_ARRAY, textureObject);
@@ -104,12 +105,14 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
         );
         slots.set(index, layer);
         aspects.set(index, bitmap.width / bitmap.height);
+        uvExtents.set(index, { x: bitmap.width / 256, y: bitmap.height / 256 });
       },
       clear(layer) {
         for (const [index, value] of slots) {
           if (value !== layer) continue;
           slots.delete(index);
           aspects.delete(index);
+          uvExtents.delete(index);
         }
       },
     },
@@ -160,7 +163,9 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
       const layer = slots.get(card.index);
       if (layer === undefined) continue;
       const aspect = aspects.get(card.index);
-      if (aspect === undefined || !Number.isFinite(aspect) || aspect <= 0) continue;
+      const uv = uvExtents.get(card.index);
+      if (aspect === undefined || uv === undefined || !Number.isFinite(aspect) || aspect <= 0)
+        continue;
       const scaleX = (layout[card.index]?.scale ?? 1) * CARD_SIZE_SHARE;
       // A quad is normalised per canvas axis, so equal numbers are not a square:
       // the height has to carry the canvas aspect divided by the picture's.
@@ -173,6 +178,8 @@ export function startCyclone(options: StartOptions): CycloneHandle | null {
         scaleY: card.index === highlight ? scaleY * 1.15 : scaleY,
         layer,
         alpha: card.index === highlight ? 1 : alpha,
+        uvX: uv.x,
+        uvY: uv.y,
       });
     }
     drawCalls = renderer.draw({ instances, background: BACKGROUND });

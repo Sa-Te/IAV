@@ -14,6 +14,7 @@ export const VERTEX_SHADER = `#version 300 es
 in vec2 aCorner;
 in vec2 aOffset;
 in vec2 aScale;
+in vec2 aUv;
 in float aLayer;
 in float aAlpha;
 
@@ -25,7 +26,7 @@ void main() {
   vec2 world = aOffset + aCorner * aScale;
   // Screen-space placement: x right, y down, matching the DOM and the projection.
   vec2 clip = vec2(world.x * 2.0 - 1.0, 1.0 - world.y * 2.0);
-  vUv = aCorner;
+  vUv = aCorner * aUv;
   vLayer = aLayer;
   vAlpha = aAlpha;
   gl_Position = vec4(clip, 0.0, 1.0);
