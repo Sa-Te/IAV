@@ -38,7 +38,7 @@ export function PersonListView({
   raw,
 }: {
   view: PersonListViewData;
-  raw: unknown;
+  raw?: unknown;
 }): JSX.Element {
   const [limit, setLimit] = useState(PERSON_PAGE);
   const shown = view.people.slice(0, limit);
@@ -85,7 +85,7 @@ export function PersonListView({
         </div>
       )}
 
-      <RawDisclosure raw={raw} />
+      {raw !== undefined && <RawDisclosure raw={raw} />}
     </div>
   );
 }

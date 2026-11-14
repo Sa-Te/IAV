@@ -31,6 +31,12 @@ export interface Person {
   readonly profileUrl: string | null;
   /** Unix seconds; null when the entry carries no date. */
   readonly timestamp: number | null;
+  /**
+   * The original entry, only kept for an unmatched connection (one with no
+   * usable username). Not stored and never rendered as a field; it exists so the
+   * diff can keep the record instead of dropping it (M25).
+   */
+  readonly raw?: unknown;
 }
 
 export interface PersonYear {
@@ -224,6 +230,29 @@ export function groupPeopleByYear(people: readonly Person[]): PeopleByYear {
   return { years, undated: [...undated].sort(comparePeople) };
 }
 
+/** Order an arbitrary person list the way the person screen expects. */
+export function toPersonList(people: readonly Person[]): PersonListView {
+  const dated = people
+    .filter((person) => person.timestamp !== null)
+    .sort((a, b) => {
+      const yearA = yearOf(a) ?? 0;
+      const yearB = yearOf(b) ?? 0;
+      return yearB - yearA || comparePeople(a, b);
+    });
+  const undated = people.filter((person) => person.timestamp === null).sort(comparePeople);
+  const ordered = [...dated, ...undated];
+  const { years, undated: undatedOut } = groupPeopleByYear(ordered);
+
+  return {
+    kind: "people",
+    years,
+    undated: undatedOut,
+    people: ordered,
+    total: ordered.length,
+    hasDates: dated.length > 0,
+  };
+}
+
 /**
  * The person list for a T4 record, or null when the category was not measured as
  * one (a hashtag list, a contact list) or the record holds no person at all.
@@ -251,23 +280,5 @@ export function toPersonView(record: {
   }
   if (people.length === 0) return null;
 
-  const dated = people
-    .filter((person) => person.timestamp !== null)
-    .sort((a, b) => {
-      const yearA = yearOf(a) ?? 0;
-      const yearB = yearOf(b) ?? 0;
-      return yearB - yearA || comparePeople(a, b);
-    });
-  const undated = people.filter((person) => person.timestamp === null).sort(comparePeople);
-  const ordered = [...dated, ...undated];
-  const { years, undated: undatedOut } = groupPeopleByYear(ordered);
-
-  return {
-    kind: "people",
-    years,
-    undated: undatedOut,
-    people: ordered,
-    total: ordered.length,
-    hasDates: dated.length > 0,
-  };
+  return toPersonList(people);
 }

@@ -118,3 +118,37 @@
   color: var(--token-color-text-muted);
   font-size: var(--token-text-12);
 }
+
+/* --- /connections: followers ∩ following -------------------------------- */
+.connections-page {
+  max-width: 88ch;
+}
+
+.connections-summary {
+  font-size: var(--token-text-18);
+  font-weight: 500;
+  margin: var(--token-space-3) 0 var(--token-space-6);
+}
+
+.connections-group {
+  margin-top: var(--token-space-10);
+}
+
+.connections-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--token-space-3);
+  margin: 0 0 var(--token-space-3);
+  padding-bottom: var(--token-space-2);
+  border-bottom: 1px solid var(--token-color-border);
+  font-size: var(--token-text-18);
+  font-weight: 600;
+}
+
+.connections-count {
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-13);
+  font-weight: 400;
+}

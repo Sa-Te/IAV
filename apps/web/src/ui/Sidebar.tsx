@@ -166,6 +166,11 @@ export function Sidebar({
               </li>
             ))}
             <li>
+              <NavLink to="/connections" className="sidebar-link">
+                Connections
+              </NavLink>
+            </li>
+            <li>
               <NavLink to="/cyclone" className="sidebar-link">
                 Cyclone
               </NavLink>

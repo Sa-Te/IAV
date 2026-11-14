@@ -75,6 +75,12 @@ export function TierPage(): JSX.Element {
       </h1>
       <p className="summary">{group.description}</p>
 
+      {group.tier === 4 && (
+        <p>
+          <Link to="/connections">Compare followers and following →</Link>
+        </p>
+      )}
+
       {rows.status === "loading" && <State kind="loading" message="Reading the archive…" />}
       {rows.status === "failed" && <State kind="error" message={rows.message} />}
 

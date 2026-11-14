@@ -43,6 +43,8 @@ export { groupMessages } from "./messages/bubbles.js";
 export type { MessageGroup } from "./messages/bubbles.js";
 export { identifyOwnerSender, toOwnerIdentity } from "./messages/ownerIdentity.js";
 export type { OwnerIdentity } from "./messages/ownerIdentity.js";
+export { diffConnections } from "./connections/diff.js";
+export type { ConnectionDiff, ConnectionRecord } from "./connections/diff.js";
 export type {
   ThreadAttachment,
   ThreadFolder,
@@ -132,6 +134,7 @@ export {
   groupPeopleByYear,
   PERSON_CATEGORY_IDS,
   toPerson,
+  toPersonList,
   toPersonView,
 } from "./categories/personView.js";
 export type { PeopleByYear, Person, PersonListView, PersonYear } from "./categories/personView.js";

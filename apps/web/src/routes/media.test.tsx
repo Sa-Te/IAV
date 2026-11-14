@@ -225,6 +225,7 @@ describe("dev route gate", () => {
       "/archived",
       "/cyclone",
       "/categories",
+      "/connections",
       "/categories/:id",
       "/tiers/:tier",
     ]);

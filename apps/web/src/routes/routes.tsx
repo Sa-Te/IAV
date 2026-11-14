@@ -5,6 +5,7 @@ import { State } from "../ui/State.js";
 import { CategoryRoute } from "../categories/CategoryView.js";
 import { TierPage } from "./TierPage.js";
 import { CategoryGallery } from "./CategoryGallery.js";
+import { ConnectionsPage } from "./ConnectionsPage.js";
 import { DevIngest } from "./DevIngest.js";
 import { DevLogs } from "./DevLogs.js";
 import { DevMediaAudit } from "./DevMediaAudit.js";
@@ -50,6 +51,7 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
       ),
     },
     { path: "/categories", element: <CategoryIndex /> },
+    { path: "/connections", element: <ConnectionsPage /> },
     { path: "/categories/:id", element: <CategoryRoute /> },
     { path: "/tiers/:tier", element: <TierPage /> },
   ];
