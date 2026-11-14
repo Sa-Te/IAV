@@ -216,33 +216,39 @@ describe("runIngest — a category that arrives as several files", () => {
     });
   }
 
-  it("keeps both files, sums their entries and records provenance", async () => {
+  it("resolves the two apps' files to two rows by parent folder (ADR 0018)", async () => {
     const sink = new MemorySink();
     const job = await runIngest({ zip: twoFileArchive(), sink, now: advancingClock() });
 
     expect(job.status).toBe("ready");
-    const record = sink.categories.get("follow_requests_you've_received");
-    expect(record).toBeDefined();
-    if (record === undefined) return;
 
-    expect(record.sources).toEqual([
+    const connections = sink.categories.get("follow_requests_you've_received");
+    const threads = sink.categories.get("threads_follow_requests_received");
+    expect(connections).toBeDefined();
+    expect(threads).toBeDefined();
+    if (connections === undefined || threads === undefined) return;
+
+    expect(connections.sources).toEqual([
       {
         path: "connections/followers_and_following/follow_requests_you've_received.json",
         entryCount: 2,
         kind: "array",
       },
+    ]);
+    expect(connections.entryCount).toBe(2);
+    expect(JSON.stringify(connections.data)).toContain('"fbid":"1"');
+    expect(JSON.stringify(connections.data)).not.toContain("threads-user");
+
+    expect(threads.sources).toEqual([
       {
         path: "your_instagram_activity/threads/follow_requests_you've_received.json",
         entryCount: 1,
         kind: "object",
       },
     ]);
-    expect(record.entryCount).toBe(3);
-
-    // Neither file's data was dropped: one payload per file, in file order.
-    expect(record.data).toHaveLength(2);
-    expect(JSON.stringify(record.data)).toContain("threads-user");
-    expect(JSON.stringify(record.data)).toContain('"fbid":"1"');
+    expect(threads.entryCount).toBe(1);
+    expect(JSON.stringify(threads.data)).toContain("threads-user");
+    expect(JSON.stringify(threads.data)).not.toContain('"fbid":"1"');
   });
 
   it("concatenates lists when every file is a list, and still sums provenance", async () => {

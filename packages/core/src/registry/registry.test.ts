@@ -14,9 +14,31 @@ import type { Category } from "./types.js";
 
 const DATA_MAP_URL = new URL("../../../../docs/DATA-MAP.md", import.meta.url);
 
+/**
+ * Rows whose filename is shared with another category, so the id is deliberately
+ * not the basename (ADR 0018: the same follow-requests file is written by
+ * Instagram and by Threads into two folders).
+ */
+const SHARED_BASENAMES: Readonly<Record<string, string>> = {
+  threads_follow_requests_received: "follow_requests_you've_received.json",
+};
+
+const THREAD_FOLDERS = ["inbox", "message_requests", "followers_and_following", "threads"] as const;
+
+function folderFor(category: Category): string {
+  const parent = category.match.parentSegment;
+  return THREAD_FOLDERS.find((segment) => parent?.test(segment)) ?? "inbox";
+}
+
 function basenameFor(category: Category): string {
-  // Message threads share one basename; every other category is named after its id.
-  return category.match.parentSegment === undefined ? `${category.id}.json` : "message_1.json";
+  const shared = SHARED_BASENAMES[category.id];
+  if (shared !== undefined) return shared;
+  // The 254 message threads share one basename; every other category is named
+  // after its id.
+  const folder = category.match.parentSegment === undefined ? null : folderFor(category);
+  return folder === "inbox" || folder === "message_requests"
+    ? "message_1.json"
+    : `${category.id}.json`;
 }
 
 function pathFor(category: Category): string {
@@ -24,10 +46,7 @@ function pathFor(category: Category): string {
   if (parent === undefined) {
     return basenameFor(category);
   }
-  const folder = ["inbox", "message_requests"].find((segment) => parent.test(segment));
-  if (folder === undefined) {
-    throw new Error(`registry test cannot build a path for ${category.id}`);
-  }
+  const folder = folderFor(category);
   return `messages/${folder}/thread_${category.id}/${basenameFor(category)}`;
 }
 

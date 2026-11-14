@@ -182,17 +182,19 @@ describe("toTableView — a category fed by several files", () => {
   });
 
   it("falls back to a tree when one file cannot be read as a table", () => {
-    // The measured follow_requests_you've_received shape: a list plus an object.
+    // A merged category whose halves are different containers: a list plus an
+    // object. (T4's follow-requests collision is two rows since ADR 0018; this
+    // test guards the merge reader itself.)
     const data = [
       [{ fbid: "1", media: [], label_values: [{ label: "A", value: "a" }] }],
       { text_post_app_follow_requests: [{ string_list_data: [{ value: "x" }] }] },
     ];
     const view = toTableView({
-      id: "follow_requests_you've_received",
+      id: "merged_example",
       data,
       sources: [
-        { path: "connections/follow_requests_you've_received.json", entryCount: 1, kind: "array" },
-        { path: "threads/follow_requests_you've_received.json", entryCount: 1, kind: "object" },
+        { path: "one/merged_example.json", entryCount: 1, kind: "array" },
+        { path: "two/merged_example.json", entryCount: 1, kind: "object" },
       ],
     });
 

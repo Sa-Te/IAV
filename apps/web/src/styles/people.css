@@ -1,0 +1,86 @@
+/*
+ * The T4 person screen (M23). A card is initials, a name, a username, a date and
+ * an optional link. No avatar image exists in the export; the initials are text
+ * on a token surface, never a generated picture or a hashed colour.
+ */
+
+.people-view {
+  max-width: 88ch;
+}
+
+.people-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--token-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.people-year {
+  margin-top: var(--token-space-6);
+}
+
+.people-year:first-of-type {
+  margin-top: var(--token-space-2);
+}
+
+.people-heading {
+  margin: 0 0 var(--token-space-3);
+  padding-bottom: var(--token-space-2);
+  border-bottom: 1px solid var(--token-color-border);
+  font-size: var(--token-text-18);
+  font-weight: 600;
+}
+
+.person-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--token-space-3);
+  height: 100%;
+  padding: var(--token-space-4);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  background: var(--token-color-surface);
+}
+
+.person-initials {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--token-space-10);
+  height: var(--token-space-10);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-full);
+  background: var(--token-color-raised);
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-13);
+}
+
+.person-body {
+  min-width: 0;
+}
+
+.person-name {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.person-username {
+  margin: 0;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+  overflow-wrap: anywhere;
+}
+
+.person-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--token-space-3);
+  margin: var(--token-space-1) 0 0;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+}

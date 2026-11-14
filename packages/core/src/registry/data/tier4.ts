@@ -88,17 +88,35 @@ export const TIER_4: readonly Category[] = [
     privacyTier: 4,
     variantRisk: "high",
     // The filename contains an apostrophe. Matched against the raw basename.
-    match: { basenames: [/^follow_requests_you've_received(?:_\d+)?\.json$/i] },
+    // The basename is also written by the Threads app in another folder, so the
+    // parent folder is the discriminator (ADR 0002, ADR 0018). Measured in M23:
+    // the two files hold disjoint people (0 of 29 in common).
+    match: {
+      basenames: [/^follow_requests_you've_received(?:_\d+)?\.json$/i],
+      parentSegment: /^followers_and_following$/i,
+    },
     signatures: [
       { kind: "object", requiredKeys: ["relationships_follow_requests_received"] },
       // Measured in archive-2/ (2026-10-31, fmt-e57990), connections/ file: the
       // label/value envelope replaced the wrapper.
       { kind: "array", requiredKeys: ["fbid", "label_values", "media", "timestamp"] },
-      // Same basename also appears under your_instagram_activity/threads/ in
-      // archive-2/, carrying a one-key object wrapper. Tier 1 assigns both files to
-      // this row, and the merge keeps that object, so the merged sample — what the
-      // drift tool measures — has this shape. Whether two apps' files may share one
-      // row is an open question (M7b report), not something this row may decide.
+    ],
+    mediaPath: "none",
+  },
+  {
+    id: "threads_follow_requests_received",
+    label: "Threads follow requests",
+    privacyTier: 4,
+    variantRisk: "high",
+    // Same basename as the row above, different app and different shape. The
+    // parent folder is the only discriminator; tier 2 alone would be a guess.
+    match: {
+      basenames: [/^follow_requests_you've_received(?:_\d+)?\.json$/i],
+      parentSegment: /^threads$/i,
+    },
+    // Measured in archive-2/ (2026-11-14): one object wrapper per file, entries of
+    // `string_list_data` with a threads.com profile URL.
+    signatures: [
       { kind: "object", requiredKeys: ["text_post_app_text_post_app_follow_requests_received"] },
     ],
     mediaPath: "none",

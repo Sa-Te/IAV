@@ -28,9 +28,27 @@ describe("resolveCategory — tier 1 (basename)", () => {
       id: "posts_you're_not_interested_in",
       tier: 1,
     });
-    expect(resolveCategory({ path: "follow_requests_you've_received.json", sample: null })).toEqual(
-      { ok: true, id: "follow_requests_you've_received", tier: 1 },
-    );
+    expect(
+      resolveCategory({
+        path: "connections/followers_and_following/follow_requests_you've_received.json",
+        sample: null,
+      }),
+    ).toEqual({ ok: true, id: "follow_requests_you've_received", tier: 1 });
+    expect(
+      resolveCategory({
+        path: "your_instagram_activity/threads/follow_requests_you've_received.json",
+        sample: null,
+      }),
+    ).toEqual({ ok: true, id: "threads_follow_requests_received", tier: 1 });
+  });
+
+  it("leaves a shared basename outside both parent folders unresolved", () => {
+    // Two apps write this filename; without the folder there is no honest answer.
+    const result = resolveCategory({
+      path: "follow_requests_you've_received.json",
+      sample: null,
+    });
+    expect(result.ok).toBe(false);
   });
 
   it("separates the 254 message threads by parent folder, not by basename", () => {

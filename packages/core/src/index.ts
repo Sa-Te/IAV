@@ -106,6 +106,13 @@ export { toSavedCollectionsView, toSavedPostsByFolder } from "./categories/saved
 export type { SavedByFolderView, SavedFolder, SavedItem } from "./categories/savedByFolder.js";
 export { toNameListView } from "./categories/nameListView.js";
 export type { NameListView, NameListSection } from "./categories/nameListView.js";
+export {
+  groupPeopleByYear,
+  PERSON_CATEGORY_IDS,
+  toPerson,
+  toPersonView,
+} from "./categories/personView.js";
+export type { PeopleByYear, Person, PersonListView, PersonYear } from "./categories/personView.js";
 export { toAvatarItemsView } from "./categories/avatarItemsView.js";
 export type { AvatarItem, AvatarItemsView } from "./categories/avatarItemsView.js";
 export { toDeviceEffectsView } from "./categories/deviceEffectsView.js";
