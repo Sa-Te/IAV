@@ -2,6 +2,9 @@ import { useCallback, useRef, useState, type JSX } from "react";
 
 import { MediaDetail } from "../media/MediaDetail.js";
 import { MediaGrid } from "../media/MediaGrid.js";
+import { MediaTimeline } from "../media/MediaTimeline.js";
+import { GalleryViewSwitch } from "../media/GalleryViewSwitch.js";
+import { useGalleryView } from "../media/useGalleryView.js";
 import { useMediaList } from "../media/useMediaList.js";
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
 import { State } from "../ui/State.js";
@@ -20,6 +23,7 @@ export function CategoryGallery({
 }): JSX.Element {
   const repository = useArchiveRepository();
   const { state, retry } = useMediaList(category);
+  const [view, setView] = useGalleryView();
   const [selected, setSelected] = useState<number | null>(null);
   const openerRef = useRef<HTMLElement | null>(null);
 
@@ -31,6 +35,8 @@ export function CategoryGallery({
   return (
     <div className="gallery">
       <h1>{title}</h1>
+
+      {state.status === "ready" && <GalleryViewSwitch view={view} onChange={setView} />}
 
       {state.status === "loading" && <State kind="loading" message="Reading the archive…" />}
 
@@ -49,14 +55,25 @@ export function CategoryGallery({
           <p className="summary">
             {state.items.length} {state.items.length === 1 ? "item" : "items"}
           </p>
-          <MediaGrid
-            items={state.items}
-            source={repository}
-            onOpen={(index) => {
-              openerRef.current = document.activeElement as HTMLElement | null;
-              setSelected(index);
-            }}
-          />
+          {view === "timeline" ? (
+            <MediaTimeline
+              items={state.items}
+              source={repository}
+              onOpen={(index) => {
+                openerRef.current = document.activeElement as HTMLElement | null;
+                setSelected(index);
+              }}
+            />
+          ) : (
+            <MediaGrid
+              items={state.items}
+              source={repository}
+              onOpen={(index) => {
+                openerRef.current = document.activeElement as HTMLElement | null;
+                setSelected(index);
+              }}
+            />
+          )}
         </>
       )}
 

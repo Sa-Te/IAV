@@ -300,6 +300,15 @@ function monthsBetween(oldest: string, newest: string): number {
   return (year(newest) - year(oldest)) * 12 + (month(newest) - month(oldest)) + 1;
 }
 
+export interface GroupingOptions {
+  /**
+   * `span` (default) applies ADR 0015's 25-month threshold. `always` keeps the
+   * year level even for a short span; the media timeline asks for year → month
+   * unconditionally, and must use the same grouping rather than a second one.
+   */
+  readonly years?: "span" | "always";
+}
+
 /**
  * Year → month → day, from the dated entries.
  *
@@ -309,14 +318,18 @@ function monthsBetween(oldest: string, newest: string): number {
  * range — a person scrolling from 2015 to 2026 wants the years, not a count of
  * months that happen to hold an entry.
  */
-export function groupByMonthAndYear(entries: readonly EventEntry[]): EventGrouping {
+export function groupByMonthAndYear(
+  entries: readonly EventEntry[],
+  options: GroupingOptions = {},
+): EventGrouping {
   const months = groupByMonth(entries);
   const oldest = months[months.length - 1];
   const newest = months[0];
   const spanMonths =
     oldest === undefined || newest === undefined ? 0 : monthsBetween(oldest.key, newest.key);
+  const always = options.years === "always";
 
-  if (spanMonths < YEAR_LEVEL_MIN_MONTHS) {
+  if (!always && spanMonths < YEAR_LEVEL_MIN_MONTHS) {
     return { months, years: [], spanMonths, showYears: false };
   }
 

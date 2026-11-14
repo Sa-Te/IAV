@@ -109,6 +109,13 @@ export type {
 export type { EventPreview, PollOption } from "./categories/eventPreview.js";
 export { toSavedCollectionsView, toSavedPostsByFolder } from "./categories/savedByFolder.js";
 export type { SavedByFolderView, SavedFolder, SavedItem } from "./categories/savedByFolder.js";
+export { toMediaTimeline } from "./categories/mediaTimeline.js";
+export type {
+  MediaTimeline,
+  MediaTimelineItem,
+  MediaTimelineMonth,
+  MediaTimelineYear,
+} from "./categories/mediaTimeline.js";
 export { toNameListView } from "./categories/nameListView.js";
 export type { NameListView, NameListSection } from "./categories/nameListView.js";
 export { toAiConversationsView } from "./categories/aiConversationView.js";
