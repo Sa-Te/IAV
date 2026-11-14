@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "rea
 import { useLocation } from "react-router-dom";
 
 import { DownloadFlow } from "../download/DownloadFlow.js";
+import { downloadOriginal } from "../download/singleFile.js";
 import { MediaDetail } from "../media/MediaDetail.js";
 import { MediaGrid } from "../media/MediaGrid.js";
 import { MediaTimeline } from "../media/MediaTimeline.js";
@@ -69,6 +70,7 @@ export function CategoryGallery({
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [downloadOpen, setDownloadOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [singleError, setSingleError] = useState<string | null>(null);
   const sizes = useMediaSizes();
   const anchorRef = useRef<string | null>(null);
   const selectRef = useRef<HTMLButtonElement | null>(null);
@@ -101,6 +103,7 @@ export function CategoryGallery({
     anchorRef.current = null;
     setDownloadOpen(false);
     setBusy(false);
+    setSingleError(null);
   }, []);
 
   // D1: a different route is a different view. The effect also covers leaving and
@@ -111,6 +114,7 @@ export function CategoryGallery({
     setDetailIndex(null);
     setDownloadOpen(false);
     setBusy(false);
+    setSingleError(null);
   }, [pathname]);
 
   // Escape leaves selection mode; the detail view owns Escape when it is open.
@@ -161,6 +165,26 @@ export function CategoryGallery({
       previous === null ? previous : selected ? selectAll(previous, ids) : deselect(previous, ids),
     );
   }, []);
+
+  /**
+   * One selected item downloads as itself, under its own name, in its own format.
+   * Two or more open the pre-flight and the streaming ZIP. The detail view has the
+   * same single-file path.
+   */
+  const downloadSelection = (): void => {
+    if (selection === null) return;
+    if (selection.count !== 1) {
+      setDownloadOpen(true);
+      return;
+    }
+    const id = [...selection.ids][0];
+    if (id === undefined) return;
+    setSingleError(null);
+    void downloadOriginal(id, repository).then((result) => {
+      if (result.ok) exitSelection();
+      else setSingleError(result.reason);
+    });
+  };
 
   return (
     <div className="gallery">
@@ -250,6 +274,11 @@ export function CategoryGallery({
         )}
       {selecting && selection !== null && (
         <div className="selection-dock">
+          {singleError !== null && (
+            <p className="download-error" role="alert">
+              {singleError}
+            </p>
+          )}
           {downloadOpen && plan !== null && (
             <DownloadFlow
               plan={plan}
@@ -265,7 +294,7 @@ export function CategoryGallery({
               count={selection.count}
               bytes={selection.bytes}
               total={orderedIds.length}
-              onDownload={() => setDownloadOpen(true)}
+              onDownload={downloadSelection}
               onSelectAll={() =>
                 setSelection((previous) =>
                   previous === null ? previous : selectAll(previous, orderedIds),

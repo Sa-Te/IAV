@@ -197,12 +197,63 @@ describe("download a selection", () => {
     expect(screen.getByRole("button", { name: "Select" })).toBeDefined();
   });
 
+  it("downloads a single selection as its own file, not a ZIP", async () => {
+    const user = userEvent.setup();
+    renderGallery();
+    await screen.findByText("3 items");
+    const select = screen.getByRole("button", { name: "Select" });
+    await waitFor(() => expect((select as HTMLButtonElement).disabled).toBe(false));
+    await user.click(select);
+    await user.click(screen.getByRole("button", { name: "a" }));
+
+    await user.click(screen.getByRole("button", { name: "Download" }));
+
+    await waitFor(() => expect(clicked).toHaveLength(1));
+    expect(clicked[0]).toBe("a.jpg");
+    expect(screen.queryByRole("region", { name: /^Download / })).toBeNull();
+    await waitFor(() =>
+      expect(screen.queryByRole("toolbar", { name: "Selection actions" })).toBeNull(),
+    );
+  });
+
+  it("downloads the original, at its own name and format, from the detail view", async () => {
+    const user = userEvent.setup();
+    renderGallery();
+    await screen.findByText("3 items");
+
+    await user.click(screen.getByRole("button", { name: "a" }));
+    const dialog = screen.getByRole("dialog");
+    expect(dialog.textContent).toContain("Original quality");
+
+    await user.click(within(dialog).getByRole("button", { name: "Download original" }));
+
+    await waitFor(() => expect(clicked).toHaveLength(1));
+    expect(clicked[0]).toBe("a.jpg");
+  });
+
+  it("keeps the detail open and says why when the original is missing", async () => {
+    const user = userEvent.setup();
+    renderGallery(repository(SIZES, {}));
+    await screen.findByText("3 items");
+
+    await user.click(screen.getByRole("button", { name: /^a/ }));
+    const dialog = screen.getByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Download original" }));
+
+    expect(await within(dialog).findByText(/no longer stored/)).toBeDefined();
+    expect(screen.getByRole("dialog")).toBeDefined();
+    expect(clicked).toEqual([]);
+  });
+
   it("warns about memory above 300 MB without blocking the download", async () => {
     const user = userEvent.setup();
-    renderGallery(repository({ "media/posts/a.jpg": 400 * MB }, { "media/posts/a.jpg": "big" }));
-    await screen.findByText("3 items");
-    await user.click(screen.getByRole("button", { name: "Select" }));
-    await user.click(screen.getByRole("button", { name: "a" }));
+    renderGallery(
+      repository(
+        { "media/posts/a.jpg": 400 * MB, "media/posts/b.jpg": 10 * MB },
+        { "media/posts/a.jpg": "big", "media/posts/b.jpg": "small" },
+      ),
+    );
+    await selectAll(user);
     const panel = await openPanel(user);
 
     expect(panel.textContent).toContain("built in memory");

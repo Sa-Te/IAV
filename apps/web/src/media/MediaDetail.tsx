@@ -1,6 +1,7 @@
 import type { MediaItemView } from "@instavault/core";
 import { useEffect, useRef, useState, type JSX } from "react";
 
+import { downloadOriginal } from "../download/singleFile.js";
 import { useMediaUrl, type MediaSource } from "./useMediaUrl.js";
 import { Provenance } from "./Provenance.js";
 import { State } from "../ui/State.js";
@@ -27,6 +28,8 @@ export function MediaDetail({
   const media = useMediaUrl(item.id, source);
   const closeRef = useRef<HTMLButtonElement | null>(null);
   const [idle, setIdle] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const idleTimer = useRef<number | null>(null);
   const reducedMotion = usePrefersReducedMotion();
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -82,6 +85,14 @@ export function MediaDetail({
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const download = async (): Promise<void> => {
+    setDownloading(true);
+    setDownloadError(null);
+    const result = await downloadOriginal(item.id, source);
+    setDownloading(false);
+    if (!result.ok) setDownloadError(result.reason);
+  };
+
   const caption = item.caption.trim();
   const when = item.takenAt > 0 ? new Date(item.takenAt * 1000).toLocaleString() : "Date unknown";
 
@@ -135,6 +146,24 @@ export function MediaDetail({
           <span>from {item.category}</span>
         </p>
         <Provenance item={item} />
+        <div className="detail-actions">
+          <button
+            type="button"
+            className="button"
+            onClick={() => void download()}
+            disabled={downloading}
+          >
+            Download original
+          </button>
+          <span className="detail-quality">
+            Original quality — the file as it is in your export.
+          </span>
+        </div>
+        {downloadError !== null && (
+          <p className="detail-error" role="alert">
+            {downloadError}
+          </p>
+        )}
       </div>
     </div>
   );
