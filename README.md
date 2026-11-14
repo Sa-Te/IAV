@@ -18,7 +18,10 @@ contact table; T5's thread lists and conversations (attachments and on-device
 search), the AI-conversation record, the payment settings page and the
 viewed-posts list. Long lists fold by year and then month; three T3 comment
 categories, T4's synced contacts and every T5 category ask before they render.
-There is no server, no account and no third-party network egress (ADR 0020).
+Any gallery can be put into selection mode — the grid or the timeline, with
+tri-state month and year checkboxes — and the selection downloads as a ZIP of the
+originals at their archive paths. There is no server, no account and no
+third-party network egress (ADR 0020, ADR 0022).
 
 ## What v1 is
 

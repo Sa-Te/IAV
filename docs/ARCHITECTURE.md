@@ -81,6 +81,8 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `categories/privacy.ts` | Which categories gate — tier 5 or the registry's `gated` flag — and the copy shown before one is revealed; reads the registry, never a hardcoded id list (ADR 0014). |
 | `media/cache.ts` | Bounded media cache: one entry and one in-flight decode per path, LRU by count at 150, evict = revoke URL then close bitmap, `releaseAll` for teardown. |
 | `media/thumbnail.ts` | Thumbnail geometry and the encode contract: max edge 512, aspect preserved, never upscaled, type taken from what the encoder produced. |
+| `selection/selection.ts` | Per-view media selection keyed by archive path: ids, count and byte total, toggle/range/all/subset/clear; immutable, no DOM (D1). |
+| `download/zipPlan.ts` | The download plan before a byte is read: entries at their archive paths, skips with a reason, duplicate paths collapsed, total bytes; absolute, `..`, backslash and control-character paths are refused. |
 | `messages/threads.ts` | Thread identity from the path (family + folder), summaries, newest-first ordering, and one thread's messages in chronological order. |
 
 The registry is **data, not code**: adding a category is one row. `registry.test.ts`
@@ -99,14 +101,21 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `packages/worker/src/index.ts` | Worker host: owns the run, posts progress, depends only on the port. |
 | `apps/web/src/repository/RepositoryContext.tsx` | The read path: the one place a view obtains an `ArchiveRepository`; components never touch IndexedDB. |
 | `apps/web/src/media/useMediaUrl.ts` | Three-state media (`pending` / `ready` / `failed`), one shared request per id, object URLs revoked on unmount. |
-| `apps/web/src/media/MediaGrid.tsx` | Responsive grid of `MediaItemView`; takes data and a media source as props. |
-| `apps/web/src/media/MediaTile.tsx` | One tile: pending skeleton, image, video frame, or a failure naming its reason. |
+| `apps/web/src/media/MediaGrid.tsx` | Responsive grid of `MediaItemView`; takes data, a media source and the selection handlers as props. |
+| `apps/web/src/media/MediaTile.tsx` | One tile: pending skeleton, image, video frame, or a failure naming its reason; in selection mode it toggles, carries `aria-pressed` and a visible check. |
 | `apps/web/src/media/MediaDetail.tsx` | Full-size view, caption, timestamp, category; Escape closes and focus returns. |
 | `apps/web/src/media/useMediaList.ts` | Pages one category — or every category — out of the repository. |
-| `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. Hosts the Grid/Timeline switch. |
+| `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. Hosts the Grid/Timeline switch and per-view selection, cleared by a route change (D1). |
 | `apps/web/src/media/GalleryViewSwitch.tsx` | Grid / Timeline as a native radio group with arrow-key handling and a status line. |
 | `apps/web/src/media/useGalleryView.ts` | The view choice, persisted in `localStorage`; Grid is the default. |
-| `apps/web/src/media/MediaTimeline.tsx` | Year → month sections, larger tiles with caption/date, and the final Undated group. |
+| `apps/web/src/media/MediaTimeline.tsx` | Year → month sections, larger tiles with caption/date, the final Undated group, and tri-state group checkboxes in selection mode. |
+| `apps/web/src/media/useMediaSizes.ts` | Every stored media path's byte size, read once per page; `null` until read so a selection is never built on unknown sizes. |
+| `apps/web/src/media/SelectionBar.tsx` | The sticky action bar: count · bytes, Download, select/deselect all of the view, cancel. |
+| `apps/web/src/download/DownloadFlow.tsx` | Owns build progress and the failure reason, so a progress update never re-renders the tile grid; throttles to 100 ms. |
+| `apps/web/src/download/DownloadPanel.tsx` | The pre-flight: totals, skipped items with reasons, the 300 MB and iOS notes, then determinate progress or the reason a build failed. |
+| `apps/web/src/download/buildZip.ts` | Streaming STORE-mode ZIP over fflate, one entry at a time, progress and a yield so the bar paints; never `zipSync`. |
+| `apps/web/src/download/saveBlob.ts` | Object URL → `<a download>` → click → immediate revoke; the dated filename. |
+| `apps/web/src/download/limits.ts` | The two honest limits: the 300 MB memory warning and iOS user-agent detection. |
 | `apps/web/src/routes/ConnectionsPage.tsx` | `/connections`: the three diff groups plus unmatched, using the person list. |
 | `apps/web/src/routes/HomeRoute.tsx` | `/`: checks the archive row once; no archive redirects to `/import`, an archive renders the gallery. The loading state is shown before the answer, never the gallery then a jump. |
 | `apps/web/src/import/ImportPage.tsx` | `/import`: the production front door, export instructions, file/drop control and the replace warning with current counts. |

@@ -222,6 +222,14 @@ These are checked, not hoped for.
   an original.
 - IndexedDB writes are batched in transactions. One transaction per record is a
   bug.
+- A download is a ZIP of originals built with fflate's streaming writer in STORE
+  mode (`ZipPassThrough`), never `zipSync`: the media is already compressed, and
+  deflating it costs seconds for no saving. Feed one entry at a time and yield so
+  progress paints; keep progress state out of the tile grid's render path.
+- A ZIP is assembled in memory. Above 300 MB the UI says so and lets the reader
+  proceed or narrow the selection; on iOS the save-through-`<a download>` caveat is
+  shown before the download starts. The object URL is revoked immediately after the
+  click.
 - Importing a 160MB export must emit progress at least every 2 seconds and must never
   leave the job in a state it cannot leave.
 

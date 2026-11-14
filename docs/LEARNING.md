@@ -345,3 +345,25 @@ progress.
 - 2026-11-14 — `fallback-is-a-deploy-file` — a client-routed static app needs one
   host rule (`/* /index.html 200`); without it a refresh on `/import` is a 404 —
   vault: `architecture/2026-11-14_m26-front-door.md`
+- 2026-11-14 — `selection-is-a-set-of-paths` — a selection is keyed by archive
+  path with a running byte total, so a re-render or page change cannot lose it and
+  a twice-referenced photo counts once —
+  vault: `learning-notes/concepts/selection-is-a-set-of-paths.md`
+- 2026-11-14 — `selection-ranges` — shift-click intersects the current view's order,
+  inclusive at both ends; a dead anchor selects only the clicked item, never
+  everything —
+  vault: `learning-notes/concepts/selection-ranges.md`
+- 2026-11-14 — `zip-path-safety` — an archive path becomes a filename, so absolute
+  paths, `..` segments, backslashes and control characters are refused and reported,
+  never rewritten —
+  vault: `learning-notes/concepts/zip-path-safety.md`
+- 2026-11-14 — `store-mode-zip` — media is already compressed, so the ZIP is STORE
+  through fflate's streaming writer, never `zipSync` + DEFLATE —
+  vault: `learning-notes/concepts/store-mode-zip.md`
+- 2026-11-14 — `revoke-immediately` — a download object URL is revoked right after
+  the click, in a `finally`; surviving URLs are the media cache's leak class —
+  vault: `learning-notes/concepts/revoke-immediately.md`
+- 2026-11-14 — `progress-in-the-leaf` — download progress in the gallery's state
+  re-rendered 419 tiles per file (14.4 s); a child owning it with a 100 ms throttle
+  took 1.8 s —
+  vault: `debug-log/2026-11-14_zip-progress-rerenders.md`
