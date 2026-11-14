@@ -315,3 +315,45 @@ is absent from this export and keeps the muted sidebar treatment already used fo
   shows initials, the display name, the username and the date, and **no link**. A
   constructed Instagram URL from the username would be an invention and is not
   taken.
+
+## 11. T5 remaining — the projection
+
+Measured from `archive-2/` on 2026-11-14 with the same ingest path. Entries are
+the app's stored counts; "files" is how many thread files feed the category. All
+five rows gate by tier 5 (ADR 0009), so no new gate work is needed.
+
+| Category | Files / entries | Measured shape | Screen today | What is left |
+| --- | ---: | --- | --- | --- |
+| `messages_inbox` | 122 files / 252 stored entries | thread objects: `participants`, `messages`, `title`, `thread_path`, `is_still_participant` | thread list, gated | none for the screen; see the count note below |
+| `messages_requests` | 142 files / 967 stored entries | the same thread object plus `is_pending` / `joinable_mode` | thread list, gated | none for the screen; same count note |
+| `threads_viewed` | 246 entries | one-key wrapper `text_post_app_text_post_app_posts_seen`; each entry `string_map_data` with `Author` (value), `Time` (timestamp), `URL` (href) | generic table/tree, gated | **the event list with `Author` as the hero**; `Time.timestamp` already exists in core, and the gate copy is the only new text |
+| `ai_conversations` | 2 entries | label/value envelope; 23 labels including `Summary`, `Message`, `Image`, `Image prompt`, `Transcription`, `Reaction`; conversation content is nested in `dict`/`vec` containers | generic table/tree, gated | **its own conversation screen**; this is the one genuinely new screen left |
+| `checkout_payment_information` | 1 entry | label/value envelope; labels `Region`, `Marketing offer seen time`, `Update time`, `Name`, `First name`, `Surname`, plus the payment fields in the raw JSON | generic table/tree, gated | **the existing settings screen**; no new screen |
+
+**The count note.** `messages_inbox` stores 252 and `messages_requests` stores 967,
+but the thread list shows 122 and 142 conversations. The stored count is
+`entryCountOf` summing each thread object's first array child (its messages), not
+its thread identity. The sidebar therefore prints a message count where the screen
+prints a thread count. This is a counting defect, not a measurement choice; it is
+the first T5 task and needs a fix in `entryCountForView` plus a test.
+
+T5 is otherwise a mapping exercise: one hero name (`Author`), one existing date
+path, one existing settings screen, and one new screen for a nested conversation.
+No new dependency and no new token are projected.
+
+### What is blocked on a decision only the owner can make
+
+1. **`ai_conversations`' presentation.** The export has a summary, a nested
+   message list, images and prompts. Is the screen a conversation transcript, a
+   labelled record with the messages expanded, or both? The data supports any of
+   the three; the choice decides the screen.
+2. **Search and filters.** Still deferred. Following's 3,362 people is the first
+   list where their absence is felt; the year fold and 200-row page make it usable
+   but not searchable.
+3. **The two real comment media URIs** (`post_comments`, §7 of T3-DESIGN): show the
+   commented-on media, or keep the row textual?
+4. **`profile_photos`' sidebar place**: it has a screen but no gallery route or
+   sidebar entry of its own.
+5. **`note_and_repost_interactions.json`**: a registry row and a tier, or leave it
+   in the unrecognised bucket.
+

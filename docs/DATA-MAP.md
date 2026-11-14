@@ -3,21 +3,21 @@
 Completion tracker for "every archive category implemented". A category is done
 only when its row says parsed + rendered + tested (AGENTS.md §16).
 
-**87 categories inventoried, 72 present, 15 not in the current baseline, 3 with
+**88 categories inventoried, 73 present, 15 not in the current baseline, 3 with
 the full per-category fixture set** (`stories`, `archived_posts`, `posts`). Plus
 one unrecognised bucket (ADR 0002, tier 3) that is always present by design.
 
-Of the 72 present in `archive-2/`, **12 T1, 24 T2 and all 18 T3 categories now
-have a bespoke screen** — ten T1 settings pages, one avatar grid, one device
+Of the 73 present in `archive-2/`, **12 T1, 24 T2, all 18 T3 and all 14 T4
+categories now have a screen** — ten T1 settings pages, one avatar grid, one device
 profile; sixteen T2 event lists, four T2 settings pages, one profile with a local
 photo, three T2 name/place lists (M20/M21); twelve T3 event lists (three of them
-gated), two saved-folder screens and one profile-photo screen — **3 media
-categories have their own gallery routes**, one more renders its media inside
-another screen (T2's profile photo), and **2 message categories render as a thread
-list** behind the reveal gate. The rest render through the
-generic table, or the raw tree when the shape carries no labels. The fifteen
-absent rows stay registered: absence is a normal state (ADR 0002), and an
-ordinary export must not look broken.
+gated), two saved-folder screens and one profile-photo screen; twelve T4 person
+lists, one tag list and one gated contact table — **3 media categories have their
+own gallery routes**, one more renders its media inside another screen (T2's
+profile photo), and **2 message categories render as a thread list** behind the
+reveal gate. The rest render through the generic table, or the raw tree when the
+shape carries no labels. The fifteen absent rows stay registered: absence is a
+normal state (ADR 0002), and an ordinary export must not look broken.
 
 `reels` is registered by name only: no reels file exists in this baseline, so it has
 no measured shape (ADR 0008 permits an empty signature list) and no observed media
@@ -143,21 +143,21 @@ the other rows are read by the shared label/value reader, and the column says so
 
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `secret_conversations` | `your_instagram_activity/messages/secret_conversations.json` | `packages/core/schema/secret-conversations.ts` | `packages/core/parsers/secret-conversations.ts` | table | high | not started — not present in the current baseline |
-| `removed_suggestions` | `connections/followers_and_following/removed_suggestions.json` | `packages/core/schema/removed-suggestions.ts` | `packages/core/parsers/removed-suggestions.ts` | list | low | parsed + rendered |
-| `restricted_profiles` | `connections/followers_and_following/restricted_profiles.json` | `packages/core/schema/restricted-profiles.ts` | `packages/core/parsers/restricted-profiles.ts` | list | low | parsed + rendered |
-| `hide_story_from` | `connections/followers_and_following/hide_story_from.json` | `packages/core/schema/hide-story-from.ts` | `packages/core/parsers/hide-story-from.ts` | list | low | parsed + rendered |
-| `close_friends` | `connections/followers_and_following/close_friends.json` | `packages/core/schema/close-friends.ts` | `packages/core/parsers/close-friends.ts` | list | low | parsed + rendered |
-| `recent_follow_requests` | `connections/followers_and_following/recent_follow_requests.json` | `packages/core/schema/follow-requests.ts` | `packages/core/parsers/follow-requests.ts` | list | medium | parsed + rendered |
-| `follow_requests_you've_received` | `connections/followers_and_following/follow_requests_you've_received.json` | `packages/core/schema/follow-requests-received.ts` | `packages/core/parsers/follow-requests-received.ts` | list | high | parsed + raw view |
-| `threads_follow_requests_received` | `your_instagram_activity/threads/follow_requests_you've_received.json` | `packages/core/schema/follow-requests-received.ts` | `packages/core/parsers/follow-requests-received.ts` | list | high | parsed + raw view |
-| `recently_unfollowed_profiles` | `connections/followers_and_following/recently_unfollowed_profiles.json` | `packages/core/schema/unfollowed-profiles.ts` | `packages/core/parsers/unfollowed-profiles.ts` | list | low | parsed + rendered |
-| `blocked_profiles` | `connections/followers_and_following/blocked_profiles.json` | `packages/core/schema/blocked-profiles.ts` | `packages/core/parsers/blocked-profiles.ts` | list | low | parsed + rendered |
-| `following_hashtags` | `connections/followers_and_following/following_hashtags.json` | `packages/core/schema/following-hashtags.ts` | `packages/core/parsers/following-hashtags.ts` | list | low | parsed + raw view |
-| `pending_follow_requests` | `connections/followers_and_following/pending_follow_requests.json` | `packages/core/schema/follow-requests-sent.ts` | `packages/core/parsers/follow-requests-sent.ts` | list | medium | parsed + rendered |
-| `followers` | `connections/followers_and_following/followers_1.json` | `packages/core/schema/followers.ts` | `packages/core/parsers/followers.ts` | list | medium | parsed + raw view |
-| `synced_contacts` | `connections/contacts/synced_contacts.json` | `packages/core/schema/synced-contacts.ts` | `packages/core/parsers/synced-contacts.ts` | list | low | parsed + rendered |
-| `following` | `connections/followers_and_following/following.json` | `packages/core/schema/following.ts` | `packages/core/parsers/following.ts` | list | low | parsed + raw view |
+| `secret_conversations` | `your_instagram_activity/messages/secret_conversations.json` | `packages/core/schema/secret-conversations.ts` | `packages/core/parsers/secret-conversations.ts` | table | high | not started — not present in the current baseline; muted sidebar row |
+| `removed_suggestions` | `connections/followers_and_following/removed_suggestions.json` | `packages/core/schema/removed-suggestions.ts` | `packages/core/parsers/removed-suggestions.ts` | person list | low | parsed + rendered + tested |
+| `restricted_profiles` | `connections/followers_and_following/restricted_profiles.json` | `packages/core/schema/restricted-profiles.ts` | `packages/core/parsers/restricted-profiles.ts` | person list | low | parsed + rendered + tested |
+| `hide_story_from` | `connections/followers_and_following/hide_story_from.json` | `packages/core/schema/hide-story-from.ts` | `packages/core/parsers/hide-story-from.ts` | person list | low | parsed + rendered + tested |
+| `close_friends` | `connections/followers_and_following/close_friends.json` | `packages/core/schema/close-friends.ts` | `packages/core/parsers/close-friends.ts` | person list | low | parsed + rendered + tested |
+| `recent_follow_requests` | `connections/followers_and_following/recent_follow_requests.json` | `packages/core/schema/follow-requests.ts` | `packages/core/parsers/follow-requests.ts` | person list | medium | parsed + rendered + tested |
+| `follow_requests_you've_received` | `connections/followers_and_following/follow_requests_you've_received.json` | `packages/core/schema/follow-requests-received.ts` | `packages/core/parsers/follow-requests-received.ts` | person list | high | parsed + rendered + tested |
+| `threads_follow_requests_received` | `your_instagram_activity/threads/follow_requests_you've_received.json` | `packages/core/schema/follow-requests-received.ts` | `packages/core/parsers/follow-requests-received.ts` | person list | high | parsed + rendered + tested |
+| `recently_unfollowed_profiles` | `connections/followers_and_following/recently_unfollowed_profiles.json` | `packages/core/schema/unfollowed-profiles.ts` | `packages/core/parsers/unfollowed-profiles.ts` | person list | low | parsed + rendered + tested |
+| `blocked_profiles` | `connections/followers_and_following/blocked_profiles.json` | `packages/core/schema/blocked-profiles.ts` | `packages/core/parsers/blocked-profiles.ts` | person list | low | parsed + rendered + tested |
+| `following_hashtags` | `connections/followers_and_following/following_hashtags.json` | `packages/core/schema/following-hashtags.ts` | `packages/core/parsers/following-hashtags.ts` | tag list | low | parsed + rendered + tested |
+| `pending_follow_requests` | `connections/followers_and_following/pending_follow_requests.json` | `packages/core/schema/follow-requests-sent.ts` | `packages/core/parsers/follow-requests-sent.ts` | person list | medium | parsed + rendered + tested |
+| `followers` | `connections/followers_and_following/followers_1.json` | `packages/core/schema/followers.ts` | `packages/core/parsers/followers.ts` | person list | medium | parsed + rendered + tested |
+| `synced_contacts` | `connections/contacts/synced_contacts.json` | `packages/core/schema/synced-contacts.ts` | `packages/core/parsers/synced-contacts.ts` | table (gated) | low | parsed + rendered + tested |
+| `following` | `connections/followers_and_following/following.json` | `packages/core/schema/following.ts` | `packages/core/parsers/following.ts` | person list | low | parsed + rendered + tested |
 
 ## T5 — third-party authored text
 
@@ -187,7 +187,7 @@ no rule matches is parsed generically and surfaced here.
 A row is only marked `parsed` once its parser has a fixture, a malformed-input
 test and an empty-file test (AGENTS.md §9). `parsed + rendered` means the category
 has a view at `/categories/:id`, bespoke or generic; the View column says which
-(`settings`, `event list`, `profile + photo`, `name list`, `gallery`, `saved folders`,
+(`settings`, `event list`, `profile + photo`, `name list`, `person list`, `tag list`, `gallery`, `saved folders`,
 `photo`, `table`, `tree`, `timeline`, `map`, `thread list`). `parsed + raw view` is the generic
 view falling back to a JSON tree because the shape has no labels. The generic
 table and tree remain the fallback for every category without a bespoke screen.

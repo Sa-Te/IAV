@@ -246,3 +246,32 @@ progress.
   wrong thing: collections embed their saved posts as records, not as ids; URL is
   the identity between the two files (ADR 0017) —
   vault: `debug-log/2026-11-13_q18-membership-in-the-nesting.md`
+- 2026-11-14 — `one-card-for-the-tier` — T4's twelve person rows differ in entry
+  shape but not in the five concepts a card shows, so one measured mapper and one
+  card serve the whole tier —
+  vault: `architecture/2026-11-14_t4-person-screen.md`
+- 2026-11-14 — `no-avatar-is-honest` — the export has no profile images; initials on
+  a token surface are the honest card, not a generated picture, a hotlink or a
+  hash-to-colour —
+  vault: `learning-notes/concepts/no-avatar-is-honest.md`
+- 2026-11-14 — `shared-filename-two-apps` — one basename written by two apps is two
+  lists; measure the overlap, then key on the parent folder (0 of 29 shared) and
+  split the registry row (ADR 0018) —
+  vault: `debug-log/2026-11-14_follow-requests-collision.md`
+- 2026-11-14 — `export-url-or-nothing` — a label called `URL` is not necessarily a
+  profile URL; link only what the export marks as the person's profile, and show no
+  link otherwise (ADR 0019) —
+  vault: `architecture/2026-11-14_t4-person-screen.md`
+- 2026-11-14 — `gate-the-contact-list` — followers are the reader's public network;
+  an address book is people who did not choose this app. Gate the contacts, not the
+  tier (ADR 0019) —
+  vault: `learning-notes/concepts/gate-the-contact-list.md`
+- 2026-11-14 — `re-measure-before-believing-a-projection` — the T3 projection called
+  following/followers/hashtags undated; every entry carries a
+  `string_list_data` timestamp, so the year fold engages and the projection was
+  wrong —
+  vault: `debug-log/2026-11-14_follow-requests-collision.md`
+- 2026-11-14 — `dom-under-the-budget` — 200 person cards plus four year headings are
+  1,620 DOM nodes, under the 2,000 threshold, so the list renders rather than
+  virtualises; a budget test holds the ceiling —
+  vault: `mind-maps/2026-11-14_t4-screens.md`
