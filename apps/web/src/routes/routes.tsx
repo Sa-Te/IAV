@@ -6,6 +6,8 @@ import { CategoryRoute } from "../categories/CategoryView.js";
 import { TierPage } from "./TierPage.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { ConnectionsPage } from "./ConnectionsPage.js";
+import { HomeRoute } from "./HomeRoute.js";
+import { ImportPage } from "../import/ImportPage.js";
 
 /** Its own chunk: the GL code must not sit in the initial download. */
 const LazyCyclone = lazy(async () => {
@@ -35,7 +37,8 @@ function devElement(loader: () => Promise<{ default: ComponentType }>): JSX.Elem
  */
 export function buildRoutes(dev: boolean): readonly AppRoute[] {
   const routes: AppRoute[] = [
-    { path: "/", element: <CategoryGallery category="all" title="Everything" /> },
+    { path: "/", element: <HomeRoute /> },
+    { path: "/import", element: <ImportPage /> },
     { path: "/posts", element: <CategoryGallery category="posts" title="Posts" /> },
     { path: "/stories", element: <CategoryGallery category="stories" title="Stories" /> },
     {

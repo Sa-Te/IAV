@@ -220,6 +220,7 @@ describe("dev route gate", () => {
     expect(development).toContain("/dev/ingest");
     expect(production).toEqual([
       "/",
+      "/import",
       "/posts",
       "/stories",
       "/archived",

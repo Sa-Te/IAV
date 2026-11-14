@@ -45,8 +45,8 @@ export function CategoryGallery({
       {state.status === "ready" && state.items.length === 0 && (
         <State
           kind="empty"
-          message={`This archive has no ${title.toLowerCase()}.`}
-          detail="If you expected media, import your export on the import page."
+          message="No media in this archive."
+          detail="If you expected photos or videos, import your export again from Import or replace archive."
         />
       )}
 

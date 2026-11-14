@@ -273,6 +273,12 @@ export function Sidebar({
         </nav>
 
         <p className="sidebar-footer">
+          <NavLink to="/import" className="sidebar-link">
+            Import or replace archive
+          </NavLink>
+        </p>
+
+        <p className="sidebar-footer">
           Read from this device. Nothing is uploaded, no account, no server.
         </p>
       </aside>
