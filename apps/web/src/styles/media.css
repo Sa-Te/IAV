@@ -26,3 +26,27 @@
   right: var(--token-space-1);
   font-family: var(--token-font-mono);
 }
+
+.tile-audio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--token-space-1);
+  width: 100%;
+  height: 100%;
+  background: var(--token-color-sunken);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+/* --- message-media provenance ------------------------------------------- */
+.media-provenance {
+  margin: var(--token-space-1) 0 0;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+  overflow-wrap: anywhere;
+}
+
+.media-thread {
+  font-family: var(--token-font-mono);
+}

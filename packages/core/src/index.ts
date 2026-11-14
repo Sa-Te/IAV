@@ -10,6 +10,8 @@ export type { StoryEntry } from "./parsers/stories.js";
 export { parsePosts } from "./parsers/posts.js";
 export { toMediaItems } from "./domain/media.js";
 export type { MediaItemView } from "./domain/media.js";
+export { mediaProvenance } from "./domain/provenance.js";
+export type { MediaProvenance } from "./domain/provenance.js";
 export { toPostEntries } from "./domain/posts.js";
 export { entryCountForView } from "./categories/entryCount.js";
 export type { PostEntry } from "./domain/posts.js";
@@ -30,6 +32,7 @@ export {
 } from "./media/thumbnail.js";
 export type { Dimensions, ThumbnailEncoder } from "./media/thumbnail.js";
 export {
+  isAttachmentPlaceholder,
   locateThread,
   sortThreads,
   threadMessages,

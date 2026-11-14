@@ -2,6 +2,7 @@ import type { MediaItemView } from "@instavault/core";
 import { useEffect, useRef, useState, type JSX } from "react";
 
 import { useMediaUrl, type MediaSource } from "./useMediaUrl.js";
+import { Provenance } from "./Provenance.js";
 import { State } from "../ui/State.js";
 import { usePrefersReducedMotion } from "../ui/usePrefersReducedMotion.js";
 
@@ -109,6 +110,8 @@ export function MediaDetail({
         {media.status === "ready" &&
           (media.mime.startsWith("video/") ? (
             <video src={media.url} controls preload="metadata" data-testid="detail-video" />
+          ) : media.mime.startsWith("audio/") ? (
+            <audio src={media.url} controls preload="metadata" data-testid="detail-audio" />
           ) : (
             <img src={media.url} alt={caption === "" ? "From your archive" : caption} />
           ))}
@@ -131,6 +134,7 @@ export function MediaDetail({
           {" · "}
           <span>from {item.category}</span>
         </p>
+        <Provenance item={item} />
       </div>
     </div>
   );

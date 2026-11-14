@@ -242,13 +242,40 @@ th {
   list-style: none;
   margin: var(--token-space-2) 0 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
   gap: var(--token-space-2);
 }
 
-.message-media .tile {
-  width: 8rem;
+.message-attachment {
+  margin: 0;
+}
+
+.message-attachment img,
+.message-attachment video {
+  display: block;
+  max-width: min(100%, 28rem);
+  max-height: 22rem;
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-sm);
+  background: var(--token-color-sunken);
+}
+
+.message-attachment audio {
+  display: block;
+  width: min(100%, 24rem);
+}
+
+.message-attachment-label {
+  margin: var(--token-space-1) 0 0;
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-12);
+}
+
+.message-attachment-note {
+  margin: var(--token-space-1) 0 0;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
 }
 
 /* --- application shell (M10) -------------------------------------------- */

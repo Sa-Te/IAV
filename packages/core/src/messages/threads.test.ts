@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import type { CategoryRecord } from "../ingest/port.js";
-import { locateThread, sortThreads, toThreadSummaries, toThreadSummary } from "./threads.js";
+import {
+  isAttachmentPlaceholder,
+  locateThread,
+  sortThreads,
+  toThreadSummaries,
+  toThreadSummary,
+} from "./threads.js";
 
 /** Three synthetic files: two inbox threads, one request thread. Never real data. */
 function messageRecord(): CategoryRecord {
@@ -214,5 +220,19 @@ describe("toThreadSummary", () => {
 
     expect(summary).toMatchObject({ id: "message_requests/carol", folder: "message_requests" });
     expect(toThreadSummary(record, "nope.json")).toBeNull();
+  });
+});
+
+describe("isAttachmentPlaceholder", () => {
+  it("recognises the literal lines the export writes when media is absent", () => {
+    expect(isAttachmentPlaceholder("You sent an attachment.")).toBe(true);
+    expect(isAttachmentPlaceholder("Instagram user sent an attachment.")).toBe(true);
+    expect(isAttachmentPlaceholder("  sent an attachment  ")).toBe(true);
+  });
+
+  it("does not treat ordinary text as an attachment placeholder", () => {
+    expect(isAttachmentPlaceholder("I sent you the file yesterday")).toBe(false);
+    expect(isAttachmentPlaceholder("Audio call ended")).toBe(false);
+    expect(isAttachmentPlaceholder("")).toBe(false);
   });
 });

@@ -192,6 +192,19 @@ export interface ThreadMessage {
   readonly attachments: readonly ThreadAttachment[];
 }
 
+/**
+ * The literal line Instagram writes when it does not include the attachment:
+ * "You sent an attachment.", "<sender> sent an attachment.",
+ * "Instagram user sent an attachment." Measured 17,057 times in archive-2/
+ * (docs/T5-DESIGN.md §3.3). It is the export's text, not ours.
+ */
+const ATTACHMENT_PLACEHOLDER =
+  /\bsent (?:an? )?(?:attachment|photo|video|voice (?:message|note)|audio|file)\b/i;
+
+export function isAttachmentPlaceholder(text: string): boolean {
+  return ATTACHMENT_PLACEHOLDER.test(text.trim());
+}
+
 const ATTACHMENT_KINDS: readonly (readonly [string, ThreadAttachment["kind"]])[] = [
   ["photos", "photo"],
   ["videos", "video"],

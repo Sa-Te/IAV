@@ -2,6 +2,7 @@ import type { MediaItemView } from "@instavault/core";
 import { useEffect, useState, type JSX } from "react";
 
 import { MediaTile } from "./MediaTile.js";
+import { Provenance } from "./Provenance.js";
 import { onThumbnailsUnavailable, thumbnailsUnavailable } from "./thumbnailWorker.js";
 import type { MediaSource } from "./useMediaUrl.js";
 
@@ -42,6 +43,7 @@ export function MediaGrid({
         {items.map((item, index) => (
           <li key={`${item.category}:${item.id}:${index}`}>
             <MediaTile item={item} source={source} onOpen={() => onOpen(index)} />
+            <Provenance item={item} />
           </li>
         ))}
       </ul>

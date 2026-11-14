@@ -17,6 +17,16 @@ import { ThreadConversation } from "./ThreadConversation.js";
  * and the category is not read — until the person clicked "Show this category".
  */
 
+function threadFromHash(hash: string): string | null {
+  const raw = hash.startsWith("#") ? hash.slice(1) : hash;
+  if (raw === "") return null;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
 function when(timestamp: number | null): string {
   if (timestamp === null) return "No messages";
   return new Date(timestamp).toLocaleString();
@@ -28,15 +38,21 @@ function people(thread: ThreadSummary): string {
 }
 
 export function ThreadList({ record }: { record: CategoryRecord }): JSX.Element {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(() =>
+    threadFromHash(window.location.hash),
+  );
   const threads = toThreadSummaries(record);
+  // A gallery provenance link opens the thread by hash. An unknown hash keeps the
+  // list rather than inventing an empty conversation.
+  const active =
+    selected !== null && threads.some((thread) => thread.id === selected) ? selected : null;
 
-  if (selected !== null) {
+  if (active !== null) {
     return (
       <ThreadConversation
-        threadId={selected}
-        summary={threads.find((thread) => thread.id === selected)}
-        messages={threadMessages(record, selected)}
+        threadId={active}
+        summary={threads.find((thread) => thread.id === active)}
+        messages={threadMessages(record, active)}
         onBack={() => setSelected(null)}
       />
     );

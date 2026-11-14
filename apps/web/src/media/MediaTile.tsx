@@ -1,7 +1,8 @@
 import type { MediaItemView, MediaState } from "@instavault/core";
 import { useEffect, useRef, useState, type JSX } from "react";
 
-import { POSTER_EDGE, requestPoster, type PosterStore } from "./poster.js";
+import { formatDuration } from "./format.js";
+import { posterStoreOf, requestPoster, type PosterSource } from "./poster.js";
 import { useInViewport } from "./useInViewport.js";
 import { useMediaUrl, type MediaSource } from "./useMediaUrl.js";
 
@@ -32,54 +33,6 @@ function reasonText(reason: "missing" | "decode" | "timeout" | "unloadable" | "p
   if (reason === "timeout") return "Timed out";
   if (reason === "poster") return "No poster";
   return "Cannot display";
-}
-
-/** The repository, as the poster store sees it. Optional: not every caller has one. */
-type PosterSource = MediaSource & {
-  getThumbnail?: (path: string) => Promise<{ blob: Blob } | null>;
-  putThumbnail?: (row: {
-    path: string;
-    blob: Blob;
-    type: string;
-    width: number;
-    height: number;
-    sourceBytes: number;
-  }) => Promise<void>;
-};
-
-function posterStoreOf(source: PosterSource): PosterStore | null {
-  if (source.getThumbnail === undefined || source.putThumbnail === undefined) return null;
-  // Called through `source`, never through an extracted reference: the repository's
-  // methods use `this.db`, and a detached call throws "reading 'db'" per tile.
-  return {
-    get: async (path) => {
-      try {
-        return (await source.getThumbnail?.(path))?.blob ?? null;
-      } catch {
-        return null;
-      }
-    },
-    put: async (path, blob) => {
-      try {
-        await source.putThumbnail?.({
-          path,
-          blob,
-          type: blob.type === "" ? "image/webp" : blob.type,
-          width: POSTER_EDGE,
-          height: POSTER_EDGE,
-          sourceBytes: blob.size,
-        });
-      } catch {
-        /* a poster that cannot be stored is regenerated next visit */
-      }
-    },
-  };
-}
-
-function formatDuration(seconds: number): string {
-  if (!Number.isFinite(seconds) || seconds <= 0) return "";
-  const whole = Math.round(seconds);
-  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
 }
 
 export function MediaTile({
@@ -212,6 +165,10 @@ export function MediaTile({
               ▶
             </span>
             {duration !== "" && <span className="tile-duration">{duration}</span>}
+          </span>
+        ) : state.mime.startsWith("audio/") ? (
+          <span className="tile-audio">
+            <span aria-hidden="true">♪</span> Audio
           </span>
         ) : (
           <img
