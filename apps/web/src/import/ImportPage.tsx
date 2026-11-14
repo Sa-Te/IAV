@@ -1,8 +1,8 @@
-import { describeFailure, type ArchiveRow } from "@instavault/core";
+import type { ArchiveRow } from "@instavault/core";
 import { useEffect, useRef, useState, type JSX } from "react";
 
 import { useArchiveRepository } from "../repository/RepositoryContext.js";
-import { State } from "../ui/State.js";
+import { IngestStatus } from "./IngestStatus.js";
 import { useIngestJob } from "./useIngestJob.js";
 
 /**
@@ -19,13 +19,6 @@ const ZIP_ACCEPT = ".zip,application/zip";
 
 function replaceWarning(archive: ArchiveRow): string {
   return `This replaces the archive on this device: ${archive.counts.categories} categories and ${archive.counts.mediaStored} media files will be deleted. This cannot be undone.`;
-}
-
-function phaseText(phase: string): string {
-  if (phase === "reading") return "Reading files";
-  if (phase === "resolving") return "Matching categories";
-  if (phase === "storing") return "Storing media";
-  return phase;
 }
 
 export function ImportPage(): JSX.Element {
@@ -122,32 +115,15 @@ export function ImportPage(): JSX.Element {
         </p>
       )}
 
+      {archive === undefined && (
+        <p className="import-note" role="status">
+          Checking this device for an existing archive…
+        </p>
+      )}
+
       <section className="import-section" aria-labelledby="import-status-heading">
         <h2 id="import-status-heading">Progress</h2>
-        {job.status === "idle" && <p className="import-note">No import has started in this tab.</p>}
-        {job.status === "parsing" && (
-          <p role="status" className="import-status">
-            {phaseText(job.phase)} — {job.done} / {job.total} — {(elapsedMs / 1000).toFixed(1)}s
-            <button type="button" className="button" onClick={cancel}>
-              Cancel import
-            </button>
-          </p>
-        )}
-        {job.status === "ready" && (
-          <p role="status" className="import-status">
-            Import complete: {job.summary.categories} categories, {job.summary.mediaStored} media
-            files. <a href="/">Open the gallery →</a>
-          </p>
-        )}
-        {job.status === "failed" && (
-          <div role="alert" className="import-status">
-            <p>{describeFailure(job.reason)}</p>
-            <p className="import-note">{job.detail}</p>
-            <button type="button" className="button" onClick={retry}>
-              Retry
-            </button>
-          </div>
-        )}
+        <IngestStatus job={job} elapsedMs={elapsedMs} onCancel={cancel} onRetry={retry} />
         {protocolError !== null && (
           <p role="alert" className="import-status">
             Worker error: {protocolError}
@@ -160,8 +136,6 @@ export function ImportPage(): JSX.Element {
           <a href="/">Back to the gallery</a>
         </p>
       )}
-
-      {archive === undefined && <State kind="loading" message="Checking this device…" />}
     </div>
   );
 }

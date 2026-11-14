@@ -66,6 +66,31 @@
   color: var(--token-color-text-muted);
 }
 
+.cyclone-preparing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 38ch;
+  padding: var(--token-space-4) var(--token-space-5);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-lg);
+  background: var(--token-glass-bg);
+  color: var(--token-color-text);
+  text-align: center;
+  pointer-events: none;
+}
+
+.cyclone-preparing p {
+  margin: 0;
+}
+
+.cyclone-preparing p + p {
+  margin-top: var(--token-space-1);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cyclone-overlay {
     backdrop-filter: none;

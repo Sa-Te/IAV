@@ -70,10 +70,23 @@ export function CycloneStage({
   const [paused, setPaused] = useState(false);
   const [motionOptIn, setMotionOptIn] = useState(false);
   const [available, setAvailable] = useState(true);
+  const [resident, setResident] = useState(0);
+  const [slow, setSlow] = useState(false);
 
   // Reduced motion is honoured until the person explicitly opts in, for this
   // session only — there is no stored preference to surprise them later.
   const animate = !reducedMotion || motionOptIn;
+
+  // The upload is not instant on a large archive. Keep a real state on screen
+  // while there is no resident card, and add a sentence if it is taking long.
+  useEffect(() => {
+    if (!animate || resident > 0) {
+      setSlow(false);
+      return;
+    }
+    const timer = setTimeout(() => setSlow(true), 5000);
+    return () => clearTimeout(timer);
+  }, [animate, resident]);
 
   useEffect(() => {
     startRef.current = start;
@@ -199,6 +212,8 @@ export function CycloneStage({
         handle.setPhase(motionRef.current.phase);
       }
       handle.frame(dt);
+      const stats = handle.stats();
+      setResident((current) => (current === stats.resident ? current : stats.resident));
 
       // A deadline, not a hope: a black canvas is not an answer (AGENTS.md §7).
       if (!reportedEmpty && now - startedAt > EMPTY_SCENE_DEADLINE_MS) {
@@ -284,6 +299,15 @@ export function CycloneStage({
         // The card under the pointer is opened on pointerup, which knows where the
         // pointer was; a click handler here could only guess.
       />
+
+      {animate && resident === 0 && (
+        <div className="cyclone-preparing" role="status">
+          <p>
+            Preparing the 3D view — {resident} of {items.length}
+          </p>
+          {slow && <p>This can take a moment on slower graphics.</p>}
+        </div>
+      )}
 
       {/* Instructions float over the canvas, top-left: they must be readable, and
           they must not push the canvas down by a single pixel. */}
