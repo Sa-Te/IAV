@@ -103,17 +103,18 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/useMediaUrl.ts` | Three-state media (`pending` / `ready` / `failed`), one shared request per id, object URLs revoked on unmount. |
 | `apps/web/src/media/MediaGrid.tsx` | Responsive grid of `MediaItemView`; takes data, a media source and the selection handlers as props. |
 | `apps/web/src/media/MediaTile.tsx` | One tile: pending skeleton, image, video frame, or a failure naming its reason; in selection mode it toggles, carries `aria-pressed` and a visible check. |
-| `apps/web/src/media/MediaDetail.tsx` | Full-size view, caption, timestamp, category; Escape closes and focus returns. |
+| `apps/web/src/media/MediaDetail.tsx` | Full-size view, caption, timestamp, category, and a Download original control; Escape closes and focus returns. |
 | `apps/web/src/media/useMediaList.ts` | Pages one category — or every category — out of the repository. |
-| `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. Hosts the Grid/Timeline switch and per-view selection, cleared by a route change (D1). |
+| `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. Hosts the Grid/Timeline switch, per-view selection (cleared by a route change, D1), the floating Select control and the download dock. |
 | `apps/web/src/media/GalleryViewSwitch.tsx` | Grid / Timeline as a native radio group with arrow-key handling and a status line. |
 | `apps/web/src/media/useGalleryView.ts` | The view choice, persisted in `localStorage`; Grid is the default. |
 | `apps/web/src/media/MediaTimeline.tsx` | Year → month sections, larger tiles with caption/date, the final Undated group, and tri-state group checkboxes in selection mode. |
 | `apps/web/src/media/useMediaSizes.ts` | Every stored media path's byte size, read once per page; `null` until read so a selection is never built on unknown sizes. |
-| `apps/web/src/media/SelectionBar.tsx` | The sticky action bar: count · bytes, Download, select/deselect all of the view, cancel. |
+| `apps/web/src/media/SelectionBar.tsx` | The sticky action bar: count · bytes, Download (one item saves as itself, more open the ZIP pre-flight), select/deselect all of the view, cancel. |
 | `apps/web/src/download/DownloadFlow.tsx` | Owns build progress and the failure reason, so a progress update never re-renders the tile grid; throttles to 100 ms. |
 | `apps/web/src/download/DownloadPanel.tsx` | The pre-flight: totals, skipped items with reasons, the 300 MB and iOS notes, then determinate progress or the reason a build failed. |
 | `apps/web/src/download/buildZip.ts` | Streaming STORE-mode ZIP over fflate, one entry at a time, progress and a yield so the bar paints; never `zipSync`. |
+| `apps/web/src/download/singleFile.ts` | One original saved as itself: the path's last segment, the same safety rule, save-and-revoke; no ZIP for one file. |
 | `apps/web/src/download/saveBlob.ts` | Object URL → `<a download>` → click → immediate revoke; the dated filename. |
 | `apps/web/src/download/limits.ts` | The two honest limits: the 300 MB memory warning and iOS user-agent detection. |
 | `apps/web/src/routes/ConnectionsPage.tsx` | `/connections`: the three diff groups plus unmatched, using the person list. |

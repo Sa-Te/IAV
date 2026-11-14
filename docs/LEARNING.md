@@ -367,3 +367,7 @@ progress.
   re-rendered 419 tiles per file (14.4 s); a child owning it with a 100 ms throttle
   took 1.8 s —
   vault: `debug-log/2026-11-14_zip-progress-rerenders.md`
+- 2026-11-14 — `one-file-is-not-a-zip` — a download's shape matches the act: one
+  selected item saves as itself under its archive filename, several become a ZIP;
+  both reuse the path rule and save-then-revoke —
+  vault: `learning-notes/concepts/one-file-is-not-a-zip.md`

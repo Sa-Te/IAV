@@ -32,7 +32,13 @@ Three measured facts shaped the decision:
 their archive paths, built entirely in the tab.**
 
 - **Originals only.** The tile shows a thumbnail; the download is the original
-  blob. The UI says "original quality" and never "HD" (D3).
+  blob. The UI says "original quality" and never "HD" or "HQ": the export has one
+  resolution and this is it (D3).
+- **One file is a file, not a ZIP.** A selection of exactly one, or the detail
+  view's Download, saves the original blob under the archive path's last segment —
+  `photo.webp` stays `photo.webp`, `clip.mp4` stays `clip.mp4`. Two or more open the
+  pre-flight and the ZIP. The same path rule applies, and an unsafe path is refused
+  with a reason rather than renamed.
 - **Archive paths are preserved** (`posts/202402/x.webp`,
   `stories/202103/y.mp4`). The ZIP therefore unpacks into the archive's own tree,
   a file that appears in two categories is one entry, and collisions are
@@ -91,9 +97,10 @@ action is theirs.
    stored; `localStorage` remains UI settings only.
 5. **Download the thumbnail for grid convenience.** Rejected: the person asked for
    their photo, not a 512 px derivative, and the export has only one original.
-6. **Per-file download buttons on each tile.** Not in this milestone. One ZIP is
-   the shape that matches "take a selection"; a per-tile control belongs with the
-   detail view's next pass.
+6. **Per-file download buttons on every tile.** Rejected: a grid of 400 tiles with
+   400 download controls is noise, and a one-entry ZIP for a single photo is a
+   container the reader has to unpack to use. The detail view carries the single
+   file; the grid carries selection.
 
 ## Consequences
 
@@ -103,9 +110,9 @@ action is theirs.
 - The ZIP builder is a web module with an injected blob getter and progress
   callback; the tests read the produced blob back with fflate's `Unzip` and assert
   entry count, paths and bytes, and prove the entries are stored, not deflated.
-- A future "save all media" is the same plan with every item selected; a future
-  per-file download is the same plan with one entry. Neither needs a second
-  implementation.
+- A future "save all media" is the same plan with every item selected. The
+  single-file path reuses the same path rule (`isSafeArchivePath`) and the same
+  save-and-revoke; it is not a second implementation of either.
 - A path that is legitimately unsafe in a future export is reported, not fixed
   here. The probe that measures it belongs in `docs/archive-manifest.md` §11 when
   one appears.
