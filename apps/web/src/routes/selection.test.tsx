@@ -176,6 +176,24 @@ describe("selection mode", () => {
     expect(tile("may a").getAttribute("aria-pressed")).toBe("false");
   });
 
+  it("shift-click follows the timeline order, not the list order", async () => {
+    const user = userEvent.setup();
+    renderPosts();
+    await screen.findByText("5 items");
+    await user.click(screen.getByRole("radio", { name: "Timeline" }));
+    await enterSelection(user);
+
+    // The Timeline orders groups newest first: June, May, then Undated — so the
+    // undated tile sits next to May, not at the far end of the list order.
+    fireEvent.click(tile("undated"));
+    fireEvent.click(tile("may a"), { shiftKey: true });
+
+    expect(screen.getByRole("toolbar").textContent).toContain("2 selected · 60 MB");
+    expect(tile("may a").getAttribute("aria-pressed")).toBe("true");
+    expect(tile("may b").getAttribute("aria-pressed")).toBe("false");
+    expect(tile("june a").getAttribute("aria-pressed")).toBe("false");
+  });
+
   it("shows a mixed month checkbox and toggles exactly that month", async () => {
     const user = userEvent.setup();
     renderPosts();
