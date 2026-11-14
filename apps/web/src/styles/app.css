@@ -29,6 +29,7 @@
 @import "./shell.css";
 @import "./media.css";
 @import "./dev.css";
+@import "./print.css";
 
 html {
   background-color: var(--token-color-canvas);

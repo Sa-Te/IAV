@@ -1,0 +1,103 @@
+/*
+ * Print a conversation (D5). The shell, navigation, controls and every
+ * non-conversation element are hidden; the messages are ink on paper, with no
+ * bubbles or backgrounds and no message split across pages.
+ *
+ * The print control exists only inside ThreadConversation, which is mounted only
+ * after the T5 reveal. Opening the print dialog is a local browser action, not a
+ * network request (ADR 0020).
+ */
+
+.print-title {
+  display: none;
+}
+
+@media print {
+  html,
+  body {
+    background: var(--token-color-print-paper);
+    color: var(--token-color-print-ink);
+  }
+
+  .app-header,
+  .app-footer,
+  .sidebar,
+  .sidebar-toggle,
+  .sidebar-scrim,
+  .skip-link,
+  .app-tools,
+  .print-hide,
+  .settings-raw,
+  .message-media,
+  .detail,
+  .category-table,
+  .category-tree,
+  .gallery > h1,
+  .gallery > p {
+    display: none !important;
+  }
+
+  .app-shell,
+  .app-content,
+  .app-main,
+  .gallery,
+  .messages,
+  .bubbles,
+  .bubble-list {
+    display: block !important;
+    background: transparent !important;
+    color: var(--token-color-print-ink);
+  }
+
+  .print-title {
+    display: block;
+    margin: 0 0 var(--token-space-6);
+    color: var(--token-color-print-ink);
+    font-size: var(--token-text-24);
+    font-weight: 600;
+  }
+
+  .message-thread-title {
+    display: none;
+  }
+
+  .message,
+  .bubble {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    padding: 0 0 var(--token-space-3);
+    border: 0;
+    background: transparent !important;
+    color: var(--token-color-print-ink);
+  }
+
+  .bubble-group {
+    max-width: 100%;
+    align-self: stretch;
+    align-items: stretch;
+  }
+
+  .message-text,
+  .bubble .message-text,
+  .message-sender,
+  .message-time,
+  .bubble-sender,
+  .bubble-date,
+  .bubble-meta,
+  .message-head {
+    color: var(--token-color-print-ink);
+  }
+
+  .message-attachment-note {
+    color: var(--token-color-print-ink);
+  }
+
+  .visually-hidden {
+    display: none !important;
+  }
+
+  a {
+    color: var(--token-color-print-ink);
+    text-decoration: none;
+  }
+}

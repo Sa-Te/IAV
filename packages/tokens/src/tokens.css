@@ -106,6 +106,9 @@
      bright thing. `on-scrim` is fixed light text on it. */
   --token-color-scrim: #0d0b0a;
   --token-color-on-scrim: #ede7df;
+  /* Print is ink on paper in both themes; the print stylesheet reads these. */
+  --token-color-print-ink: #000000;
+  --token-color-print-paper: #ffffff;
 }
 
 /* Paper — the light theme. */

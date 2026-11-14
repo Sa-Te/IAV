@@ -1,4 +1,6 @@
 import {
+  conversationCsv,
+  csvFilename,
   groupMessages,
   isAttachmentPlaceholder,
   type ThreadMessage,
@@ -125,20 +127,48 @@ export function ThreadConversation({
     element?.focus();
   }, [focusMessageIndex]);
 
+  const threadName =
+    summary === undefined || summary.participants.length === 0
+      ? threadId
+      : summary.participants.join(", ");
+  const threadFolder = threadId.split("/").pop() ?? "conversation";
+
+  /**
+   * ADR 0020: this is a local write to the user's own disk. The blob URL never
+   * leaves the process; no request is made and no exception is needed.
+   */
+  const downloadCsv = (): void => {
+    const blob = new Blob([conversationCsv(messages)], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = csvFilename(threadFolder);
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
-      <p>
+      <p className="print-hide">
         <button type="button" onClick={onBack}>
           Back to conversations
         </button>
       </p>
 
-      <h2>
-        {summary === undefined || summary.participants.length === 0
-          ? threadId
-          : summary.participants.join(", ")}
-      </h2>
-      <p className="banner" role="note">
+      <h1 className="print-title">{threadName}</h1>
+
+      <h2 className="message-thread-title">{threadName}</h2>
+
+      <p className="message-actions print-hide">
+        <button type="button" className="button" onClick={() => window.print()}>
+          Print conversation
+        </button>
+        <button type="button" className="button" onClick={downloadCsv}>
+          Export CSV
+        </button>
+      </p>
+
+      <p className="banner print-hide" role="note">
         This is a read-only copy of the export. Nothing is sent anywhere, and you cannot reply from
         here.
       </p>
@@ -153,7 +183,7 @@ export function ThreadConversation({
         />
       ) : (
         <>
-          <p className="banner" role="note">
+          <p className="banner print-hide" role="note">
             The export does not say which participant is the account holder, so this is a labelled
             list rather than aligned bubbles.
           </p>

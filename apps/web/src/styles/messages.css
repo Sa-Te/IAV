@@ -191,6 +191,13 @@
   font-size: var(--token-text-13);
 }
 
+.message-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--token-space-2);
+  margin: var(--token-space-2) 0 var(--token-space-4);
+}
+
 /* --- aligned conversation bubbles --------------------------------------- */
 .bubbles {
   list-style: none;

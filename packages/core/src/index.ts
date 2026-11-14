@@ -43,6 +43,7 @@ export { groupMessages } from "./messages/bubbles.js";
 export type { MessageGroup } from "./messages/bubbles.js";
 export { identifyOwnerSender, toOwnerIdentity } from "./messages/ownerIdentity.js";
 export type { OwnerIdentity } from "./messages/ownerIdentity.js";
+export { conversationCsv, csvFilename } from "./messages/csv.js";
 export { diffConnections } from "./connections/diff.js";
 export type { ConnectionDiff, ConnectionRecord } from "./connections/diff.js";
 export type {
