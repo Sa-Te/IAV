@@ -231,17 +231,18 @@ These are checked, not hoped for.
 
 **Tokens are the single source of truth.** `packages/tokens/src/tokens.css` holds
 every colour, space step, radius, type size, shadow and the one glass recipe, as
-plain custom properties. Tailwind v4 maps its names onto those properties in
-`apps/web/src/styles/app.css` (`@theme`); it defines no value of its own. Any future
-view — DOM, canvas or WebGL — reads the same tokens.
+plain custom properties. The token file is the only styling source; there are no
+utility classes. Component classes live in `apps/web/src/styles/*.css` and read
+those properties. Any future view — DOM, canvas or WebGL — reads the same tokens.
 
 - **Two themes, named Umber (dark) and Paper (light).** Both are data on
   `[data-theme]`, plus a `prefers-color-scheme` fallback while no explicit choice is
   stored. Themes are never branches in components. "Nebula" and "Starlight" survive
   only inside `reference-frontend/` and are not this project's palette.
-- **No raw hex outside the tokens file.** No arbitrary Tailwind values
-  (`bg-[#123]`, `p-[13px]`, `mt-[7px]`). **No gradients anywhere.** `pnpm
-  check:styles` fails the build on all three, printing `file:line`.
+- **No raw hex outside the tokens file.** No utility classes; component values
+  come from tokens, not one-off literals. **No gradients anywhere.** `pnpm
+  check:styles` fails the build on raw hex, gradients and a utility-framework directive,
+  printing `file:line`.
 - **Accent is a signal, not a surface.** Links, focus rings, the active nav item and
   the reveal button. It covers ≤5% of any screen. Everything else is canvas, surface,
   border and text.

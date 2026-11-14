@@ -1,7 +1,7 @@
 /*
  * Component classes for the shell, media, tables and threads.
  * Values are tokens only; `pnpm check:styles` fails on a hex literal, an arbitrary
- * Tailwind value or a gradient.
+ * raw hex value or a gradient.
  */
 
 /* --- layout ------------------------------------------------------------- */

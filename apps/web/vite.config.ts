@@ -1,6 +1,5 @@
 import { execSync } from "node:child_process";
 
-import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
@@ -18,7 +17,7 @@ function gitShortHash(): string {
 }
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react()],
   define: {
     __GIT_HASH__: JSON.stringify(gitShortHash()),
   },

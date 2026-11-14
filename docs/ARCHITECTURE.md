@@ -143,7 +143,7 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/categories/CategoryIndex.tsx` | `/categories`: an overview of the five tiers, not a table of 86 rows. |
 | `apps/web/src/media/poster.ts` | One poster frame per video, generated once and stored in the existing thumbs store. |
 | `apps/web/src/ui/ThemeSwitch.tsx` | System/Umber/Paper as a native radio group; stores only an explicit choice. |
-| `scripts/check-styles.mjs` | Fails the build on a raw hex, an arbitrary Tailwind value or a gradient outside the tokens package. |
+| `scripts/check-styles.mjs` | Fails the build on a raw hex, a gradient or a utility-framework directive outside the tokens package. |
 | `packages/core/src/cyclone/layout.ts` | Golden-angle spiral with a wrapping vertical coordinate: deterministic, endless, no accumulated state. |
 | `packages/core/src/cyclone/projection.ts` | Hand-written perspective projection with DOM-consistent screen coordinates; the source of picking and focus positions. |
 | `packages/core/src/cyclone/{picking,window,motion}.ts` | Nearest-visible picking with depth tie-break, the 96-card resident window, and motion that is a no-op under reduced motion. |

@@ -1,0 +1,128 @@
+/*
+ * `/dev/tokens` — the palette preview. Dev-only, but it follows the same rule:
+ * plain classes and tokens, no utility classes.
+ */
+
+.dev-tokens {
+  max-width: 90ch;
+}
+
+.dev-title {
+  font-size: var(--token-text-32);
+  line-height: var(--token-leading-32);
+  letter-spacing: var(--token-tracking-32);
+}
+
+.dev-intro {
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-14);
+}
+
+.dev-panels {
+  display: grid;
+  gap: var(--token-space-6);
+  margin-top: var(--token-space-6);
+}
+
+@media (min-width: 900px) {
+  .dev-panels {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.dev-panel {
+  padding: var(--token-space-6);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-lg);
+  background: var(--token-color-canvas);
+  color: var(--token-color-text);
+}
+
+.dev-panel-title {
+  font-size: var(--token-text-24);
+  line-height: var(--token-leading-24);
+}
+
+.dev-heading {
+  margin-top: var(--token-space-6);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-14);
+}
+
+.dev-colors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--token-space-2);
+  margin: var(--token-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--token-text-12);
+}
+
+.dev-swatch {
+  display: block;
+  height: var(--token-space-10);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-sm);
+}
+
+.dev-type-name {
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-12);
+}
+
+.dev-space {
+  margin: var(--token-space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--token-space-1);
+}
+
+.dev-space-row {
+  display: flex;
+  align-items: center;
+  gap: var(--token-space-3);
+  font-size: var(--token-text-12);
+}
+
+.dev-space-bar {
+  height: var(--token-space-2);
+  background: var(--token-color-accent);
+}
+
+.dev-components {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--token-space-3);
+  margin-top: var(--token-space-2);
+}
+
+.dev-button-secondary {
+  padding: var(--token-space-2) var(--token-space-3);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  background: var(--token-color-surface);
+  color: var(--token-color-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dev-pill {
+  padding: var(--token-space-1) var(--token-space-3);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-full);
+  font-size: var(--token-text-13);
+}
+
+.dev-quiet {
+  margin-top: var(--token-space-4);
+  padding: var(--token-space-4);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+  background: var(--token-color-surface);
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}

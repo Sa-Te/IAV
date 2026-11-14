@@ -1,7 +1,7 @@
 /**
  * InstaVault design tokens — the single source of truth (AGENTS.md §8).
  *
- * Plain custom properties on purpose: Tailwind maps its names onto these, the
+ * Plain custom properties on purpose: hand-written component classes and the
  * future 3D/canvas views read the same values, and no component file holds a hex
  * literal. Umber is the dark theme, Paper the light one; "Nebula"/"Starlight" no
  * longer exist outside reference-frontend/.
@@ -17,7 +17,7 @@
  */
 
 :root {
-  /* Space — 4-based, 4..128. Tailwind's --spacing is 4px, so p-4 = 16px. */
+  /* Space — 4-based, 4..128, in pixels. */
   --token-space-1: 4px;
   --token-space-2: 8px;
   --token-space-3: 12px;

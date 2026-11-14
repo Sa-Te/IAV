@@ -3,9 +3,13 @@
  * AGENTS.md §8 as a build gate.
  *
  * The tokens package is the only place a colour value may be written. Everywhere
- * else, a raw hex literal, an arbitrary Tailwind value (`bg-[#123]`, `p-[13px]`)
- * or a gradient utility is a design-system escape hatch, and escape hatches are
- * how a palette stops being a palette.
+ * else, a raw hex literal or a gradient is a design-system escape hatch, and escape
+ * hatches are how a palette stops being a palette.
+ *
+ * There is no utility framework (M25), so there is no "arbitrary Tailwind value" to
+ * ban. The old rule was dropped rather than reworded into something that no longer
+ * meant anything. A Tailwind directive is still refused so the framework cannot
+ * quietly return through a stylesheet.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
@@ -23,14 +27,14 @@ const RULES = [
     hint: "use a token from @instavault/tokens",
   },
   {
-    name: "arbitrary Tailwind value",
-    pattern: /\b[a-z][a-z0-9-]*-\[[^\]\s]+\]/,
-    hint: "use a token-backed utility or a token in CSS",
-  },
-  {
     name: "gradient",
     pattern: /\b(bg-gradient-to-[a-z]+|bg-linear-to-[a-z]+|bg-radial|bg-conic)\b|gradient\(/,
     hint: "gradients are banned by AGENTS §8",
+  },
+  {
+    name: "Tailwind directive",
+    pattern: /@(tailwind|apply|theme)\b/,
+    hint: "Tailwind is removed; use tokens and hand-written CSS",
   },
 ];
 
@@ -79,4 +83,6 @@ if (violations.length > 0) {
   process.exit(1);
 }
 
-console.log(`check:styles — ${files.length} files, no raw hex, no arbitrary values, no gradients.`);
+console.log(
+  `check:styles — ${files.length} files, no raw hex, no gradients, no Tailwind directives.`,
+);
