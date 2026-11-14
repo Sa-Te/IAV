@@ -119,6 +119,7 @@
 /* Component classes live in components.css; this file is the Tailwind entry. */
 @import "./components.css";
 @import "./views.css";
+@import "./messages.css";
 @import "./settings.css";
 @import "./events.css";
 @import "./profiles.css";

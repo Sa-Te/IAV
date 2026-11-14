@@ -14,8 +14,8 @@ payment file, and every T5 category through the app's own ingest path.
 
 | Category | Entries (stored) | Shape | Screen today | Screen it needs |
 | --- | ---: | --- | --- | --- |
-| `messages_inbox` | 252 | 122 thread objects | thread list, gated | thread list + conversation, attachments, search |
-| `messages_requests` | 967 | 142 thread objects | thread list, gated | the same |
+| `messages_inbox` | 252 | 122 files → 121 conversations | thread list, gated | thread list + conversation, attachments, search |
+| `messages_requests` | 967 | 142 files → 142 conversations | thread list, gated | the same |
 | `ai_conversations` | 2 | label/value envelope with nested turns | generic table/tree, gated | labelled record, turns collapsed |
 | `checkout_payment_information` | 1 | label/value envelope, settings-shaped | generic table/tree, gated | the settings screen |
 | `threads_viewed` | 246 | one-key wrapper of `string_map_data` | generic table/tree, gated | the event list, `Author` as hero |
@@ -29,7 +29,7 @@ first array is usually `messages`, so the stored count is a **message** count:
 
 | Category | Stored entries | Conversations the thread list shows |
 | --- | ---: | ---: |
-| `messages_inbox` | 252 | 122 |
+| `messages_inbox` | 252 | 121 |
 | `messages_requests` | 967 | 142 |
 
 The sidebar printed the stored number, so it said 252 conversations where the
@@ -39,8 +39,10 @@ conversation per folder, including a thread split across `message_1.json` and
 `message_2.json`. The raw stored count stays in drift reports, which describe
 files, not screens.
 
-Across both message families the 263 files hold **33,703 messages**. (The
-projection said "28k"; the measured number is higher.)
+Across both message families the 263 files hold **33,870 messages**. (The
+projection said "28k"; the measured number is higher.) `messages_inbox` has 122
+files but 121 conversations: one thread is split across `message_1.json` and
+`message_2.json`, and the thread reader merges it.
 
 ## 3. Attachments
 
@@ -89,7 +91,7 @@ is `You sent an attachment.`, and for an unresolved account it is
 `Instagram user sent an attachment.` This is a literal written by Instagram, not
 our placeholder.
 
-Measured count: **17,057 messages** say "sent an attachment." and carry no media
+Measured count: **17,200 messages** say "sent an attachment." and carry no media
 in this export. (52 more content lines are call events such as "Audio call ended";
 they are not attachments.) These render as an explicit "attachment not included in
 this export" note, not as a dead placeholder.
@@ -203,7 +205,7 @@ search. The other three are the remaining screen work.
 
 ## 9. Decisions this measurement supports
 
-- **Search** is a pure in-memory index over 33,703 message bodies. That is a
+- **Search** is a pure in-memory index over 33,870 message bodies. That is a
   measurement, not an assumption; no worker and no persistence are needed unless
   the measured build/query time says otherwise (reported with the implementation).
 - **Attachments** render by kind from the `uri`, with no width/height/duration

@@ -45,6 +45,8 @@ export type {
   ThreadMessage,
   ThreadSummary,
 } from "./messages/threads.js";
+export { buildIndex, normaliseQuery, search } from "./search/index.js";
+export type { SearchHit, SearchIndex, SearchableThread } from "./search/index.js";
 export {
   BASE_RADIUS,
   camera,
