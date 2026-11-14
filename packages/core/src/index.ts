@@ -127,6 +127,14 @@ export {
   toggle,
 } from "./selection/selection.js";
 export type { MediaSizes, SelectionSize, SelectionState } from "./selection/selection.js";
+export { buildZipPlan, isSafeArchivePath } from "./download/zipPlan.js";
+export type {
+  MediaRecordSize,
+  ZipEntry,
+  ZipPlan,
+  ZipSkip,
+  ZipSkipReason,
+} from "./download/zipPlan.js";
 export { toMediaTimeline } from "./categories/mediaTimeline.js";
 export type {
   MediaTimeline,

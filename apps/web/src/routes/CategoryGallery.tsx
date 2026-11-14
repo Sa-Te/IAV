@@ -1,4 +1,5 @@
 import {
+  buildZipPlan,
   createSelection,
   selectAll,
   selectRange,
@@ -7,11 +8,16 @@ import {
   deselect,
   toMediaTimeline,
   type MediaItemView,
+  type MediaRecordSize,
   type SelectionState,
+  type ZipPlan,
 } from "@instavault/core";
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { useLocation } from "react-router-dom";
 
+import { buildZip } from "../download/buildZip.js";
+import { DownloadPanel } from "../download/DownloadPanel.js";
+import { saveBlob, zipFilename } from "../download/saveBlob.js";
 import { MediaDetail } from "../media/MediaDetail.js";
 import { MediaGrid } from "../media/MediaGrid.js";
 import { MediaTimeline } from "../media/MediaTimeline.js";
@@ -63,6 +69,10 @@ export function CategoryGallery({
   const [detailIndex, setDetailIndex] = useState<number | null>(null);
   const openerRef = useRef<HTMLElement | null>(null);
   const [selection, setSelection] = useState<SelectionState | null>(null);
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [building, setBuilding] = useState(false);
+  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
   const sizes = useMediaSizes();
   const anchorRef = useRef<string | null>(null);
   const selectRef = useRef<HTMLButtonElement | null>(null);
@@ -74,6 +84,17 @@ export function CategoryGallery({
   const items = state.status === "ready" ? state.items : NO_ITEMS;
   const orderedIds = useMemo(() => orderedIdsFor(view, items), [view, items]);
 
+  // The plan is derived from the live selection, so it can never describe a
+  // selection the reader has already changed.
+  const records = useMemo<readonly MediaRecordSize[]>(
+    () => (sizes === null ? [] : [...sizes].map(([id, bytes]) => ({ id, bytes, hasBlob: true }))),
+    [sizes],
+  );
+  const plan = useMemo<ZipPlan | null>(
+    () => (selection === null ? null : buildZipPlan([...selection.ids], records)),
+    [selection, records],
+  );
+
   const closeDetail = useCallback(() => {
     setDetailIndex(null);
     openerRef.current?.focus();
@@ -82,6 +103,9 @@ export function CategoryGallery({
   const exitSelection = useCallback(() => {
     setSelection(null);
     anchorRef.current = null;
+    setDownloadOpen(false);
+    setDownloadError(null);
+    setProgress(null);
   }, []);
 
   // D1: a different route is a different view. The effect also covers leaving and
@@ -90,6 +114,9 @@ export function CategoryGallery({
     setSelection(null);
     anchorRef.current = null;
     setDetailIndex(null);
+    setDownloadOpen(false);
+    setDownloadError(null);
+    setProgress(null);
   }, [pathname]);
 
   // Escape leaves selection mode; the detail view owns Escape when it is open.
@@ -140,6 +167,33 @@ export function CategoryGallery({
       previous === null ? previous : selected ? selectAll(previous, ids) : deselect(previous, ids),
     );
   }, []);
+
+  const startDownload = async (): Promise<void> => {
+    if (plan === null || plan.entries.length === 0 || building) return;
+    setBuilding(true);
+    setDownloadError(null);
+    setProgress({ done: 0, total: plan.entries.length });
+
+    const result = await buildZip(
+      plan,
+      (id) => repository.getMediaBlob(id),
+      (done, total) => setProgress({ done, total }),
+    );
+
+    if (!result.ok) {
+      // The selection is deliberately kept: the reason is visible and a retry
+      // needs no re-selection.
+      setBuilding(false);
+      setDownloadError(result.reason);
+      return;
+    }
+
+    saveBlob(result.blob, zipFilename());
+    setBuilding(false);
+    setProgress(null);
+    setDownloadOpen(false);
+    exitSelection();
+  };
 
   return (
     <div className="gallery">
@@ -228,21 +282,37 @@ export function CategoryGallery({
           />
         )}
       {selecting && selection !== null && (
-        <SelectionBar
-          barRef={barRef}
-          count={selection.count}
-          bytes={selection.bytes}
-          total={orderedIds.length}
-          onSelectAll={() =>
-            setSelection((previous) =>
-              previous === null ? previous : selectAll(previous, orderedIds),
-            )
-          }
-          onDeselectAll={() =>
-            setSelection((previous) => (previous === null ? previous : clear(previous)))
-          }
-          onCancel={exitSelection}
-        />
+        <div className="selection-dock">
+          {downloadOpen && plan !== null && (
+            <DownloadPanel
+              plan={plan}
+              building={building}
+              progress={progress}
+              error={downloadError}
+              userAgent={navigator.userAgent}
+              onConfirm={() => void startDownload()}
+              onClose={() => setDownloadOpen(false)}
+            />
+          )}
+          {!building && (
+            <SelectionBar
+              barRef={barRef}
+              count={selection.count}
+              bytes={selection.bytes}
+              total={orderedIds.length}
+              onDownload={() => setDownloadOpen(true)}
+              onSelectAll={() =>
+                setSelection((previous) =>
+                  previous === null ? previous : selectAll(previous, orderedIds),
+                )
+              }
+              onDeselectAll={() =>
+                setSelection((previous) => (previous === null ? previous : clear(previous)))
+              }
+              onCancel={exitSelection}
+            />
+          )}
+        </div>
       )}
     </div>
   );

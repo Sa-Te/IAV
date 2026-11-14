@@ -180,16 +180,21 @@
 
 /* Sticky at the bottom of the content area: reachable without scrolling back
    past a long grid, and it ends at the end of the gallery. */
-.selection-bar {
+.selection-dock {
   position: sticky;
   bottom: 0;
   z-index: 2;
+  display: grid;
+  gap: var(--token-space-2);
+  margin-top: var(--token-space-6);
+}
+
+.selection-bar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--token-space-3);
-  margin-top: var(--token-space-6);
   padding: var(--token-space-3) var(--token-space-4);
   border: 1px solid var(--token-color-border);
   border-radius: var(--token-radius-lg);
@@ -239,4 +244,45 @@
 
 .media-thread {
   font-family: var(--token-font-mono);
+}
+
+/* --- download pre-flight and progress ------------------------------------ */
+.download-panel {
+  display: grid;
+  gap: var(--token-space-2);
+  padding: var(--token-space-4);
+  border: 1px solid var(--token-color-border);
+  border-top: 3px solid var(--token-color-accent);
+  border-radius: var(--token-radius-lg);
+  background: var(--token-color-surface);
+  box-shadow: var(--token-shadow-2);
+}
+
+.download-panel h2 {
+  margin: 0;
+  font-size: var(--token-text-18);
+}
+
+.download-note {
+  margin: 0;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-13);
+}
+
+.download-progress {
+  display: grid;
+  gap: var(--token-space-1);
+}
+
+.download-progress p {
+  margin: 0;
+}
+
+.download-progress progress {
+  width: 100%;
+}
+
+.download-error {
+  margin: 0;
+  color: var(--token-color-danger);
 }

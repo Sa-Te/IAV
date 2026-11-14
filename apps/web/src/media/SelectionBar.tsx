@@ -15,6 +15,7 @@ export function SelectionBar({
   count,
   bytes,
   total,
+  onDownload,
   onSelectAll,
   onDeselectAll,
   onCancel,
@@ -24,6 +25,7 @@ export function SelectionBar({
   bytes: number;
   /** Every item in the view, not the rendered page (D4). */
   total: number;
+  onDownload: () => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
   onCancel: () => void;
@@ -42,6 +44,9 @@ export function SelectionBar({
         {count} selected · {formatBytes(bytes)}
       </p>
       <div className="selection-actions">
+        <button type="button" className="button" onClick={onDownload} disabled={count === 0}>
+          Download
+        </button>
         <button
           type="button"
           className="button button-quiet"
