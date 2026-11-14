@@ -362,3 +362,22 @@ No new dependency and no new token are projected.
 5. **`note_and_repost_interactions.json`**: a registry row and a tier, or leave it
    in the unrecognised bucket.
 
+## 12. The follower diff (M25)
+
+Measured from `archive-2/` after the T5 work, by username and case-insensitively:
+
+| Measure | Count |
+| --- | ---: |
+| Followers | 325 |
+| Following | 3,362 |
+| Mutual | 170 |
+| You follow only | 3,192 |
+| Follows you only | 155 |
+| Entries with no username | 0 |
+
+The three sets add up on each side: 170 + 155 = 325 followers and 170 + 3,192 =
+3,362 following. `/connections` is ungated because these are the reader's own
+public relationships (ADR 0019). A future export with a username-less entry puts
+it in the fourth group and in none of these totals.
+
+

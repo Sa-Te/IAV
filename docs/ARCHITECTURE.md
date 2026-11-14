@@ -68,7 +68,12 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `categories/savedByFolder.ts` | Collections as folders of their nested posts, and the flat saved list grouped by them with URL as identity (ADR 0017). |
 | `categories/entryCount.ts` | The count a screen prints when it differs from the raw per-file sum: `posts` can arrive twice in one export, and a message category stores messages while its screen shows conversations (M24). |
 | `categories/nameListView.ts` | A vec of names/places plus optional explanatory text → a paginated name list; `null` when the record has neither. |
+| `categories/mediaTimeline.ts` | Media items → year → month, by adapting to `EventEntry` and calling `groupByMonthAndYear`; undated items are a final group (M25). |
 | `categories/aiConversationView.ts` | `ai_conversations` → a labelled record and its ordered turns, read from the one label-less container; `null` when the turn container is absent. |
+| `connections/diff.ts` | Followers ∩ following by username, with username-less entries kept in `unmatched` and never compared (D4). |
+| `messages/ownerIdentity.ts` | The account holder's Name/Username from `personal_information`, and the one sender_name that matches; zero or several matches is no owner (D3). |
+| `messages/bubbles.ts` | Consecutive messages grouped by sender and local day, carrying the date and the first index; the bubble view's one grouping rule. |
+| `messages/csv.ts` | One conversation as RFC 4180 CSV with BOM/CRLF and unconditional formula-injection prefixing; the sanitised filename. |
 | `domain/provenance.ts` | A media path → message family/thread/filename or category id; no stored field (ADR 0021). |
 | `search/index.ts` | A pure in-memory index over message bodies, case/diacritic/whitespace-insensitive, with bounded snippets; a short query returns nothing (D3). |
 | `categories/personView.ts` | T4's twelve measured person rows → one card model (display name, username, export profile URL, date), year-grouped and alphabetically ordered; a hashtag or contact record returns `null` (ADR 0019). |
@@ -98,7 +103,11 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/MediaTile.tsx` | One tile: pending skeleton, image, video frame, or a failure naming its reason. |
 | `apps/web/src/media/MediaDetail.tsx` | Full-size view, caption, timestamp, category; Escape closes and focus returns. |
 | `apps/web/src/media/useMediaList.ts` | Pages one category — or every category — out of the repository. |
-| `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. |
+| `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. Hosts the Grid/Timeline switch. |
+| `apps/web/src/media/GalleryViewSwitch.tsx` | Grid / Timeline as a native radio group with arrow-key handling and a status line. |
+| `apps/web/src/media/useGalleryView.ts` | The view choice, persisted in `localStorage`; Grid is the default. |
+| `apps/web/src/media/MediaTimeline.tsx` | Year → month sections, larger tiles with caption/date, and the final Undated group. |
+| `apps/web/src/routes/ConnectionsPage.tsx` | `/connections`: the three diff groups plus unmatched, using the person list. |
 | `apps/web/src/routes/Nav.tsx` | Categories that actually have media, with counts; `aria-current` comes from the router. |
 | `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: renders the panel `screenOf` chose and keeps loading / empty / failed distinct; the repository read happens inside the gate. |
 | `apps/web/src/categories/screenOf.ts` | The measured screen choice: T1 settings/avatar/device, T2 event/profile/name list/settings, T3 event/saved list, T4 person/tag list, T5 AI record / payment settings / viewed-posts, then table or tree. |
@@ -127,8 +136,10 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/useInViewport.ts` | IntersectionObserver with a 200px margin; once seen, stays seen, so scrolling back does not re-request. |
 | `packages/worker/src/thumbnails.ts` | Decode → OffscreenCanvas → webp (whatever type comes back), off the main thread. |
 | `apps/web/src/messages/ThreadList.tsx` | Message categories as a thread list: participants, count, newest date, empty threads marked, plus the gated on-device search box and hash-to-thread opening. |
-| `apps/web/src/messages/ThreadConversation.tsx` | One conversation chronologically, attachments inline, a search hit scrolls to its message, and the read-only note. |
+| `apps/web/src/messages/ThreadConversation.tsx` | One conversation: bubbles when the owner is identifiable, a labelled list otherwise, print and CSV controls. |
 | `apps/web/src/messages/MessageAttachment.tsx` | One photo/video/audio attachment with a type label, image dimensions or media duration when the browser knows them; a placeholder with no media says so. |
+| `apps/web/src/styles/reset.css` | The Preflight-equivalent base reset, written explicitly so the layout does not depend on a framework. |
+| `apps/web/src/styles/print.css` | The print contract for a conversation: shell hidden, ink on paper, messages unbroken. |
 | `apps/web/src/media/Provenance.tsx` | The "from messages · family · thread" line and link for a message media tile (ADR 0021). |
 | `apps/web/src/media/format.ts` | The one `m:ss` formatter shared by video tiles and inline attachments. |
 | `apps/web/src/styles/messages.css` | Threads, conversations, attachments and search; tokens only. |

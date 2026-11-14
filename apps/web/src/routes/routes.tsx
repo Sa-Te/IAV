@@ -1,4 +1,4 @@
-import { lazy, Suspense, type JSX } from "react";
+import { lazy, Suspense, type ComponentType, type JSX } from "react";
 
 import { CategoryIndex } from "../categories/CategoryIndex.js";
 import { State } from "../ui/State.js";
@@ -6,18 +6,8 @@ import { CategoryRoute } from "../categories/CategoryView.js";
 import { TierPage } from "./TierPage.js";
 import { CategoryGallery } from "./CategoryGallery.js";
 import { ConnectionsPage } from "./ConnectionsPage.js";
-import { DevIngest } from "./DevIngest.js";
-import { DevLogs } from "./DevLogs.js";
-import { DevMediaAudit } from "./DevMediaAudit.js";
-import { DevTokens } from "./DevTokens.js";
 
 /** Its own chunk: the GL code must not sit in the initial download. */
-/** Dev-only, but still lazy: it imports the GL module, which must not enter the entry chunk. */
-const LazyDevCycloneStats = lazy(async () => {
-  const module = await import("./DevCycloneStats.js");
-  return { default: module.DevCycloneStats };
-});
-
 const LazyCyclone = lazy(async () => {
   const module = await import("../cyclone/CyclonePage.js");
   return { default: module.CyclonePage };
@@ -28,10 +18,20 @@ export interface AppRoute {
   readonly element: JSX.Element;
 }
 
+function devElement(loader: () => Promise<{ default: ComponentType }>): JSX.Element {
+  const Lazy = lazy(loader);
+  return (
+    <Suspense fallback={<State kind="loading" message="Loading the dev view…" />}>
+      <Lazy />
+    </Suspense>
+  );
+}
+
 /**
- * The route table. The dev harness exists only when `dev` is true, which the app
- * passes as `import.meta.env.DEV` — in a production build the route is not in the
- * table at all, not merely hidden.
+ * The route table. Dev routes are gated twice: by the caller's `dev` flag and by
+ * `import.meta.env.DEV`. The second gate is what removes the imports from a
+ * production build; the modules are dynamic imports inside the dead branch, so the
+ * manifest has no `/dev/*` entry and the router has no `/dev/*` path.
  */
 export function buildRoutes(dev: boolean): readonly AppRoute[] {
   const routes: AppRoute[] = [
@@ -56,18 +56,41 @@ export function buildRoutes(dev: boolean): readonly AppRoute[] {
     { path: "/tiers/:tier", element: <TierPage /> },
   ];
 
-  if (dev) {
-    routes.push({ path: "/dev/ingest", element: <DevIngest /> });
-    routes.push({ path: "/dev/tokens", element: <DevTokens /> });
-    routes.push({ path: "/dev/media-audit", element: <DevMediaAudit /> });
-    routes.push({ path: "/dev/logs", element: <DevLogs /> });
+  if (dev && import.meta.env.DEV) {
+    routes.push({
+      path: "/dev/ingest",
+      element: devElement(async () => {
+        const module = await import("./DevIngest.js");
+        return { default: module.DevIngest };
+      }),
+    });
+    routes.push({
+      path: "/dev/tokens",
+      element: devElement(async () => {
+        const module = await import("./DevTokens.js");
+        return { default: module.DevTokens };
+      }),
+    });
+    routes.push({
+      path: "/dev/media-audit",
+      element: devElement(async () => {
+        const module = await import("./DevMediaAudit.js");
+        return { default: module.DevMediaAudit };
+      }),
+    });
+    routes.push({
+      path: "/dev/logs",
+      element: devElement(async () => {
+        const module = await import("./DevLogs.js");
+        return { default: module.DevLogs };
+      }),
+    });
     routes.push({
       path: "/dev/cyclone-stats",
-      element: (
-        <Suspense fallback={<State kind="loading" message="Loading the stats view…" />}>
-          <LazyDevCycloneStats />
-        </Suspense>
-      ),
+      element: devElement(async () => {
+        const module = await import("./DevCycloneStats.js");
+        return { default: module.DevCycloneStats };
+      }),
     });
   }
 

@@ -199,6 +199,28 @@ A changed shape is **more** signatures on the existing row, never a looser one
 (ADR 0008). A category that is absent from the new export is normal, not an error:
 mark it, do not delete it (ADR 0002).
 
+## Deploying
+
+This is a static build. There is no server process, no API and no environment
+variable to set.
+
+```bash
+pnpm build          # writes apps/web/dist
+pnpm --filter @instavault/web preview   # serve the built folder locally
+```
+
+Publish `apps/web/dist`. The only host requirement is **client-side routing
+fallback**: `react-router-dom` uses `BrowserRouter`, so an unknown path such as
+`/connections` must serve `index.html` rather than a 404. Any static host that can
+do that works (Cloudflare Pages, Netlify, an Nginx `try_files`, a Tauri asset
+handler).
+
+The production bundle contains no `/dev/*` route and no dev-route chunk; that is
+checked from the built manifest and the emitted assets, not from the source. M25's
+sizes: initial JS **140.2 kB gzip**, CSS **7.9 kB gzip**, worker **37.5 kB gzip**,
+cyclone chunk **6.6 kB gzip**. The initial JS is under the 200 kB gzip target with
+about 60 kB of headroom; the worker is fetched only when an import starts.
+
 ## Local gates
 
 The repository enforces its own rules; they are not conventions to remember.

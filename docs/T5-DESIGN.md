@@ -268,3 +268,24 @@ category has a screen, and every T5 category is gated.
 Nothing above is blocked on a measurement; 1 is a human review, 2 and 3 are
 deferred features with decided rules, 4 needs an owner choice of host.
 
+## 12. Owner identification (M25)
+
+Measured from `personal_information` and every message file:
+
+| Measure | `messages_inbox` | `messages_requests` |
+| --- | ---: | ---: |
+| Messages | 33,602 | 268 |
+| Distinct `sender_name` values | 97 | 33 |
+| Distinct senders matching the owner | **1** | **1** |
+| Messages sent by that sender | 17,338 | 11 |
+
+The owner's `Name` is empty in this export; `Username` is present. Exactly one
+distinct `sender_name` matches it in each category, so the account holder is
+identifiable without guessing. The bubble view is used when that count is one;
+zero or several matches falls back to the labelled list with an explanation.
+
+The 122 inbox files are 121 conversations (one thread is split across two files);
+the 142 request files are 142 conversations. Both counts are measured, not derived
+from the file count alone.
+
+

@@ -301,3 +301,31 @@ progress.
   container with no `label`; the AI conversation's 29 turns live in exactly that
   container, so the reader must read the raw `label_values` —
   vault: `architecture/2026-11-14_t5-screens.md`
+- 2026-11-14 — `no-utility-css` — Tailwind is removed; the token file and
+  hand-written classes are the only styling system, and the framework cannot
+  return through a stylesheet —
+  vault: `learning-notes/concepts/no-utility-css.md`
+- 2026-11-14 — `reset-is-part-of-the-design` — removing the framework removed its
+  preflight reset; the browser defaults returned until an explicit reset restored
+  the pixels —
+  vault: `debug-log/2026-11-14_tailwind-preflight.md`
+- 2026-11-14 — `timeline-reuses-grouping` — the media timeline adapts each item to
+  the event grouping's `timestamp` and calls `groupByMonthAndYear`; it does not
+  write a second year/month grouping —
+  vault: `mind-maps/2026-11-14_m25-views.md`
+- 2026-11-14 — `owner-is-one-sender-match` — the account holder is identifiable
+  only when exactly one distinct sender_name matches the exported Name/Username;
+  zero or several matches is a labelled list, never a frequency guess —
+  vault: `architecture/2026-11-14_m25-styling-and-connections.md`
+- 2026-11-14 — `diff-by-username` — followers and following are compared by
+  username; a username-less record is kept in `unmatched` and counted in none of
+  the three sets —
+  vault: `architecture/2026-11-14_m25-styling-and-connections.md`
+- 2026-11-14 — `csv-formula-injection` — a cell beginning with `=`, `+`, `-`, `@`
+  or a tab is prefixed with one apostrophe before RFC 4180 quoting; the user's own
+  message is still untrusted input to a spreadsheet —
+  vault: `learning-notes/concepts/csv-injection.md`
+- 2026-11-14 — `print-and-download-are-local` — print and CSV are user-initiated
+  local actions under ADR 0020; the print control exists only after the reveal,
+  and the CSV is a blob URL, not a request —
+  vault: `learning-notes/2026-11-14_session-22.md`
