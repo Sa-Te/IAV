@@ -127,6 +127,108 @@
   font-size: var(--token-text-12);
 }
 
+/* --- selection mode (M27) ------------------------------------------------- */
+.gallery-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--token-space-3);
+}
+
+/* The check is the affordance; the ring and fill on the tile are the state. */
+.tile-check {
+  position: absolute;
+  top: var(--token-space-2);
+  right: var(--token-space-2);
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 2px solid var(--token-color-on-scrim);
+  border-radius: var(--token-radius-sm);
+  background: var(--token-color-scrim);
+  color: var(--token-color-on-scrim);
+  font-size: var(--token-text-13);
+  line-height: 1;
+}
+
+.tile-selected {
+  border-color: var(--token-color-accent);
+  box-shadow: 0 0 0 2px var(--token-color-accent);
+}
+
+.tile-selected .tile-check {
+  border-color: var(--token-color-accent);
+  background: var(--token-color-accent);
+  color: var(--token-color-on-accent);
+}
+
+/* Month, year and Undated group checkboxes: native, so mixed is announceable. */
+.group-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--token-space-2);
+  cursor: pointer;
+}
+
+.group-check {
+  width: 1.1em;
+  height: 1.1em;
+  accent-color: var(--token-color-accent);
+}
+
+/* Sticky at the bottom of the content area: reachable without scrolling back
+   past a long grid, and it ends at the end of the gallery. */
+.selection-bar {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--token-space-3);
+  margin-top: var(--token-space-6);
+  padding: var(--token-space-3) var(--token-space-4);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-lg);
+  background: var(--token-color-surface);
+  box-shadow: var(--token-shadow-2);
+}
+
+.selection-bar:focus-visible {
+  outline: 2px solid var(--token-color-accent);
+  outline-offset: 2px;
+}
+
+.selection-count {
+  margin: 0;
+  font-weight: 500;
+}
+
+.selection-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--token-space-2);
+}
+
+.button-quiet {
+  border-color: var(--token-color-border-strong);
+  background: var(--token-color-surface);
+  color: var(--token-color-text);
+}
+
+.button-quiet:hover {
+  border-color: var(--token-color-text-muted);
+  background: var(--token-color-raised);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* --- message-media provenance ------------------------------------------- */
 .media-provenance {
   margin: var(--token-space-1) 0 0;

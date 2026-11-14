@@ -26,15 +26,23 @@ function ThumbnailNotice(): JSX.Element | null {
   ) : null;
 }
 
+/** Present only in selection mode. Grid order is the gallery's order. */
+export interface GridSelection {
+  readonly isSelected: (id: string) => boolean;
+  readonly onToggle: (id: string, shiftKey: boolean) => void;
+}
+
 /** Responsive grid. Fixed aspect ratio per tile so the layout never jumps. */
 export function MediaGrid({
   items,
   source,
   onOpen,
+  select,
 }: {
   items: readonly MediaItemView[];
   source: MediaSource;
   onOpen: (index: number) => void;
+  select?: GridSelection | undefined;
 }): JSX.Element {
   return (
     <>
@@ -42,7 +50,19 @@ export function MediaGrid({
       <ul className="grid">
         {items.map((item, index) => (
           <li key={`${item.category}:${item.id}:${index}`}>
-            <MediaTile item={item} source={source} onOpen={() => onOpen(index)} />
+            <MediaTile
+              item={item}
+              source={source}
+              onOpen={() => onOpen(index)}
+              select={
+                select === undefined
+                  ? undefined
+                  : {
+                      selected: select.isSelected(item.id),
+                      onToggle: (shiftKey) => select.onToggle(item.id, shiftKey),
+                    }
+              }
+            />
             <Provenance item={item} />
           </li>
         ))}

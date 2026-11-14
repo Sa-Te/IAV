@@ -35,14 +35,22 @@ function reasonText(reason: "missing" | "decode" | "timeout" | "unloadable" | "p
   return "Cannot display";
 }
 
+/** Present only in selection mode: the tile toggles instead of opening. */
+export interface TileSelection {
+  readonly selected: boolean;
+  readonly onToggle: (shiftKey: boolean) => void;
+}
+
 export function MediaTile({
   item,
   source,
   onOpen,
+  select,
 }: {
   item: MediaItemView;
   source: MediaSource;
   onOpen: () => void;
+  select?: TileSelection | undefined;
 }): JSX.Element {
   const ref = useRef<HTMLButtonElement | null>(null);
   const nearViewport = useInViewport(ref);
@@ -186,17 +194,30 @@ export function MediaTile({
     }
   };
 
+  const classes = ["tile"];
+  if (failure !== null) classes.push("tile-has-failure");
+  if (select?.selected === true) classes.push("tile-selected");
+
   return (
     <button
       ref={ref}
       type="button"
       data-media-state={media.status}
       data-media-reason={failure === null ? undefined : failure.toLowerCase()}
-      className={failure === null ? "tile" : "tile tile-has-failure"}
+      className={classes.join(" ")}
       aria-label={failure === null ? label : `${label} — ${failure.toLowerCase()}`}
-      onClick={onOpen}
+      aria-pressed={select === undefined ? undefined : select.selected}
+      onClick={select === undefined ? onOpen : (event) => select.onToggle(event.shiftKey)}
     >
       <span className="tile-body">{body(media)}</span>
+      {/* The check is the affordance; the border and background on the tile are the
+          state. Two signals, so a reader who cannot see the tick still sees a
+          selected tile. */}
+      {select !== undefined && (
+        <span className="tile-check" aria-hidden="true">
+          {select.selected ? "✓" : ""}
+        </span>
+      )}
     </button>
   );
 }

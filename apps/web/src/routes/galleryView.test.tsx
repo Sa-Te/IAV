@@ -2,6 +2,7 @@
 import type { CategoryRecord } from "@instavault/core";
 import type { ArchiveRepository } from "@instavault/storage";
 import { cleanup, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -41,9 +42,11 @@ function repository(): ArchiveRepository & { listCategories: ReturnType<typeof v
 
 function renderGallery(source: ArchiveRepository): void {
   render(
-    <RepositoryProvider repository={source}>
-      <CategoryGallery category="posts" title="Posts" />
-    </RepositoryProvider>,
+    <MemoryRouter initialEntries={["/posts"]}>
+      <RepositoryProvider repository={source}>
+        <CategoryGallery category="posts" title="Posts" />
+      </RepositoryProvider>
+    </MemoryRouter>,
   );
 }
 
