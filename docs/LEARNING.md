@@ -275,3 +275,28 @@ progress.
   1,620 DOM nodes, under the 2,000 threshold, so the list renders rather than
   virtualises; a budget test holds the ceiling —
   vault: `mind-maps/2026-11-14_t4-screens.md`
+- 2026-11-14 — `destination-not-click` — the network rule asks what a request tells
+  someone else, not whether the user clicked; local download and object URLs are
+  not egress, third-party fetches are never allowed (ADR 0020) —
+  vault: `learning-notes/concepts/destination-not-click.md`
+- 2026-11-14 — `conversation-count-not-message-count` — a thread object's first
+  array is its messages, so the stored entry count is a message count; the screen
+  counts conversations (121 inbox, 142 requests), and the two numbers differ for a
+  measured reason —
+  vault: `debug-log/2026-11-14_message-count-and-attachments.md`
+- 2026-11-14 — `attachment-placeholder-is-export-text` — "You sent an attachment."
+  is a literal Instagram writes when it omits the file; 17,200 such messages in
+  the baseline are a note, not a dead image slot —
+  vault: `learning-notes/concepts/attachment-placeholder.md`
+- 2026-11-14 — `provenance-from-path` — a media path already names the message
+  family, thread and filename; derive the label at render, add no stored field
+  (ADR 0021) —
+  vault: `learning-notes/concepts/provenance-from-path.md`
+- 2026-11-14 — `search-is-a-view` — an in-memory index over 33,870 message bodies
+  builds after the reveal in ~168 ms and answers in ~0.1 ms; no persistence, no
+  worker, and a reload gates it again —
+  vault: `mind-maps/2026-11-14_t5-search.md`
+- 2026-11-14 — `label-less-container-hides-turns` — `labelItemsOf` drops a
+  container with no `label`; the AI conversation's 29 turns live in exactly that
+  container, so the reader must read the raw `label_values` —
+  vault: `architecture/2026-11-14_t5-screens.md`

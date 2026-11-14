@@ -10,14 +10,15 @@ ZIP and shows it back to you.
 
 **Pre-alpha, browser-only.** The import path works end to end: a ZIP is parsed in
 a worker, stored in IndexedDB, and rendered through galleries, a 3D cyclone and
-per-category screens. T1, T2, T3 and T4 now have screens: T1 settings, the avatar
-grid and the device profile; T2 event/activity lists, settings, a profile with its
-local photo, and the name/place lists; T3's fourteen activity and comment lists,
-plus three media galleries; T4's twelve person lists, its tag list and its gated
-contact table. Long lists fold by year and then month; three T3 comment categories
-and T4's synced contacts ask before they render because they hold other people's
-words or contact details. T5 still renders through the generic table or raw tree.
-There is no server, no account and no network egress.
+per-category screens. Every tier now has screens: T1 settings, the avatar grid and
+the device profile; T2 event/activity lists, settings, a profile with its local
+photo, and the name/place lists; T3's fourteen activity and comment lists, plus
+three media galleries; T4's twelve person lists, its tag list and its gated
+contact table; T5's thread lists and conversations (attachments and on-device
+search), the AI-conversation record, the payment settings page and the
+viewed-posts list. Long lists fold by year and then month; three T3 comment
+categories, T4's synced contacts and every T5 category ask before they render.
+There is no server, no account and no third-party network egress (ADR 0020).
 
 ## What v1 is
 
@@ -116,7 +117,14 @@ You need an Instagram export ZIP (request it as **JSON**, not HTML).
    The list groups by year and pages 200 at a time. Following hashtags has its own
    tag list because a hashtag is not a person. Synced contacts is a gated table:
    address-book names and phone numbers belong to people who did not choose this
-   app, so it asks before it reads them.
+   app, so it asks before it reads them. T5's conversations render attachments
+   inline — a photo, a video with its poster and duration, an audio player — and
+   a "sent an attachment" line with no file says so instead of showing a dead
+   placeholder. The thread list has on-device search over message bodies; a hit
+   shows a snippet and jumps to the message. Message photos in `/` say which
+   inbox thread they came from and link back to it. AI conversations are a
+   labelled record with a collapsed transcript, and Threads posts you viewed open
+   on the event list with the author as the row's subject.
 
 **What privacy means in practice.** The ZIP is read with the browser's own file
 API, parsed in a worker in the same tab, and stored in IndexedDB. Nothing is
@@ -142,7 +150,9 @@ the comments other people wrote on your posts and reels, and the comments you li
 Comments stay on the "your content" page; the gate is not a tier (ADR 0014).
 Synced contacts stays on the T4 page; its gate exists because an address-book entry
 belongs to someone who has not necessarily used Instagram (ADR 0019). The reveal is
-not remembered: reloading the page gates them again.
+not remembered: reloading the page gates them again. Message search is also behind
+that gate and on-device only: the index is built in memory after the reveal, is
+never persisted, and is gone on reload.
 
 **Every parsed category has a page.** `/categories` lists all of them by privacy
 tier; a category whose shape carries no labels renders as a collapsible JSON tree

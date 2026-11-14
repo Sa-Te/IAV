@@ -7,17 +7,20 @@ only when its row says parsed + rendered + tested (AGENTS.md §16).
 the full per-category fixture set** (`stories`, `archived_posts`, `posts`). Plus
 one unrecognised bucket (ADR 0002, tier 3) that is always present by design.
 
-Of the 73 present in `archive-2/`, **12 T1, 24 T2, all 18 T3 and all 14 T4
-categories now have a screen** — ten T1 settings pages, one avatar grid, one device
-profile; sixteen T2 event lists, four T2 settings pages, one profile with a local
-photo, three T2 name/place lists (M20/M21); twelve T3 event lists (three of them
-gated), two saved-folder screens and one profile-photo screen; twelve T4 person
-lists, one tag list and one gated contact table — **3 media categories have their
+Of the 73 present in `archive-2/`, **12 T1, 24 T2, all 18 T3, 13 of 14 T4 and
+all 5 T5 categories have a real screen** — ten T1 settings pages, one avatar grid,
+one device profile; sixteen T2 event lists, four T2 settings pages, one profile
+with a local photo, three T2 name/place lists (M20/M21); twelve T3 event lists
+(three of them gated), two saved-folder screens and one profile-photo screen;
+twelve T4 person lists and one tag list; two T5 thread lists with conversations,
+attachments, provenance and search, one AI-conversation record, one payment
+settings page and one viewed-posts event list — **3 media categories have their
 own gallery routes**, one more renders its media inside another screen (T2's
 profile photo), and **2 message categories render as a thread list** behind the
-reveal gate. The rest render through the generic table, or the raw tree when the
-shape carries no labels. The fifteen absent rows stay registered: absence is a
-normal state (ADR 0002), and an ordinary export must not look broken.
+reveal gate. The only present category on the generic table is `synced_contacts`,
+deliberately: it is a contact table behind the gate (ADR 0019). The unrecognised
+bucket remains a tree by definition. The fifteen absent rows stay registered:
+absence is a normal state (ADR 0002), and an ordinary export must not look broken.
 
 `reels` is registered by name only: no reels file exists in this baseline, so it has
 no measured shape (ADR 0008 permits an empty signature list) and no observed media
@@ -163,11 +166,11 @@ the other rows are read by the shared label/value reader, and the column says so
 
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `messages_requests` | `your_instagram_activity/messages/message_requests/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | thread list | high | parsed + rendered (M9: thread list behind the T5 gate) |
-| `messages_inbox` | `your_instagram_activity/messages/inbox/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | thread list | high | parsed + rendered (M9: thread list behind the T5 gate) |
-| `ai_conversations` | `your_instagram_activity/messages/ai_conversations.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
-| `checkout_payment_information` | `your_instagram_activity/shopping/checkout_payment_information.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
-| `threads_viewed` | `your_instagram_activity/threads/threads_viewed.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | none | medium | parsed + rendered |
+| `messages_requests` | `your_instagram_activity/messages/message_requests/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | thread list + conversation | high | parsed + rendered + tested (M24: attachments, provenance, search behind the T5 gate) |
+| `messages_inbox` | `your_instagram_activity/messages/inbox/**/message_1.json` | `packages/core/schema/messages.ts` | `packages/core/parsers/messages.ts` | thread list + conversation | high | parsed + rendered + tested (M24: attachments, provenance, search behind the T5 gate) |
+| `ai_conversations` | `your_instagram_activity/messages/ai_conversations.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | AI conversation | medium | parsed + rendered + tested |
+| `checkout_payment_information` | `your_instagram_activity/shopping/checkout_payment_information.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | settings | medium | parsed + rendered + tested |
+| `threads_viewed` | `your_instagram_activity/threads/threads_viewed.json` | `packages/core/src/schema/opaque.ts` | `packages/core/src/parsers/opaque.ts` | event list | medium | parsed + rendered + tested |
 
 ## Unrecognised bucket — not a category
 
@@ -176,7 +179,7 @@ no rule matches is parsed generically and surfaced here.
 
 | Category | Source file(s) | Schema module | Parser module | View | Variant risk | Status |
 | --- | --- | --- | --- | --- | --- | --- |
-| `(unrecognised bucket)` | any JSON file matching no name rule and no structural signature | `packages/core/schema/unrecognised.ts` | `packages/core/parsers/unrecognised.ts` | table | high | not started |
+| `(unrecognised bucket)` | any JSON file matching no name rule and no structural signature | `packages/core/schema/unrecognised.ts` | `packages/core/parsers/unrecognised.ts` | table | high | not started — by design; `note_and_repost_interactions.json` stays here (T5-DESIGN §10) |
 
 ## Status values
 
@@ -187,7 +190,7 @@ no rule matches is parsed generically and surfaced here.
 A row is only marked `parsed` once its parser has a fixture, a malformed-input
 test and an empty-file test (AGENTS.md §9). `parsed + rendered` means the category
 has a view at `/categories/:id`, bespoke or generic; the View column says which
-(`settings`, `event list`, `profile + photo`, `name list`, `person list`, `tag list`, `gallery`, `saved folders`,
-`photo`, `table`, `tree`, `timeline`, `map`, `thread list`). `parsed + raw view` is the generic
+(`settings`, `event list`, `profile + photo`, `name list`, `person list`, `tag list`, `AI conversation`, `gallery`, `saved folders`,
+`photo`, `table`, `tree`, `timeline`, `map`, `thread list`, `thread list + conversation`). `parsed + raw view` is the generic
 view falling back to a JSON tree because the shape has no labels. The generic
 table and tree remain the fallback for every category without a bespoke screen.

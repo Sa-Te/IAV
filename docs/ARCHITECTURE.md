@@ -66,8 +66,11 @@ no DOM, no network, no storage. `pnpm check:boundaries` enforces that.
 | `categories/eventPreview.ts` | The two sticker/poll shapes whose values are presentation: a colour and an option's font size (ADR 0016); everything else keeps the field list. |
 | `categories/nestedUrl.ts` | The one reader of label-less containers, and only to find the link a story reaction, question or quiz keeps inside one. |
 | `categories/savedByFolder.ts` | Collections as folders of their nested posts, and the flat saved list grouped by them with URL as identity (ADR 0017). |
-| `categories/entryCount.ts` | The count a screen prints when it differs from the raw per-file sum: `posts` can arrive twice in one export (docs/T3-DESIGN.md §2). |
+| `categories/entryCount.ts` | The count a screen prints when it differs from the raw per-file sum: `posts` can arrive twice in one export, and a message category stores messages while its screen shows conversations (M24). |
 | `categories/nameListView.ts` | A vec of names/places plus optional explanatory text → a paginated name list; `null` when the record has neither. |
+| `categories/aiConversationView.ts` | `ai_conversations` → a labelled record and its ordered turns, read from the one label-less container; `null` when the turn container is absent. |
+| `domain/provenance.ts` | A media path → message family/thread/filename or category id; no stored field (ADR 0021). |
+| `search/index.ts` | A pure in-memory index over message bodies, case/diacritic/whitespace-insensitive, with bounded snippets; a short query returns nothing (D3). |
 | `categories/personView.ts` | T4's twelve measured person rows → one card model (display name, username, export profile URL, date), year-grouped and alphabetically ordered; a hashtag or contact record returns `null` (ADR 0019). |
 | `categories/tagView.ts` | `following_hashtags` → tag, tag-page URL and date; `null` for any other category. A tag is not a person. |
 | `categories/privacy.ts` | Which categories gate — tier 5 or the registry's `gated` flag — and the copy shown before one is revealed; reads the registry, never a hardcoded id list (ADR 0014). |
@@ -98,7 +101,7 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/routes/CategoryGallery.tsx` | One page parameterised by category; `/`, `/posts`, `/stories`, `/archived`. |
 | `apps/web/src/routes/Nav.tsx` | Categories that actually have media, with counts; `aria-current` comes from the router. |
 | `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: renders the panel `screenOf` chose and keeps loading / empty / failed distinct; the repository read happens inside the gate. |
-| `apps/web/src/categories/screenOf.ts` | The measured screen choice: T1 settings/avatar/device, T2 event/profile/name list/settings, T3 event/saved list, T4 person/tag list, then table or tree. |
+| `apps/web/src/categories/screenOf.ts` | The measured screen choice: T1 settings/avatar/device, T2 event/profile/name list/settings, T3 event/saved list, T4 person/tag list, T5 AI record / payment settings / viewed-posts, then table or tree. |
 | `apps/web/src/people/PersonCard.tsx` | One person: initials on a token surface, display name, @username, localised date, and the export's own profile URL as a real outbound link; no avatar image exists (ADR 0019). |
 | `apps/web/src/people/PersonListView.tsx` | The T4 person list: year sections, alphabetical inside a year, 200 cards at a time, raw JSON behind the one disclosure. |
 | `apps/web/src/people/TagListView.tsx` | `following_hashtags`: tag, tag-page link and date; deliberately not a person card. |
@@ -123,8 +126,14 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/MediaCaches.tsx` | Creates the per-root original and thumbnail caches from the repository; releases both on teardown. |
 | `apps/web/src/media/useInViewport.ts` | IntersectionObserver with a 200px margin; once seen, stays seen, so scrolling back does not re-request. |
 | `packages/worker/src/thumbnails.ts` | Decode → OffscreenCanvas → webp (whatever type comes back), off the main thread. |
-| `apps/web/src/messages/ThreadList.tsx` | Message categories as a thread list: participants, count, newest date, empty threads marked, inside the T5 gate. |
-| `apps/web/src/messages/ThreadConversation.tsx` | One conversation chronologically with media through the cache, and the read-only note. |
+| `apps/web/src/messages/ThreadList.tsx` | Message categories as a thread list: participants, count, newest date, empty threads marked, plus the gated on-device search box and hash-to-thread opening. |
+| `apps/web/src/messages/ThreadConversation.tsx` | One conversation chronologically, attachments inline, a search hit scrolls to its message, and the read-only note. |
+| `apps/web/src/messages/MessageAttachment.tsx` | One photo/video/audio attachment with a type label, image dimensions or media duration when the browser knows them; a placeholder with no media says so. |
+| `apps/web/src/media/Provenance.tsx` | The "from messages · family · thread" line and link for a message media tile (ADR 0021). |
+| `apps/web/src/media/format.ts` | The one `m:ss` formatter shared by video tiles and inline attachments. |
+| `apps/web/src/styles/messages.css` | Threads, conversations, attachments and search; tokens only. |
+| `apps/web/src/categories/AiConversationsView.tsx` | `ai_conversations`: title and header fields, then the turns as one collapsed ordered list (D2). |
+| `apps/web/src/styles/ai.css` | The AI-conversation record; tokens only. |
 | `packages/tokens/src/tokens.css` | Every colour, space, radius, type, shadow and glass value; Umber and Paper as data, plus the system fallback. |
 | `apps/web/src/ui/State.tsx` | The four async states — loading, empty, error, unavailable — announced and styled once. |
 | `apps/web/src/ui/AppShell.tsx` | Skip link, the persistent sidebar, one main landmark, honest footer. |

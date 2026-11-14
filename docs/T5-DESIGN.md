@@ -230,3 +230,41 @@ search. The other three are the remaining screen work.
   for 0.2% of rows would make the comment screen about the commented-on post, not
   the comment. The URI remains in the raw JSON. Reopen if a measured export has a
   materially larger share.
+
+## 11. Every tier is now complete
+
+Measured from `archive-2/` on 2026-11-14, by running the same ingest and screen
+choice the app runs, then counting the present categories per tier. "Real screen"
+means a bespoke or shared measured screen; "generic" means the table/tree
+fallback; "absent" means registered but not in this export.
+
+| Tier | Present | Real screen | Generic | Absent | What is on the generic view |
+| --- | ---: | ---: | ---: | ---: | --- |
+| T1 | 12 | 12 | 0 | 8 | — |
+| T2 | 24 | 24 | 0 | 5 | — |
+| T3 | 18 | 18 | 0 | 1 | — |
+| T4 | 14 | 13 | 1 | 1 | `synced_contacts`, deliberately a gated contact table |
+| T5 | 5 | 5 | 0 | 0 | — |
+| **Total** | **73** | **72** | **1** | **15** | 88 registered categories, 73 present |
+
+The one generic present category is a decision, not an omission: a contact list
+has no label/value screen and no person card (ADR 0019). Every other present
+category has a screen, and every T5 category is gated.
+
+### What remains before release
+
+1. **The design pass.** The T5 screens need the Web Interface Guidelines audit and
+   a visual pass against the tokens (the message search box, the attachment
+   figures, the AI record). This is a human check, not a unit test.
+2. **Sync.** ADR 0020 decides the rule (E2EE or the user's own drive) but no sync
+   code exists; it needs its own ADR and key-management design.
+3. **The Tauri wrapper.** A desktop shell is still not started. It must keep the
+   same repository seam and the same no-third-party-egress rule.
+4. **Deploy.** There is no deployment target yet (AGENTS §10). The static build is
+   ready; continuous deployment needs an endpoint.
+5. **Download / ZIP export.** Legal by ADR 0020, not built. It needs no new network
+   permission; it is a local read and an `<a download>`.
+
+Nothing above is blocked on a measurement; 1 is a human review, 2 and 3 are
+deferred features with decided rules, 4 needs an owner choice of host.
+
