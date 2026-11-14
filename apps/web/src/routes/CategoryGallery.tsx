@@ -15,9 +15,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState, type JSX } from "react";
 import { useLocation } from "react-router-dom";
 
-import { buildZip } from "../download/buildZip.js";
-import { DownloadPanel } from "../download/DownloadPanel.js";
-import { saveBlob, zipFilename } from "../download/saveBlob.js";
+import { DownloadFlow } from "../download/DownloadFlow.js";
 import { MediaDetail } from "../media/MediaDetail.js";
 import { MediaGrid } from "../media/MediaGrid.js";
 import { MediaTimeline } from "../media/MediaTimeline.js";
@@ -70,9 +68,7 @@ export function CategoryGallery({
   const openerRef = useRef<HTMLElement | null>(null);
   const [selection, setSelection] = useState<SelectionState | null>(null);
   const [downloadOpen, setDownloadOpen] = useState(false);
-  const [building, setBuilding] = useState(false);
-  const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
-  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const sizes = useMediaSizes();
   const anchorRef = useRef<string | null>(null);
   const selectRef = useRef<HTMLButtonElement | null>(null);
@@ -104,8 +100,7 @@ export function CategoryGallery({
     setSelection(null);
     anchorRef.current = null;
     setDownloadOpen(false);
-    setDownloadError(null);
-    setProgress(null);
+    setBusy(false);
   }, []);
 
   // D1: a different route is a different view. The effect also covers leaving and
@@ -115,8 +110,7 @@ export function CategoryGallery({
     anchorRef.current = null;
     setDetailIndex(null);
     setDownloadOpen(false);
-    setDownloadError(null);
-    setProgress(null);
+    setBusy(false);
   }, [pathname]);
 
   // Escape leaves selection mode; the detail view owns Escape when it is open.
@@ -167,33 +161,6 @@ export function CategoryGallery({
       previous === null ? previous : selected ? selectAll(previous, ids) : deselect(previous, ids),
     );
   }, []);
-
-  const startDownload = async (): Promise<void> => {
-    if (plan === null || plan.entries.length === 0 || building) return;
-    setBuilding(true);
-    setDownloadError(null);
-    setProgress({ done: 0, total: plan.entries.length });
-
-    const result = await buildZip(
-      plan,
-      (id) => repository.getMediaBlob(id),
-      (done, total) => setProgress({ done, total }),
-    );
-
-    if (!result.ok) {
-      // The selection is deliberately kept: the reason is visible and a retry
-      // needs no re-selection.
-      setBuilding(false);
-      setDownloadError(result.reason);
-      return;
-    }
-
-    saveBlob(result.blob, zipFilename());
-    setBuilding(false);
-    setProgress(null);
-    setDownloadOpen(false);
-    exitSelection();
-  };
 
   return (
     <div className="gallery">
@@ -284,17 +251,15 @@ export function CategoryGallery({
       {selecting && selection !== null && (
         <div className="selection-dock">
           {downloadOpen && plan !== null && (
-            <DownloadPanel
+            <DownloadFlow
               plan={plan}
-              building={building}
-              progress={progress}
-              error={downloadError}
-              userAgent={navigator.userAgent}
-              onConfirm={() => void startDownload()}
+              source={repository}
               onClose={() => setDownloadOpen(false)}
+              onDone={exitSelection}
+              onBusyChange={setBusy}
             />
           )}
-          {!building && (
+          {!busy && (
             <SelectionBar
               barRef={barRef}
               count={selection.count}

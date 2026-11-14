@@ -41,7 +41,8 @@ export function DownloadPanel({
       </h2>
 
       <p>
-        {formatBytes(plan.totalBytes)} of originals, at their archive paths. Nothing is uploaded.
+        Originals only, at original quality: {formatBytes(plan.totalBytes)} at their archive paths.
+        Nothing is uploaded.
       </p>
 
       {plan.skipped.length > 0 && (

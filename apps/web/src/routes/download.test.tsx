@@ -170,6 +170,33 @@ describe("download a selection", () => {
     expect(clicked).toEqual([]);
   });
 
+  it("shows determinate progress while the ZIP is being built", async () => {
+    const user = userEvent.setup();
+    let release: () => void = () => {};
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const gated: ArchiveRepository = {
+      ...repository(),
+      getMediaBlob: async (id: string) => {
+        await gate;
+        return id === "media/posts/no-blob.jpg" ? null : new Blob([id]);
+      },
+    };
+    renderGallery(gated);
+    await selectAll(user);
+    const panel = await openPanel(user);
+
+    await user.click(within(panel).getByRole("button", { name: "Download ZIP" }));
+
+    expect(await screen.findByText("Adding 0 of 2 files")).toBeDefined();
+    expect(panel.querySelector("progress")?.getAttribute("max")).toBe("2");
+
+    release();
+    await waitFor(() => expect(screen.queryByRole("region", { name: /^Download / })).toBeNull());
+    expect(screen.getByRole("button", { name: "Select" })).toBeDefined();
+  });
+
   it("warns about memory above 300 MB without blocking the download", async () => {
     const user = userEvent.setup();
     renderGallery(repository({ "media/posts/a.jpg": 400 * MB }, { "media/posts/a.jpg": "big" }));
