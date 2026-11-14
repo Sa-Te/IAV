@@ -4,6 +4,9 @@
   // which package to deploy, and auto-detection fails with "run in the root of a workspace".
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "instavault",
+  // The dashboard sets this too; declaring it here keeps the file the single
+  // source of truth and stops the deploy warning about a dropped remote var.
+  "vars": { "NODE_VERSION": "22" },
   "compatibility_date": "2026-11-14",
   "assets": {
     "directory": "./apps/web/dist",

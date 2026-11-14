@@ -208,7 +208,8 @@ mark it, do not delete it (ADR 0002).
 ## Deploy
 
 The target is **Cloudflare Workers static assets** — no Worker script, no server
-process, no API, no environment variable. The output directory is declared in
+process, no API, no secret. The only variable is `NODE_VERSION`, declared in
+`wrangler.jsonc` rather than only in the dashboard. The output directory is declared in
 [`wrangler.jsonc`](wrangler.jsonc) at the repository root, because this repo is a
 pnpm workspace: wrangler cannot infer which package to deploy, and auto-detection
 refuses to run from a workspace root.
@@ -232,12 +233,17 @@ The dashboard owns exactly three values, and they must match this file:
 The output directory is **not** a dashboard setting: `wrangler.jsonc` declares
 `assets.directory` as `./apps/web/dist`. Renaming it is a change to that file.
 
-Client-side routing keeps two fallbacks, both deliberate. `react-router-dom` uses
+Client-side routing has exactly one fallback per host. `react-router-dom` uses
 `BrowserRouter`, so an unknown path such as `/import` or `/connections` must serve
-`index.html` rather than a 404: `not_found_handling: "single-page-application"` is
-what does that on Workers, and `apps/web/public/_redirects`
-(`/* /index.html 200`) carries the same rule into the build for Netlify (via the
-included `netlify.toml`) and any other host that reads it.
+`index.html` rather than a 404: on Workers that is
+`not_found_handling: "single-page-application"` in `wrangler.jsonc`.
+
+A `_redirects` file was removed from `apps/web/public/` and must not come back.
+Workers reads and validates that file, and a catch-all (`/* /index.html 200`)
+loops there — `/*` matches `/index.html`, Workers strips `.html` to `/index`, and
+the rule matches again — so the deploy is rejected at the API. Netlify gets the
+same fallback from the included `netlify.toml`, which is a switch for a different
+host, not a second pipeline.
 
 The production bundle contains no `/dev/*` route and no dev-route chunk; that is
 checked from the built assets, not from the source. M26's sizes: initial JS
