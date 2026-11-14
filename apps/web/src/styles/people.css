@@ -84,3 +84,37 @@
   color: var(--token-color-text-muted);
   font-size: var(--token-text-12);
 }
+
+/* --- following_hashtags: topics, not people ----------------------------- */
+
+.tag-view {
+  max-width: 72ch;
+}
+
+.tag-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--token-space-3);
+  padding: var(--token-space-2) var(--token-space-3);
+  border-bottom: 1px solid var(--token-color-border);
+}
+
+.tag-name {
+  font-family: var(--token-font-mono);
+}
+
+.tag-date {
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+}

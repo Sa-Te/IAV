@@ -109,6 +109,13 @@ describe("PersonListView", () => {
     expect(screen.getAllByRole("article")).toHaveLength(2);
   });
 
+  it("keeps the first 200-row page under the 2,000-node budget", () => {
+    const { container } = render(<PersonListView view={viewOf(people)} raw={null} />);
+
+    expect(container.querySelectorAll(".person-card")).toHaveLength(PERSON_PAGE);
+    expect(container.querySelectorAll("*").length).toBeLessThan(2_000);
+  });
+
   it("sorts alphabetically inside a year, as the core orders it", () => {
     render(
       <PersonListView

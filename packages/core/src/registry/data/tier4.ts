@@ -187,6 +187,9 @@ export const TIER_4: readonly Category[] = [
     id: "synced_contacts",
     label: "Synced contacts",
     privacyTier: 4,
+    // The one T4 row that gates (D2): address-book names and contact details
+    // belong to people who did not choose this app and may not use Instagram.
+    gated: true,
     variantRisk: "low",
     match: { basenames: [/^synced_contacts(?:_\d+)?\.json$/i] },
     signatures: [{ kind: "object", requiredKeys: ["contacts_contact_info"] }],

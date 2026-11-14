@@ -22,6 +22,16 @@ describe("isGated — the gate is not the tier", () => {
     expect(isGated("posts")).toBe(false);
   });
 
+  it("gates synced contacts while leaving it in T4 (D2, M23)", () => {
+    expect(isGated("synced_contacts")).toBe(true);
+    const synced = CATEGORIES.find((category) => category.id === "synced_contacts");
+    expect(synced?.privacyTier).toBe(4);
+    expect(synced?.gated).toBe(true);
+    for (const id of ["followers", "following", "blocked_profiles"]) {
+      expect(isGated(id)).toBe(false);
+    }
+  });
+
   it("still gates every T5 category", () => {
     const t5 = CATEGORIES.filter((category) => category.privacyTier === 5);
     expect(t5.length).toBeGreaterThan(0);

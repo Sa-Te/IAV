@@ -154,4 +154,28 @@ describe("T5 reveal gate", () => {
       cleanup();
     }
   });
+
+  it("gates synced contacts without reading the address book first (D2)", async () => {
+    const user = userEvent.setup();
+    const repository = repositoryWith(["synced_contacts"]);
+    renderView(repository, "synced_contacts");
+
+    expect(repository.getCategory).toHaveBeenCalledTimes(0);
+    expect(document.body.textContent).toContain("address book");
+    expect(document.body.textContent).toContain("phone numbers and email addresses");
+    expect(screen.getByRole("button", { name: "Show this category" })).toBeDefined();
+
+    await user.click(screen.getByRole("button", { name: "Show this category" }));
+
+    expect(repository.getCategory).toHaveBeenCalledTimes(1);
+    expect(repository.getCategory).toHaveBeenCalledWith("synced_contacts");
+  });
+
+  it("does not gate the other T4 rows, including followers and following", () => {
+    for (const id of ["following", "followers", "blocked_profiles", "pending_follow_requests"]) {
+      renderView(repositoryWith([id]), id);
+      expect(screen.queryByRole("button", { name: "Show this category" })).toBeNull();
+      cleanup();
+    }
+  });
 });

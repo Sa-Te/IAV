@@ -285,9 +285,12 @@ because a person list is a directory, not a chronology. The 200-row page cap
 (AGENTS §7) applies to the flattened list: 200 cards, then one "show more" button.
 
 The measured DOM node count for the rendered `/categories/following` screen at
-its first 200-row page is recorded in §10 once the screen exists; the projection
-is under 2,000 nodes (200 cards plus year headings), which is the threshold below
-which AGENTS §7 says not to virtualise.
+its first 200-row page is **1,620 nodes**, with year sections 2026, 2025, 2024 and
+2023 (the 200th card falls inside 2023). Every year heading is present and the
+page does not render the remaining 3,162 cards. That is below the 2,000-node
+threshold AGENTS §7 sets for virtualisation, so the page renders rather than
+virtualises. A budget test in `apps/web/src/people/people.test.tsx` asserts the
+2,000-node ceiling.
 
 ## 9. Screen assignment
 
@@ -304,9 +307,8 @@ is absent from this export and keeps the muted sidebar treatment already used fo
 
 ## 10. What is still open
 
-- The person card and the tag list are M23 commits 2 and 3. The DOM count in §8
-  is filled in by the commit that renders the screen, because a projection is not
-  a measurement.
+- The person card and the tag list landed in M23 commits 2 and 3. The DOM count
+  in §8 is measured from the rendered screen.
 - `synced_contacts` is the only T4 row that gates (D2). Its copy names address-book
   names and contact details, and the repository is not read before the reveal.
 - The label/value interactions carry no profile URL at all (§4). A card for them

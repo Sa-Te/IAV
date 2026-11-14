@@ -70,6 +70,10 @@ const COPY: Readonly<Record<string, RevealCopy>> = {
     title: "Comments other people wrote that you liked",
     body: "This category holds words other people wrote to you: comments you liked, the account that wrote each one, a link to it, and when you liked it. It is stored on this device exactly as the export provided it.",
   },
+  synced_contacts: {
+    title: "Names and contact details from your address book",
+    body: "This category holds names and contact details copied from your address book: phone numbers and email addresses belonging to people who have not necessarily used Instagram. It is stored on this device exactly as the export provided it.",
+  },
 };
 
 const FALLBACK: RevealCopy = {

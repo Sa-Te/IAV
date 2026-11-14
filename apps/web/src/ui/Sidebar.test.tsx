@@ -164,6 +164,33 @@ describe("sidebar", () => {
     expect(link.getAttribute("href")).toBe("/categories/reels");
     expect(within(galleries).queryByText("no reels in this export")).toBeNull();
   });
+
+  it("shows secret conversations as a muted, non-clickable row when absent", async () => {
+    const user = userEvent.setup();
+    renderShell();
+    const categories = await screen.findByRole("navigation", { name: "Categories" });
+    await user.click(within(categories).getByRole("button", { name: /T4/ }));
+
+    const panel = document.querySelector<HTMLElement>("#tier-panel-4");
+    expect(panel).not.toBeNull();
+    if (panel === null) return;
+    expect(within(panel).getByText("not in this export")).toBeDefined();
+    expect(within(panel).queryByRole("link", { name: /Secret conversations/ })).toBeNull();
+  });
+
+  it("links secret conversations when the export actually contains it", async () => {
+    const user = userEvent.setup();
+    renderShell("/posts", [...defaultRecords, record("secret_conversations", 1)]);
+    const categories = await screen.findByRole("navigation", { name: "Categories" });
+    await user.click(within(categories).getByRole("button", { name: /T4/ }));
+
+    const panel = document.querySelector<HTMLElement>("#tier-panel-4");
+    expect(panel).not.toBeNull();
+    if (panel === null) return;
+    const link = await within(panel).findByRole("link", { name: /Secret conversations/ });
+    expect(link.getAttribute("href")).toBe("/categories/secret_conversations");
+    expect(within(panel).queryByText("not in this export")).toBeNull();
+  });
 });
 
 describe("back to top", () => {

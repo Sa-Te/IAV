@@ -51,6 +51,7 @@ export function Sidebar({
   const countOf = (category: string): number =>
     category === "everything" ? everything : (counts[category] ?? 0);
   const reels = byId.get("reels");
+  const secretConversations = byId.get("secret_conversations");
 
   // The tier that owns the current route opens by itself: `/categories/:id` finds
   // its category's tier, `/tiers/tN` is that tier.
@@ -236,6 +237,19 @@ export function Sidebar({
                       })}
                       {rows.status === "ready" && present.length === 0 && (
                         <li className="sidebar-note">Nothing from this tier here.</li>
+                      )}
+                      {/*
+                        Secret conversations is registered but absent from this
+                        export. The same treatment as reels: never hidden, never
+                        invented, and a normal link the day the file exists.
+                      */}
+                      {group.tier === 4 && secretConversations?.present === false && (
+                        <li>
+                          <span className="sidebar-muted">
+                            <span>{secretConversations.label}</span>{" "}
+                            <span className="sidebar-count">not in this export</span>
+                          </span>
+                        </li>
                       )}
                     </ul>
                     <NavLink to={`/tiers/t${group.tier}`} className="sidebar-link sidebar-more">

@@ -113,6 +113,8 @@ export {
   toPersonView,
 } from "./categories/personView.js";
 export type { PeopleByYear, Person, PersonListView, PersonYear } from "./categories/personView.js";
+export { toTagListView } from "./categories/tagView.js";
+export type { TagEntry, TagListView } from "./categories/tagView.js";
 export { toAvatarItemsView } from "./categories/avatarItemsView.js";
 export type { AvatarItem, AvatarItemsView } from "./categories/avatarItemsView.js";
 export { toDeviceEffectsView } from "./categories/deviceEffectsView.js";
