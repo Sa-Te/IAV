@@ -141,7 +141,9 @@
 .select-fab {
   position: fixed;
   right: var(--token-space-4);
-  bottom: var(--token-space-4);
+  /* Stacked above Back to top (44px at space-4): they are both bottom-right, and
+     the shell's control wins the corner. Without the offset it swallowed clicks. */
+  bottom: calc(var(--token-space-4) + 44px + var(--token-space-2));
   z-index: 15;
   padding: var(--token-space-2) var(--token-space-5);
   border: 1px solid var(--token-color-border);
