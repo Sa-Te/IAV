@@ -90,6 +90,7 @@ const HERO_PRIORITY = [
   "Question",
   "Comment",
   "Name",
+  "Author",
   "Search",
   "Changed",
   "Activation Type",

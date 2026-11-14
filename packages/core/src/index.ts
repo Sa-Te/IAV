@@ -111,6 +111,12 @@ export { toSavedCollectionsView, toSavedPostsByFolder } from "./categories/saved
 export type { SavedByFolderView, SavedFolder, SavedItem } from "./categories/savedByFolder.js";
 export { toNameListView } from "./categories/nameListView.js";
 export type { NameListView, NameListSection } from "./categories/nameListView.js";
+export { toAiConversationsView } from "./categories/aiConversationView.js";
+export type {
+  AiConversation,
+  AiConversationsView,
+  AiTurn,
+} from "./categories/aiConversationView.js";
 export {
   groupPeopleByYear,
   PERSON_CATEGORY_IDS,

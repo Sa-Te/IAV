@@ -108,7 +108,7 @@ describe("T5 reveal gate", () => {
   });
 
   it("uses the neutral fallback for a T5 category we have no copy for, and still gates", () => {
-    renderView(repositoryWith(["threads_viewed"]), "threads_viewed");
+    renderView(repositoryWith(["unrecognised"]), "unrecognised");
 
     expect(screen.getByText("Third-party authored text")).toBeDefined();
     expect(screen.getByRole("button", { name: "Show this category" })).toBeDefined();

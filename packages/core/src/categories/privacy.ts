@@ -74,6 +74,10 @@ const COPY: Readonly<Record<string, RevealCopy>> = {
     title: "Names and contact details from your address book",
     body: "This category holds names and contact details copied from your address book: phone numbers and email addresses belonging to people who have not necessarily used Instagram. It is stored on this device exactly as the export provided it.",
   },
+  threads_viewed: {
+    title: "Threads posts you viewed",
+    body: "This category holds the Threads posts you viewed: the account that posted each one, when you saw it, and a link. It is stored on this device exactly as the export provided it.",
+  },
 };
 
 const FALLBACK: RevealCopy = {

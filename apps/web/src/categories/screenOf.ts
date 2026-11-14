@@ -1,6 +1,7 @@
 import {
   findCategory,
   PERSON_CATEGORY_IDS,
+  toAiConversationsView,
   toAvatarItemsView,
   toDeviceEffectsView,
   toEventListView,
@@ -12,6 +13,7 @@ import {
   toSettingsView,
   toTableView,
   toTagListView,
+  type AiConversationsView as AiConversationsViewData,
   type AvatarItemsView as AvatarItemsViewData,
   type CategoryRecord,
   type DeviceEffectsView as DeviceEffectsViewData,
@@ -116,6 +118,7 @@ export type Screen =
   | { readonly kind: "name-list"; readonly view: NameListViewData }
   | { readonly kind: "people"; readonly view: PersonListViewData }
   | { readonly kind: "tags"; readonly view: TagListViewData }
+  | { readonly kind: "ai"; readonly view: AiConversationsViewData }
   | { readonly kind: "photos"; readonly media: readonly MediaItemView[] }
   | {
       readonly kind: "saved";
@@ -198,6 +201,27 @@ export function screenOf(
       ...(record.sources === undefined ? {} : { sources: record.sources }),
     });
     if (tags !== null) return { kind: "tags", view: tags };
+  }
+
+  // T5's three remaining shapes (docs/T5-DESIGN.md §8): the event list with
+  // Author as the row's subject, the AI record with collapsed turns, and the
+  // existing settings screen for the payment envelope.
+  if (id === "threads_viewed") {
+    const event = toEventListView(record);
+    if (event !== null) return { kind: "event", view: event };
+  }
+
+  if (id === "ai_conversations") {
+    const ai = toAiConversationsView({
+      data: record.data,
+      ...(record.sources === undefined ? {} : { sources: record.sources }),
+    });
+    if (ai !== null) return { kind: "ai", view: ai };
+  }
+
+  if (id === "checkout_payment_information") {
+    const settings = toSettingsView(record);
+    if (settings !== null) return { kind: "settings", view: settings };
   }
 
   if (id === "profile_photos") {

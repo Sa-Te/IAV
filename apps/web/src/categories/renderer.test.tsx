@@ -226,6 +226,11 @@ describe("CategoryView — one category per privacy tier", () => {
         // The T3 activity lists use the event screen (docs/T3-DESIGN.md §6).
         expect((await screen.findByText("a post")).tagName).toBe("P");
         expect(document.querySelector(".event-view")).not.toBeNull();
+      } else if (fixture.id === "threads_viewed") {
+        // T5's viewed-posts list is the event screen with Author as the hero
+        // (docs/T5-DESIGN.md §7).
+        expect((await screen.findByText("someone")).tagName).toBe("P");
+        expect(document.querySelector(".event-view")).not.toBeNull();
       } else {
         expect(await screen.findByRole("table")).toBeDefined();
         expect(screen.getAllByRole("columnheader").length).toBeGreaterThan(0);

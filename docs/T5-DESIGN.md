@@ -216,3 +216,17 @@ search. The other three are the remaining screen work.
   turns collapsed; a chat UI would invent a conversation model the export does
   not carry.
 - **`checkout_payment_information`** is settings-shaped; no bespoke screen.
+
+## 10. Two M23 open items, decided
+
+- **`note_and_repost_interactions.json` stays in the unrecognised bucket.** It
+  measures 2 entries, each one label-less `Author` container, with no timestamp
+  and no media. A registry row would need a name rule, a privacy tier and a screen;
+  the screen would still be the raw tree, so there is no user-visible gain today.
+  It must not be folded back into `posts` (the M22 signature fix is what stopped
+  that). Reopen if a future export gives it a real list, a date or a media item.
+- **The two real comment media URIs in `post_comments` stay textual.** Two of 853
+  comments carry `media_list_data[0].uri`; adding a media slot to every event row
+  for 0.2% of rows would make the comment screen about the commented-on post, not
+  the comment. The URI remains in the raw JSON. Reopen if a measured export has a
+  materially larger share.

@@ -7,6 +7,7 @@ import { ThreadList } from "../messages/ThreadList.js";
 import { PersonListView } from "../people/PersonListView.js";
 import { TagListView } from "../people/TagListView.js";
 import { AvatarItemsView } from "./AvatarItemsView.js";
+import { AiConversationsView } from "./AiConversationsView.js";
 import { CategoryTable } from "./CategoryTable.js";
 import { CategoryTree } from "./CategoryTree.js";
 import { DeviceEffectsView } from "./DeviceEffectsView.js";
@@ -146,6 +147,10 @@ function CategoryData({ id }: { id: string }): JSX.Element {
 
       {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.screen.kind === "tags" && (
         <TagListView view={state.screen.view} raw={state.record.data} />
+      )}
+
+      {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.screen.kind === "ai" && (
+        <AiConversationsView view={state.screen.view} raw={state.record.data} />
       )}
 
       {state.status === "ready" && !THREAD_CATEGORIES.has(id) && state.screen.kind === "photos" && (

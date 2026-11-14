@@ -1,0 +1,67 @@
+/*
+ * The ai_conversations screen. A labelled record with a collapsed transcript;
+ * no bubbles, no tinted sender roles. Tokens only.
+ */
+
+.ai-view {
+  max-width: 80ch;
+}
+
+.ai-conversation {
+  margin-top: var(--token-space-6);
+  padding-top: var(--token-space-4);
+  border-top: 1px solid var(--token-color-border);
+}
+
+.ai-title {
+  margin: 0 0 var(--token-space-3);
+  font-size: var(--token-text-18);
+  font-weight: 600;
+}
+
+.ai-transcript {
+  margin-top: var(--token-space-4);
+}
+
+.ai-transcript summary {
+  cursor: pointer;
+  font-weight: 500;
+  padding: var(--token-space-2) 0;
+}
+
+.ai-turns {
+  list-style: none;
+  margin: var(--token-space-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--token-space-4);
+}
+
+.ai-turn {
+  padding-left: var(--token-space-3);
+  border-left: 2px solid var(--token-color-border);
+}
+
+.ai-turn-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--token-space-3);
+  margin: 0;
+}
+
+.ai-role {
+  font-weight: 600;
+}
+
+.ai-turn-time {
+  color: var(--token-color-text-muted);
+  font-family: var(--token-font-mono);
+  font-size: var(--token-text-12);
+}
+
+.ai-text {
+  margin: var(--token-space-1) 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
