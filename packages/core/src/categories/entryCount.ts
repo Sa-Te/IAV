@@ -1,3 +1,5 @@
+import type { CategorySource } from "../ingest/port.js";
+import { toThreadSummaries } from "../messages/threads.js";
 import { toPostEntries } from "../domain/posts.js";
 
 /**
@@ -10,17 +12,34 @@ import { toPostEntries } from "../domain/posts.js";
  * looking at the gallery sees 78 posts, and two numbers for the same screen is a
  * bug in the app's voice. The parser is the identity check, so ask it.
  *
+ * The message categories have the same mismatch for a different reason:
+ * `entryCountOf` sees each thread object's first array child (its messages) and
+ * sums those, so `archive-2/` stores 252 for `messages_inbox` while the screen
+ * shows 122 conversations. A thread category counts conversations; the thread
+ * reader is the identity check (M24).
+ *
  * Drift reports keep using the raw count: they describe files, not screens.
  */
+const THREAD_CATEGORIES = new Set(["messages_inbox", "messages_requests"]);
+
 export function entryCountForView(
   categoryId: string,
-  record: { readonly data: unknown; readonly entryCount: number },
+  record: {
+    readonly data: unknown;
+    readonly entryCount: number;
+    readonly sources?: readonly CategorySource[];
+  },
 ): number {
   if (categoryId === "posts") {
     const posts = toPostEntries(record.data);
     // A record the parser could not read keeps the stored number rather than
     // claiming the category is empty.
     return posts.length > 0 ? posts.length : record.entryCount;
+  }
+  if (THREAD_CATEGORIES.has(categoryId)) {
+    const threads = toThreadSummaries(record);
+    // Same rule as posts: an unreadable record keeps the stored count.
+    return threads.length > 0 ? threads.length : record.entryCount;
   }
   return record.entryCount;
 }

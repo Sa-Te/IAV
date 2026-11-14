@@ -1,4 +1,4 @@
-import type { CategoryRecord } from "../ingest/port.js";
+import type { CategorySource } from "../ingest/port.js";
 
 /**
  * Message threads, in core.
@@ -122,7 +122,17 @@ interface Source {
  * the files have different container kinds, and a concatenated list when they are
  * all lists (M8's additive merge), so `sources` decides how to read it.
  */
-function sourcesOf(record: CategoryRecord): readonly Source[] {
+/**
+ * The structural part of a category record the thread readers need. Keeping it
+ * structural lets `entryCountForView` pass `{data, sources}` without inventing a
+ * full record, and keeps every caller honest about what it actually reads.
+ */
+export interface ThreadRecord {
+  readonly data: unknown;
+  readonly sources?: readonly CategorySource[];
+}
+
+function sourcesOf(record: ThreadRecord): readonly Source[] {
   const sources = record.sources ?? [];
   if (sources.length <= 1) {
     const only = sources[0];
@@ -133,7 +143,7 @@ function sourcesOf(record: CategoryRecord): readonly Source[] {
 }
 
 /** One thread from the single file it lives in. */
-export function toThreadSummary(record: CategoryRecord, sourcePath: string): ThreadSummary | null {
+export function toThreadSummary(record: ThreadRecord, sourcePath: string): ThreadSummary | null {
   const source = sourcesOf(record).find((candidate) => candidate.path === sourcePath);
   if (source === undefined) return null;
   const location = locateThread(sourcePath);
@@ -142,7 +152,7 @@ export function toThreadSummary(record: CategoryRecord, sourcePath: string): Thr
 }
 
 /** Every thread in a message category, one per folder, newest message first. */
-export function toThreadSummaries(record: CategoryRecord): readonly ThreadSummary[] {
+export function toThreadSummaries(record: ThreadRecord): readonly ThreadSummary[] {
   const groups = new Map<string, { location: Location; payloads: unknown[] }>();
 
   for (const source of sourcesOf(record)) {
@@ -190,7 +200,7 @@ const ATTACHMENT_KINDS: readonly (readonly [string, ThreadAttachment["kind"]])[]
 ];
 
 /** One thread's messages, oldest first. Identity again comes from the folder. */
-export function threadMessages(record: CategoryRecord, threadId: string): readonly ThreadMessage[] {
+export function threadMessages(record: ThreadRecord, threadId: string): readonly ThreadMessage[] {
   const payloads = sourcesOf(record)
     .filter((source) => {
       const location = locateThread(source.path);
