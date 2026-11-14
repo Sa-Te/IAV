@@ -116,6 +116,17 @@ export type {
 export type { EventPreview, PollOption } from "./categories/eventPreview.js";
 export { toSavedCollectionsView, toSavedPostsByFolder } from "./categories/savedByFolder.js";
 export type { SavedByFolderView, SavedFolder, SavedItem } from "./categories/savedByFolder.js";
+export {
+  clear,
+  createSelection,
+  deselect,
+  isSelected,
+  selectAll,
+  selectRange,
+  size,
+  toggle,
+} from "./selection/selection.js";
+export type { MediaSizes, SelectionSize, SelectionState } from "./selection/selection.js";
 export { toMediaTimeline } from "./categories/mediaTimeline.js";
 export type {
   MediaTimeline,
