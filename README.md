@@ -94,10 +94,12 @@ pnpm dev
 
 You need an Instagram export ZIP (request it as **JSON**, not HTML).
 
-1. Open `/dev/ingest` and drop the ZIP in. It parses in a Web Worker and writes
-   categories and media to IndexedDB on this device. You should see
-   `reading → resolving → storing`, then a summary: categories, entries,
-   media stored, media missing, unrecognised files, and a shape fingerprint.
+1. Open `/import` (the first visit redirects there automatically) and drop the ZIP
+   in. It parses in a Web Worker and writes categories and media to IndexedDB on
+   this device. You should see `reading → resolving → storing`, then a summary:
+   categories, entries, media stored, media missing, unrecognised files, and a
+   shape fingerprint. The progress bar is determinate once the reader knows the
+   total; Cancel stops the import. `/dev/ingest` remains the dev harness.
 2. Open `/` for everything, `/posts`, `/stories`, `/archived` for one gallery,
    `/cyclone` for the 3D view, and `/categories` or `/tiers/t1` … `/tiers/t5` for
    the archive's categories, grouped by the privacy tier they belong to. The
@@ -202,24 +204,33 @@ mark it, do not delete it (ADR 0002).
 ## Deploying
 
 This is a static build. There is no server process, no API and no environment
-variable to set.
+variable to set. The recorded provider is **Cloudflare Pages** (free static
+hosting); `netlify.toml` is included as a switch, not a second pipeline.
 
 ```bash
 pnpm build          # writes apps/web/dist
 pnpm --filter @instavault/web preview   # serve the built folder locally
 ```
 
-Publish `apps/web/dist`. The only host requirement is **client-side routing
-fallback**: `react-router-dom` uses `BrowserRouter`, so an unknown path such as
-`/connections` must serve `index.html` rather than a 404. Any static host that can
-do that works (Cloudflare Pages, Netlify, an Nginx `try_files`, a Tauri asset
-handler).
+Cloudflare Pages settings: build command `pnpm build`, output directory
+`apps/web/dist`. Publish that folder. The only host requirement is
+**client-side routing fallback**: `react-router-dom` uses `BrowserRouter`, so an
+unknown path such as `/import` or `/connections` must serve `index.html` rather
+than a 404. `apps/web/public/_redirects` is copied into the build:
+
+```
+/* /index.html 200
+```
+
+Any static host that can do that works (Cloudflare Pages, Netlify with the
+included `netlify.toml`, an Nginx `try_files`, a Tauri asset handler).
 
 The production bundle contains no `/dev/*` route and no dev-route chunk; that is
-checked from the built manifest and the emitted assets, not from the source. M25's
-sizes: initial JS **140.2 kB gzip**, CSS **7.9 kB gzip**, worker **37.5 kB gzip**,
-cyclone chunk **6.6 kB gzip**. The initial JS is under the 200 kB gzip target with
-about 60 kB of headroom; the worker is fetched only when an import starts.
+checked from the built assets, not from the source. M26's sizes: initial JS
+**144.0 kB gzip**, CSS **8.0 kB gzip**, worker **37.5 kB gzip**, cyclone chunk
+**6.8 kB gzip**. The initial JS is under the 200 kB gzip target with about 56 kB
+of headroom; the worker is fetched only when an import starts. The import route
+added roughly 2.5 kB gzip over M25.
 
 ## Local gates
 

@@ -108,6 +108,10 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `apps/web/src/media/useGalleryView.ts` | The view choice, persisted in `localStorage`; Grid is the default. |
 | `apps/web/src/media/MediaTimeline.tsx` | Year → month sections, larger tiles with caption/date, and the final Undated group. |
 | `apps/web/src/routes/ConnectionsPage.tsx` | `/connections`: the three diff groups plus unmatched, using the person list. |
+| `apps/web/src/routes/HomeRoute.tsx` | `/`: checks the archive row once; no archive redirects to `/import`, an archive renders the gallery. The loading state is shown before the answer, never the gallery then a jump. |
+| `apps/web/src/import/ImportPage.tsx` | `/import`: the production front door, export instructions, file/drop control and the replace warning with current counts. |
+| `apps/web/src/import/useIngestJob.ts` | The worker session: recover, start, cancel, retry, clear, elapsed time and protocol errors. |
+| `apps/web/src/import/IngestStatus.tsx` | The one job renderer shared by `/import` and the dev harness: determinate/indeterminate bar, phase words, summary and Retry. |
 | `apps/web/src/routes/Nav.tsx` | Categories that actually have media, with counts; `aria-current` comes from the router. |
 | `apps/web/src/categories/CategoryView.tsx` | `/categories/:id`: renders the panel `screenOf` chose and keeps loading / empty / failed distinct; the repository read happens inside the gate. |
 | `apps/web/src/categories/screenOf.ts` | The measured screen choice: T1 settings/avatar/device, T2 event/profile/name list/settings, T3 event/saved list, T4 person/tag list, T5 AI record / payment settings / viewed-posts, then table or tree. |
@@ -159,7 +163,7 @@ registry and `docs/DATA-MAP.md` drift apart.
 | `packages/core/src/cyclone/projection.ts` | Hand-written perspective projection with DOM-consistent screen coordinates; the source of picking and focus positions. |
 | `packages/core/src/cyclone/{picking,window,motion}.ts` | Nearest-visible picking with depth tie-break, the 96-card resident window, and motion that is a no-op under reduced motion. |
 | `apps/web/src/cyclone/gl/*` | WebGL2 only: context/caps, one instanced program on a sampler2DArray, the bounded texture window, and a renderer with no clock. |
-| `apps/web/src/cyclone/{CyclonePage,CycloneStage}.tsx` | Route and interaction: canvas is aria-hidden, a hidden button list mirrors the sequence, fallbacks for no-GL, few items and reduced motion. |
+| `apps/web/src/cyclone/{CyclonePage,CycloneStage}.tsx` | Route and interaction: canvas is aria-hidden, a hidden button list mirrors the sequence, fallbacks for no-GL, few items and reduced motion; the stage shows resident-card progress until the first drawn frame. |
 
 **Dependency direction: worker → core → nothing. Storage implements core's ports.**
 For the cyclone: `gl/` imports core maths and nothing else — no React, no storage;

@@ -329,3 +329,19 @@ progress.
   local actions under ADR 0020; the print control exists only after the reveal,
   and the CSV is a blob URL, not a request —
   vault: `learning-notes/2026-11-14_session-22.md`
+- 2026-11-14 — `first-run-is-a-row` — the archive row decides the first screen;
+  no row redirects to `/import`, and the loading state is rendered before the
+  answer so the gallery never flashes —
+  vault: `architecture/2026-11-14_m26-front-door.md`
+- 2026-11-14 — `progress-is-a-state` — an import has a determinate bar when the
+  total is known, an indeterminate bar when it is not, phase words, counts, a
+  cancel and a human failure; the same renderer serves the product and the dev
+  harness —
+  vault: `mind-maps/2026-11-14_m26-front-door.md`
+- 2026-11-14 — `resident-count-is-progress` — the cyclone's texture manager
+  already counts resident cards; that count is the preparing state, replaced by
+  the first frame with at least one card —
+  vault: `learning-notes/2026-11-14_session-23.md`
+- 2026-11-14 — `fallback-is-a-deploy-file` — a client-routed static app needs one
+  host rule (`/* /index.html 200`); without it a refresh on `/import` is a 404 —
+  vault: `architecture/2026-11-14_m26-front-door.md`
