@@ -190,3 +190,88 @@
   color: var(--token-color-text-muted);
   font-size: var(--token-text-13);
 }
+
+/* --- aligned conversation bubbles --------------------------------------- */
+.bubbles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--token-space-5);
+}
+
+.bubble-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-1);
+  max-width: 80%;
+}
+
+.bubble-group.is-owner {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.bubble-group.is-other {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.bubble-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--token-space-2);
+  margin: 0;
+  color: var(--token-color-text-muted);
+  font-size: var(--token-text-12);
+}
+
+.bubble-sender {
+  font-weight: 500;
+}
+
+.bubble-date {
+  font-family: var(--token-font-mono);
+}
+
+.bubble-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--token-space-1);
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bubble-group.is-owner .bubble-list {
+  align-items: flex-end;
+}
+
+.bubble-group.is-other .bubble-list {
+  align-items: flex-start;
+}
+
+.bubble {
+  max-width: 100%;
+  padding: var(--token-space-2) var(--token-space-3);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-md);
+}
+
+.bubble-owner {
+  background: var(--token-color-accent-subtle);
+  border-color: var(--token-color-accent-subtle);
+}
+
+.bubble-other {
+  background: var(--token-color-raised);
+}
+
+.bubble .message-text {
+  margin: 0;
+}
+
+.bubble .message-media {
+  margin-top: var(--token-space-2);
+}

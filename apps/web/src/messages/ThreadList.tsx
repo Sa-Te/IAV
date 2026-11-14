@@ -1,16 +1,20 @@
 import {
   buildIndex,
+  identifyOwnerSender,
   normaliseQuery,
   search,
   threadMessages,
+  toOwnerIdentity,
   toThreadSummaries,
   type CategoryRecord,
+  type OwnerIdentity,
   type SearchHit,
   type ThreadMessage,
   type ThreadSummary,
 } from "@instavault/core";
-import { useMemo, useState, type JSX } from "react";
+import { useEffect, useMemo, useState, type JSX } from "react";
 
+import { useArchiveRepository } from "../repository/RepositoryContext.js";
 import { State } from "../ui/State.js";
 import { ThreadConversation } from "./ThreadConversation.js";
 
@@ -61,22 +65,56 @@ interface HitGroup {
 }
 
 export function ThreadList({ record }: { record: CategoryRecord }): JSX.Element {
+  const repository = useArchiveRepository();
   const [selected, setSelected] = useState<string | null>(() =>
     threadFromHash(window.location.hash),
   );
   const [query, setQuery] = useState("");
   const [focusMessage, setFocusMessage] = useState<number | null>(null);
+  const [owner, setOwner] = useState<OwnerIdentity | null>(null);
 
   const threads = useMemo(() => toThreadSummaries(record), [record]);
+  const messagesByThread = useMemo(
+    () => new Map(threads.map((thread) => [thread.id, threadMessages(record, thread.id)] as const)),
+    [record, threads],
+  );
   const index = useMemo(
     () =>
       buildIndex(
         threads.map((thread) => ({
           id: thread.id,
-          messages: threadMessages(record, thread.id).map((message) => message.text),
+          messages: (messagesByThread.get(thread.id) ?? []).map((message) => message.text),
         })),
       ),
-    [record, threads],
+    [messagesByThread, threads],
+  );
+
+  // The owner is read once after the gate, from the same local archive. A missing
+  // or unreadable record means "not identifiable", never a guess.
+  useEffect(() => {
+    let cancelled = false;
+    void repository
+      .getCategory("personal_information")
+      .then((record) => {
+        if (!cancelled) setOwner(record === null ? null : toOwnerIdentity(record));
+      })
+      .catch(() => {
+        if (!cancelled) setOwner(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [repository]);
+
+  const ownerSender = useMemo(
+    () =>
+      identifyOwnerSender(
+        [...messagesByThread.values()].flatMap((messages) =>
+          messages.map((message) => message.sender),
+        ),
+        owner,
+      ),
+    [messagesByThread, owner],
   );
 
   const needle = normaliseQuery(query);
@@ -113,7 +151,8 @@ export function ThreadList({ record }: { record: CategoryRecord }): JSX.Element 
       <ThreadConversation
         threadId={active}
         summary={threads.find((thread) => thread.id === active)}
-        messages={threadMessages(record, active)}
+        messages={messagesByThread.get(active) ?? []}
+        ownerSender={ownerSender}
         focusMessageIndex={focusMessage}
         onBack={() => {
           setSelected(null);

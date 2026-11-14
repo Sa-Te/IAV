@@ -60,8 +60,8 @@ describe("T5 reveal gate", () => {
 
     await user.click(screen.getByRole("button", { name: "Show this category" }));
 
-    expect(repository.getCategory).toHaveBeenCalledTimes(1);
     expect(repository.getCategory).toHaveBeenCalledWith("messages_inbox");
+    expect(repository.getCategory.mock.calls[0]?.[0]).toBe("messages_inbox");
   });
 
   it("gates once per category per page session, including across remounts", async () => {
@@ -79,7 +79,9 @@ describe("T5 reveal gate", () => {
     renderView(repository, "messages_inbox");
 
     expect(screen.queryByRole("button", { name: "Show this category" })).toBeNull();
-    expect(repository.getCategory).toHaveBeenCalledTimes(2);
+    expect(
+      repository.getCategory.mock.calls.filter(([id]) => id === "messages_inbox"),
+    ).toHaveLength(2);
   });
 
   it("moves focus into the revealed content", async () => {

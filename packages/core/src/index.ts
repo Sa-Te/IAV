@@ -39,6 +39,10 @@ export {
   toThreadSummaries,
   toThreadSummary,
 } from "./messages/threads.js";
+export { groupMessages } from "./messages/bubbles.js";
+export type { MessageGroup } from "./messages/bubbles.js";
+export { identifyOwnerSender, toOwnerIdentity } from "./messages/ownerIdentity.js";
+export type { OwnerIdentity } from "./messages/ownerIdentity.js";
 export type {
   ThreadAttachment,
   ThreadFolder,

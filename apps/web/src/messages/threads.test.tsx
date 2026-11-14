@@ -89,7 +89,8 @@ describe("threads inside the reveal gate", () => {
 
     await user.click(screen.getByRole("button", { name: "Show this category" }));
 
-    expect(getCategory).toHaveBeenCalledTimes(1);
+    expect(getCategory).toHaveBeenCalledWith("messages_inbox");
+    expect(getCategory.mock.calls[0]?.[0]).toBe("messages_inbox");
     expect(await screen.findByText(/conversations, newest first/)).toBeDefined();
   });
 
@@ -157,8 +158,10 @@ describe("threads inside the reveal gate", () => {
     await user.click(screen.getByRole("button", { name: "Show this category" }));
     await user.click(await screen.findByRole("button", { name: /alice, you/ }));
 
-    const note = screen.getByRole("note");
-    expect(note.textContent).toContain("read-only copy of the export");
+    const notes = screen.getAllByRole("note");
+    expect(notes.map((note) => note.textContent).join(" ")).toContain(
+      "read-only copy of the export",
+    );
     const items = screen.getAllByRole("listitem");
     const texts = within(items[0]?.parentElement ?? document.body)
       .getAllByText(/earlier|later/)
