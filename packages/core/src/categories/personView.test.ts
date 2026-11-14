@@ -130,6 +130,33 @@ describe("toPersonView — category assignment", () => {
       }),
     ).toBeNull();
   });
+
+  it("reads a pre-split merged follow-requests record: connections array + Threads wrapper", () => {
+    // An archive imported before ADR 0018 still stores one record for both apps.
+    // It must land on the person screen too, not fall back to the tree.
+    const view = toPersonView({
+      id: "follow_requests_you've_received",
+      data: [
+        [labelPerson("Ada Lovelace", "ada")],
+        {
+          text_post_app_text_post_app_follow_requests_received: [
+            {
+              string_list_data: [
+                { href: "https://www.threads.com/bea", value: "bea", timestamp: AT(2024, 6, 1) },
+              ],
+            },
+          ],
+        },
+      ],
+      sources: [
+        { path: "connections/follow_requests_you've_received.json", entryCount: 1, kind: "array" },
+        { path: "threads/follow_requests_you've_received.json", entryCount: 1, kind: "object" },
+      ],
+    });
+
+    expect(view?.total).toBe(2);
+    expect(view?.people.map((person) => person.username).sort()).toEqual(["ada", "bea"]);
+  });
 });
 
 describe("toPersonView — ordering and the year fold", () => {

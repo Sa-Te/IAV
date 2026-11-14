@@ -74,6 +74,10 @@ list of 29 that did not exist.
 
 - Ingest stores two records instead of one merged record. The old merged-payload
   test now asserts two rows, each with one source.
+- An archive imported **before** this change still holds the merged record. The
+  person reader handles that shape too, so the old row shows all 29 people on the
+  person screen rather than falling back to the raw tree. A re-import creates the
+  two separate rows; the sidebar then shows 14 and 15.
 - The M7b "two apps' files may share one row" question is answered: they may not.
 - `docs/DATA-MAP.md` gains one row; the inventory count moves from 87 to 88
   registered categories, 73 of them present in the baseline.

@@ -2,10 +2,11 @@
 import type { CategoryRecord } from "@instavault/core";
 import type { ArchiveRepository } from "@instavault/storage";
 import { cleanup, render, screen } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { RepositoryProvider } from "../repository/RepositoryContext.js";
-import { CategoryView } from "./CategoryView.js";
+import { CategoryRoute, CategoryView } from "./CategoryView.js";
 import { clearRevealedCategories } from "./RevealGate.js";
 
 /**
@@ -146,5 +147,28 @@ describe("T4 screens — routing", () => {
     expect(screen.getByRole("link", { name: "https://www.instagram.com/topic" }).textContent).toBe(
       "#topic",
     );
+  });
+
+  it("reaches the person screen through the apostrophe route, encoded or not", async () => {
+    const id = "follow_requests_you've_received";
+
+    for (const path of [
+      `/categories/${id}`,
+      `/categories/${encodeURIComponent(id).replace("'", "%27")}`,
+    ]) {
+      render(
+        <MemoryRouter initialEntries={[path]}>
+          <RepositoryProvider repository={repositoryWith([recordFor(id)])}>
+            <Routes>
+              <Route path="/categories/:id" element={<CategoryRoute />} />
+            </Routes>
+          </RepositoryProvider>
+        </MemoryRouter>,
+      );
+
+      await screen.findByText("1 person");
+      expect(document.querySelector(".people-view")).not.toBeNull();
+      cleanup();
+    }
   });
 });

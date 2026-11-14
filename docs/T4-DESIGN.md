@@ -249,6 +249,11 @@ gets the id `threads_follow_requests_received`. Each is resolved by its **parent
 folder**, because the basename is identical and tier 2 cannot separate two
 different app shapes reliably on its own.
 
+An archive imported before the split still holds one merged record. The person
+reader handles that shape too, so the old row renders all 29 people on the person
+screen; a re-import creates the two rows (14 and 15). No screen falls back to the
+tree because of the storage format.
+
 ## 7. Grouping and the person card
 
 | Group | Categories | Rows | Entries | Fits the person card? |

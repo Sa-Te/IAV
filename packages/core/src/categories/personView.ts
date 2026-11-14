@@ -1,5 +1,5 @@
 import type { CategorySource } from "../ingest/port.js";
-import { entriesOf } from "./entries.js";
+import { entriesOf, payloadsOf } from "./entries.js";
 
 /**
  * The person screen's pure half (M23, docs/T4-DESIGN.md §3).
@@ -235,10 +235,20 @@ export function toPersonView(record: {
 }): PersonListView | null {
   if (!PERSON_IDS.has(record.id)) return null;
 
-  const entries = entriesOf(record.data);
-  if (entries === null) return null;
-
-  const people = entries.map(toPerson).filter((person): person is Person => person !== null);
+  // `payloadsOf` is what every multi-file reader uses. A fresh import stores the
+  // two follow-request apps as two rows, but an archive imported before ADR 0018
+  // still holds one merged record: payload 1 is the connections array, payload 2
+  // is the Threads wrapper. Reading both keeps that stored archive on the person
+  // screen instead of silently falling back to the tree.
+  const people: Person[] = [];
+  for (const payload of payloadsOf(record)) {
+    const entries = entriesOf(payload);
+    if (entries === null) continue;
+    for (const entry of entries) {
+      const person = toPerson(entry);
+      if (person !== null) people.push(person);
+    }
+  }
   if (people.length === 0) return null;
 
   const dated = people
