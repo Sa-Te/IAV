@@ -193,16 +193,22 @@ export function CategoryGallery({
       {state.status === "ready" && !selecting && (
         <div className="gallery-toolbar">
           <GalleryViewSwitch view={view} onChange={setView} />
-          <button
-            ref={selectRef}
-            type="button"
-            className="button button-quiet"
-            onClick={enterSelection}
-            disabled={sizes === null || items.length === 0}
-          >
-            Select
-          </button>
         </div>
+      )}
+
+      {/* Floating, not in the header: selecting must be reachable from anywhere in
+          a 400-item gallery, and this is the one place the glass recipe applies
+          outside the shell. Hidden while selecting, where the bar takes over. */}
+      {state.status === "ready" && !selecting && items.length > 0 && (
+        <button
+          ref={selectRef}
+          type="button"
+          className="select-fab"
+          onClick={enterSelection}
+          disabled={sizes === null}
+        >
+          Select
+        </button>
       )}
 
       {state.status === "loading" && <State kind="loading" message="Reading the archive…" />}

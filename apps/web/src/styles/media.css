@@ -136,6 +136,39 @@
   gap: var(--token-space-3);
 }
 
+/* The one floating layer outside the shell: visible wherever the reader is in a
+   long gallery. Glass is reserved for floating layers (AGENTS §8). */
+.select-fab {
+  position: fixed;
+  right: var(--token-space-4);
+  bottom: var(--token-space-4);
+  z-index: 15;
+  padding: var(--token-space-2) var(--token-space-5);
+  border: 1px solid var(--token-color-border);
+  border-radius: var(--token-radius-full);
+  background: var(--token-glass-bg);
+  backdrop-filter: var(--token-glass-blur);
+  color: var(--token-color-text);
+  font: inherit;
+  font-weight: 500;
+  box-shadow: var(--token-shadow-2);
+  cursor: pointer;
+}
+
+.select-fab:hover {
+  border-color: var(--token-color-border-strong);
+}
+
+.select-fab:focus-visible {
+  outline: 2px solid var(--token-color-accent);
+  outline-offset: 2px;
+}
+
+.select-fab:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 /* The check is the affordance; the ring and fill on the tile are the state. */
 .tile-check {
   position: absolute;

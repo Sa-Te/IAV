@@ -109,6 +109,21 @@ afterEach(() => {
 });
 
 describe("selection mode", () => {
+  it("keeps Select as a floating control outside the header, gone while selecting", async () => {
+    const user = userEvent.setup();
+    renderPosts();
+    await screen.findByText("5 items");
+
+    const select = screen.getByRole("button", { name: "Select" });
+    await vi.waitFor(() => expect((select as HTMLButtonElement).disabled).toBe(false));
+    expect(select.className).toContain("select-fab");
+    expect(select.closest(".gallery-toolbar")).toBeNull();
+
+    await user.click(select);
+
+    expect(screen.queryByRole("button", { name: "Select" })).toBeNull();
+  });
+
   it("toggles a tile instead of opening the detail view", async () => {
     const user = userEvent.setup();
     renderPosts();
