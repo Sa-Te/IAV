@@ -6,6 +6,7 @@ archive/
 node_modules/
 dist/
 coverage/
+.wrangler/
 pnpm-lock.yaml
 *.md
 

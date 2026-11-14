@@ -1,0 +1,14 @@
+{
+  // Cloudflare Workers static assets for apps/web.
+  // The directory is explicit because this repo is a pnpm workspace: wrangler cannot guess
+  // which package to deploy, and auto-detection fails with "run in the root of a workspace".
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "instavault",
+  "compatibility_date": "2026-11-14",
+  "assets": {
+    "directory": "./apps/web/dist",
+    // Serve index.html for unknown paths. The app is a client-side SPA: /import,
+    // /connections and /categories/:id are real routes with no file on disk.
+    "not_found_handling": "single-page-application",
+  },
+}

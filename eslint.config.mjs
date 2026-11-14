@@ -7,6 +7,7 @@ export default tseslint.config(
       "**/dist/**",
       "**/node_modules/**",
       "**/coverage/**",
+      ".wrangler/**",
       "reference-backend/**",
       "reference-frontend/**",
       "archive/**",

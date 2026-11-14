@@ -345,6 +345,10 @@ Green check on a fresh clone is a feature.
   same-origin URL, analytics string, or remote font reference.
 - Deploy: static export to Cloudflare Pages / Netlify on merge to `main`.
   Preview deploy on every PR.
+- Deployment target is Cloudflare Workers static assets. The output directory is
+  declared in `wrangler.jsonc` because the repo is a workspace; it is never
+  inferred. A deploy that renames the output path is a change to that file, not to
+  the dashboard.
 - One lockfile. One package manager. `npm`/`yarn` artefacts get deleted, not
   tolerated.
 - Dependency bumps: pin exact versions, bump to the minimum fixed version when

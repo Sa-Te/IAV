@@ -26,6 +26,9 @@ out/
 dist/
 build/
 
+# --- Cloudflare local deploy state (wrangler dry runs, caches) ---------------
+.wrangler/
+
 # --- Compiled artefacts ------------------------------------------------------
 *.tsbuildinfo
 backend/api

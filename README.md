@@ -205,29 +205,39 @@ A changed shape is **more** signatures on the existing row, never a looser one
 (ADR 0008). A category that is absent from the new export is normal, not an error:
 mark it, do not delete it (ADR 0002).
 
-## Deploying
+## Deploy
 
-This is a static build. There is no server process, no API and no environment
-variable to set. The recorded provider is **Cloudflare Pages** (free static
-hosting); `netlify.toml` is included as a switch, not a second pipeline.
+The target is **Cloudflare Workers static assets** — no Worker script, no server
+process, no API, no environment variable. The output directory is declared in
+[`wrangler.jsonc`](wrangler.jsonc) at the repository root, because this repo is a
+pnpm workspace: wrangler cannot infer which package to deploy, and auto-detection
+refuses to run from a workspace root.
 
 ```bash
-pnpm build          # writes apps/web/dist
-pnpm --filter @instavault/web preview   # serve the built folder locally
+pnpm run build        # writes apps/web/dist
+npx wrangler deploy   # uploads that directory and nothing else
 ```
 
-Cloudflare Pages settings: build command `pnpm build`, output directory
-`apps/web/dist`. Publish that folder. The only host requirement is
-**client-side routing fallback**: `react-router-dom` uses `BrowserRouter`, so an
-unknown path such as `/import` or `/connections` must serve `index.html` rather
-than a 404. `apps/web/public/_redirects` is copied into the build:
+`wrangler` is pinned in the root `devDependencies`; `npx` resolves the local
+binary, so a deploy cannot silently change version.
 
-```
-/* /index.html 200
-```
+The dashboard owns exactly three values, and they must match this file:
 
-Any static host that can do that works (Cloudflare Pages, Netlify with the
-included `netlify.toml`, an Nginx `try_files`, a Tauri asset handler).
+| Setting | Value |
+| --- | --- |
+| Root directory | `/` (the repository root) |
+| Build command | `pnpm run build` |
+| Deploy command | `npx wrangler deploy` |
+
+The output directory is **not** a dashboard setting: `wrangler.jsonc` declares
+`assets.directory` as `./apps/web/dist`. Renaming it is a change to that file.
+
+Client-side routing keeps two fallbacks, both deliberate. `react-router-dom` uses
+`BrowserRouter`, so an unknown path such as `/import` or `/connections` must serve
+`index.html` rather than a 404: `not_found_handling: "single-page-application"` is
+what does that on Workers, and `apps/web/public/_redirects`
+(`/* /index.html 200`) carries the same rule into the build for Netlify (via the
+included `netlify.toml`) and any other host that reads it.
 
 The production bundle contains no `/dev/*` route and no dev-route chunk; that is
 checked from the built assets, not from the source. M26's sizes: initial JS

@@ -1,5 +1,5 @@
-# Netlify alternative. The recorded provider is Cloudflare Pages, which reads
-# apps/web/public/_redirects; this file keeps a switch to Netlify a configuration
+# Netlify alternative. The recorded provider is Cloudflare Workers static assets,
+# configured by wrangler.jsonc; this file keeps a switch to Netlify a configuration
 # change rather than a code change.
 [build]
   command = "pnpm build"
