@@ -26,10 +26,13 @@ as something to run in v1.
 
 ## 1. Invariants — violating one means revert the change
 
-1. **No network egress.** No fetch/XHR/WebSocket/beacon to any origin other
-   than same-origin static assets. No analytics, no telemetry, no runtime CDN,
-   no remote fonts, no remote images. A test greps the built bundle to enforce
-   this.
+1. **No third-party network egress.** No fetch/XHR/WebSocket/beacon to any
+   third party, and no analytics, telemetry, runtime CDN, remote font or remote
+   image. Egress to the user's own storage, on the user's explicit action, is
+   allowed; egress to a third party that learns what the user viewed is never
+   allowed. Same-origin static assets, `<a download>`, object URLs and a locally
+   generated ZIP are not egress (ADR 0020). A test greps the built bundle to
+   enforce the third-party part.
 2. **No server.** No API routes, no server components in the pipeline, no
    database, no auth in v1.
 3. **User data lives in the browser only.** IndexedDB for archive records and
@@ -563,6 +566,9 @@ unknown.**
   that uses them (a photo can appear in posts, stories and archived posts).
 - E2EE sync design — deliberately postponed to v2. Do not build toward it
   speculatively beyond the repository seam.
+- Sync and download are deferred features with a decided rule, not open questions.
+  Download is local and needs nothing. Sync needs an ADR of its own and E2EE
+  (ADR 0020).
 - Retention/erase UX for an archive the user wants to remove from the device.
 - One archive in storage at a time. Multiple archives may exist on disk for drift
   comparison; only one is ever imported. `archive-2/` is the working baseline; `archive/`
